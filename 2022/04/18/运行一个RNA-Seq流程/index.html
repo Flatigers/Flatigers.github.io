@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/assets/safari-pinned-tab.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="生物信息学,RNA-Seq," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="运行一个RNA-Seq流程  此流程根据《使用HISAT StringTie和Ballgown进行的转录本表达水平分析》重复文中的RNA-Seq实验  流程设计本流程分为如下步骤：  生物信息服务器的搭建 生信环境的配置 在生信环境上操作RNA-seq实验 统计数据及结果分析  生信服务器的搭建生物信息学分析所使用的数据量极大，往往需要数百G以上的存储空间及大量内存，这样的需求在一般PC上较难实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="运行一个RNA-Seq流程">
+<meta property="og:url" content="https://flatig.vip/2022/04/18/%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AARNA-Seq%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Flatig">
+<meta property="og:description" content="运行一个RNA-Seq流程  此流程根据《使用HISAT StringTie和Ballgown进行的转录本表达水平分析》重复文中的RNA-Seq实验  流程设计本流程分为如下步骤：  生物信息服务器的搭建 生信环境的配置 在生信环境上操作RNA-seq实验 统计数据及结果分析  生信服务器的搭建生物信息学分析所使用的数据量极大，往往需要数百G以上的存储空间及大量内存，这样的需求在一般PC上较难实现">
+<meta property="og:locale">
+<meta property="article:published_time" content="2022-04-18T02:20:02.000Z">
+<meta property="article:modified_time" content="2022-04-19T05:15:19.933Z">
+<meta property="article:author" content="flatig_Liu">
+<meta property="article:tag" content="生物信息学">
+<meta property="article:tag" content="RNA-Seq">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://flatig.vip/2022/04/18/运行一个RNA-Seq流程/"/>
+
+
+
+
+
+  <title>运行一个RNA-Seq流程 | Flatig</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Flatig</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">我的个人博客站</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://flatig.vip/2022/04/18/%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AARNA-Seq%E6%B5%81%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Flatig">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">运行一个RNA-Seq流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-04-18T10:20:02+08:00">
+                2022-04-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">生物信息学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="运行一个RNA-Seq流程"><a href="#运行一个RNA-Seq流程" class="headerlink" title="运行一个RNA-Seq流程"></a>运行一个RNA-Seq流程</h2><hr>
+<blockquote>
+<p>此流程根据《使用HISAT StringTie和Ballgown进行的转录本表达水平分析》重复文中的RNA-Seq实验</p>
+</blockquote>
+<h3 id="流程设计"><a href="#流程设计" class="headerlink" title="流程设计"></a>流程设计</h3><p>本流程分为如下步骤：</p>
+<ol>
+<li>生物信息服务器的搭建</li>
+<li>生信环境的配置</li>
+<li>在生信环境上操作RNA-seq实验</li>
+<li>统计数据及结果分析</li>
+</ol>
+<h3 id="生信服务器的搭建"><a href="#生信服务器的搭建" class="headerlink" title="生信服务器的搭建"></a>生信服务器的搭建</h3><p>生物信息学分析所使用的数据量极大，往往需要数百G以上的存储空间及大量内存，这样的需求在一般PC上较难实现。而且生信分析往往需要众人分工协作，由此搭建一个公用服务器十分重要。</p>
+<p>本次重复的实验使用的数据较小，在个人PC上完全可以操作，需要的硬盘存储空间约<strong>20G</strong>以内，由于条件的限制，作者本次实验在个人Linux系统上进行操作。</p>
+<p>生物信息学实验使用服务器是必不可少的，在今后的操作中，读者需熟练掌握Linux操作系统及shell命令编程的使用，熟练使用云Linux服务器进行操作。国内云计算提供商有<strong>腾讯云，阿里云，华为云</strong>等，新用户均有数月的云服务器体验，读者可根据自己的实际情况自行选择。</p>
+<h3 id="生信环境的配置"><a href="#生信环境的配置" class="headerlink" title="生信环境的配置"></a>生信环境的配置</h3><h4 id="系统环境"><a href="#系统环境" class="headerlink" title="系统环境"></a>系统环境</h4><p>根据此流程需要进行的操作，本次实验需要在Linux系统上配置的环境如下：</p>
+<ul>
+<li>R语言环境</li>
+<li>R包：alyssafrazee&#x2F;RSkittleBrewer, <strong>ballgown</strong>, genefilter, dplyr, devtools</li>
+<li>分析软件：Hisat2, StringTie, <strong>Samtools</strong>， gffcompare</li>
+</ul>
+<p>安装hisat2和StringTie:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install hisat2</span><br><span class="line">sudo apt install stringtie</span><br></pre></td></tr></table></figure>
+<p>安装Conda并使用其安装Samtools, gffcompare:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">wget -c https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh</span><br><span class="line"># 适合于linux 64位</span><br><span class="line">chmod 777 Miniconda3-latest-Linux-x86_64.sh</span><br><span class="line">#给执行权限</span><br><span class="line">bash Miniconda3-latest-Linux-x86_64.sh</span><br><span class="line">#运行安装程序，所有选项均选&#x27;yes&#x27;</span><br><span class="line"></span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/</span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/</span><br><span class="line">#配置conda频道，这里选择清华Tuna镜像</span><br><span class="line"></span><br><span class="line">conda install samtools</span><br><span class="line">conda install gffcompare</span><br><span class="line">#使用conda安装Samtools和gffcompare</span><br><span class="line">#这里使用conda安装是因为作者使用apt安装samtools时出现问题</span><br><span class="line">#conda是专用于生物信息学分析的环境配置器</span><br><span class="line">#Hisat, StringTie以及其他R包均可使用conda安装</span><br></pre></td></tr></table></figure>
+
+<p>安装 R 和 R包Ballgown：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">conda create -n Rspcae</span><br><span class="line">#创建名为Rspace的conda环境，可以替换成自己需要的名称</span><br><span class="line">source activate Rspace</span><br><span class="line">#激活此环境</span><br><span class="line"></span><br><span class="line">conda install r-base=4.1.3</span><br><span class="line">#安装4.1.3的R，可以在conda官网包管理页面查询r包的最新版本</span><br><span class="line">conda install r-ballgown</span><br><span class="line">#conda 安装r包需要在包名前 添加 r-</span><br><span class="line">#此处作者使用conda安装r包，也是因为在R中安装遇到问题</span><br><span class="line">#若无问题，可以直接在R中安装任何R包，具体为：</span><br><span class="line">#install.packages(ballgown) 或</span><br><span class="line">#BiocManager::install(&quot;ballgown&quot;)</span><br><span class="line">#使用BiocManager需先安装，参加下一步</span><br><span class="line"></span><br><span class="line">conda deactivate</span><br><span class="line">#安装完成后退出当前conda环境</span><br></pre></td></tr></table></figure>
+
+<p>安装其他R包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">R        </span><br><span class="line">#进入R环境</span><br><span class="line">install.packages(“devtools”)</span><br><span class="line"></span><br><span class="line">install.packages(&quot;BiocManager&quot;)</span><br><span class="line">library(&quot;BiocManager&quot;)</span><br><span class="line">#安装并导入BiocManager</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">BiocManager::install(c(&quot;alyssafrazee/RSkittleBrewer&quot;,&quot;ballgown&quot;,&quot;genefilter&quot;,&quot;dplyr&quot;))</span><br><span class="line"></span><br><span class="line">#source(&quot;http://www.bioconductor.org/biocLite.R&quot;)</span><br><span class="line">#BiocManager::biocLite(c(&quot;alyssafrazee/RSkittleBrewer&quot;,&quot;ballgown&quot;,&quot;genefilter&quot;,&quot;dplyr&quot;))</span><br><span class="line">#安装R包,此项为旧版本用法</span><br><span class="line">#此处也可使用：</span><br><span class="line">#install.packages()</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="资源"><a href="#资源" class="headerlink" title="资源"></a>资源</h4><p>此处所需资源为文章中提供的测序数据及参考序列等资料：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd /home/username/RNA</span><br><span class="line">nohup wget ftp://ftp.ccb.jhu.edu/pub/RNAseq_protocol/chrX_data.tar.gz &amp;</span><br><span class="line">tar zxvf chrX_data.tar.gz</span><br><span class="line">#先cd到工作环境下文件夹</span><br><span class="line">#下载并解压</span><br></pre></td></tr></table></figure>
+
+<h3 id="在生信环境上操作RNA-seq实验"><a href="#在生信环境上操作RNA-seq实验" class="headerlink" title="在生信环境上操作RNA-seq实验"></a>在生信环境上操作RNA-seq实验</h3><h4 id="hisat2-将reads与genome匹配"><a href="#hisat2-将reads与genome匹配" class="headerlink" title="hisat2:将reads与genome匹配"></a>hisat2:将reads与genome匹配</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for i in *1.fastq.gz; </span><br><span class="line">do</span><br><span class="line">i=$&#123;i%1.fastq.gz*&#125;; </span><br><span class="line">nohup hisat2 -p 8 --dta -x /home/username/RNA/chrX_data/indexes/chrX_tran -1 $&#123;i&#125;1.fastq.gz -2 $&#123;i&#125;2.fastq.gz -S /home/username/RNA/chrX_data/result/$&#123;i&#125;align.sam /home/username/RNA/chrX_data/result/$&#123;i&#125;align.log &amp; </span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">#此步骤将在/ home/username/RNA/chrX_data/result/ 下生成sample reads的sam文件</span><br></pre></td></tr></table></figure>
+<h4 id="samtools-将sam文件转换为bam文件"><a href="#samtools-将sam文件转换为bam文件" class="headerlink" title="samtools:将sam文件转换为bam文件"></a>samtools:将sam文件转换为bam文件</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for i in *.sam;</span><br><span class="line">do </span><br><span class="line">i=$&#123;i%_align.sam*&#125;;</span><br><span class="line">nohup samtools sort -@ 8 -o $&#123;i&#125;.bam $&#123;i&#125;_align.sam &amp; </span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">#此步骤将在同目录下生成bam文件</span><br></pre></td></tr></table></figure>
+<h4 id="stringtie-组装转录本并定量表达基因"><a href="#stringtie-组装转录本并定量表达基因" class="headerlink" title="stringtie:组装转录本并定量表达基因"></a>stringtie:组装转录本并定量表达基因</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for i in *.bam; </span><br><span class="line">do </span><br><span class="line">i=$&#123;i%.bam*&#125;;</span><br><span class="line">nohup stringtie -p 8 -G /home/username/RNA/chrX_data/genes/chrX.gtf -o $&#123;i&#125;.gtf $&#123;i&#125;.bam &amp; </span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">#此步骤将在同目录下生成gtf文件</span><br></pre></td></tr></table></figure>
+<h4 id="stringtie-合并所有转录本"><a href="#stringtie-合并所有转录本" class="headerlink" title="stringtie:合并所有转录本"></a>stringtie:合并所有转录本</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">stringtie --merge -p 8 -G  /home/username/RNA/chrX_data/genes/chrX.gtf -o stringtie_merged.gtf  /home/username/RNA/chrX_data/mergelist.txt</span><br><span class="line"></span><br><span class="line">#此步骤将在同目录下生成 stringtie_merged.gtf 文件</span><br></pre></td></tr></table></figure>
+<h4 id="gffcompare-检测相对于注释文件，转录本的组装情况"><a href="#gffcompare-检测相对于注释文件，转录本的组装情况" class="headerlink" title="gffcompare:检测相对于注释文件，转录本的组装情况"></a>gffcompare:检测相对于注释文件，转录本的组装情况</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gffcompare -r /home/username/RNA/chrX_data/genes/chrX.gtf  -G -o merged stringtie_merged.gtf</span><br><span class="line"></span><br><span class="line">#此步骤将生成如下文件：</span><br><span class="line">#gffcmp.annotated.gtf</span><br><span class="line">#它在每个转录本上添加一个 “类代码”（描述参见流程文档）和注释文件中的转录本名称</span><br><span class="line">#gffcmp.stats</span><br><span class="line">#输出文件中计算不同基因特征的灵敏度和精确度（P值）统计</span><br></pre></td></tr></table></figure>
+<h4 id="stringtie-重新组装转录本并估算基因表达丰度，并为ballgown创建读入文件"><a href="#stringtie-重新组装转录本并估算基因表达丰度，并为ballgown创建读入文件" class="headerlink" title="stringtie:重新组装转录本并估算基因表达丰度，并为ballgown创建读入文件"></a>stringtie:重新组装转录本并估算基因表达丰度，并为ballgown创建读入文件</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for i in *_chrX.bam; </span><br><span class="line">do </span><br><span class="line">i=$&#123;i%_chrX.bam*&#125;;</span><br><span class="line">nohup stringtie -e -B -p 8 -G stringtie_merged.gtf -o ballgown/$&#123;i&#125;/$&#123;i&#125;_chrX.gtf  $&#123;i&#125;_chrX.bam &amp; </span><br><span class="line">done</span><br><span class="line">#此步骤将在 /home/username/RNA/chrX_data/ballgown/ 下生成</span><br><span class="line">#以sample名为文件夹名的的ballgown读取文件</span><br></pre></td></tr></table></figure>
+
+<h3 id="统计数据及结果分析"><a href="#统计数据及结果分析" class="headerlink" title="统计数据及结果分析"></a>统计数据及结果分析</h3><p>此步骤将在R环境中进行统计步骤及结果分析</p>
+<h4 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h4><ul>
+<li><p>进入R并加载R包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">library(ballgown)</span><br><span class="line">library(RSkittleBrewer)</span><br><span class="line">library(genefilter)</span><br><span class="line">library(dplyr)</span><br><span class="line">library(devtools)</span><br></pre></td></tr></table></figure></li>
+<li><p>加载表型数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setwd(&quot;/home/username/RNA/chrX_data/&quot;)</span><br><span class="line">#设置R工作环境目录</span><br><span class="line">pheno_data = read.csv(&quot;geuvadis_phenodata.csv&quot;)</span><br></pre></td></tr></table></figure></li>
+<li><p>读入StringTie的计算结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bg_chrX = ballgown(dataDir = &quot;/home/username/RNA/chrX_data/result/ballgown&quot;, samplePattern = &quot;ERR&quot;, pData=pheno_data)</span><br></pre></td></tr></table></figure></li>
+<li><p>滤去低丰度基因（样本间差异少于一个转录本）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bg_chrX_filt = subset(bg_chrX,&quot;rowVars(texpr(bg_chrX)) &gt;1&quot;,genomesubset=TRUE)</span><br></pre></td></tr></table></figure></li>
+<li><p>得到组间有差异的转录本和基因</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">results_transcripts = stattest(bg_chrX_filt, feature=&quot;transcript&quot; covariate=&quot;sex&quot;,adjustvars = c(&quot;population&quot;),  getFC=TRUE, meas=&quot;FPKM&quot;)</span><br><span class="line"></span><br><span class="line">results_genes = stattest(bg_chrX_filt, feature=&quot;gene&quot;, covariate=&quot;sex&quot;, adjustvars = c(&quot;population&quot;), getFC=TRUE, meas=&quot;FPKM&quot;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>对转录本结果添加基因名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">results_transcripts = data.frame(geneNames=ballgown::geneNames(bg_chrX_filt), geneIDs=ballgown::geneIDs(bg_chrX_filt), results_transcripts)</span><br></pre></td></tr></table></figure></li>
+<li><p>转录本与基因结果按P值排序</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">results_transcripts=arrange(results_transcripts,pval)</span><br><span class="line">results_genes=arrange(results_genes,pval)</span><br></pre></td></tr></table></figure></li>
+<li><p>将排序结果写入文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">write.csv(results_transcripts, &quot;chrX_transcript_results.csv&quot;,row。names=FALSE)</span><br><span class="line">write.csv(results_genes, &quot;chrX_gene_results.csv&quot;,row.names=FALSE)</span><br><span class="line"></span><br><span class="line">#此步骤生成 chrX_transcript_results.csv, chrX_gene_results.csv</span><br><span class="line">#两个文字表格文件</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>识别q值小于0.05的转录物和基因（性别间表达有差异）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">subset(results_transcripts,results_transcripts$qval&lt;0.05)</span><br><span class="line">subset(results_genes,results_genes$qval&lt;0.05)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="结果可视化"><a href="#结果可视化" class="headerlink" title="结果可视化"></a>结果可视化</h4><ul>
+<li><p>FPKM为参考值，性别为区分条件作图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">palette(rainbow(5))</span><br><span class="line">#为调色板指定颜色</span><br><span class="line"></span><br><span class="line">fpkm = texpr(bg_chrX,meas=&quot;FPKM&quot;)</span><br><span class="line">fpkm = log2(fpkm+1)</span><br><span class="line">#提取FPKM值并做log转换</span><br><span class="line">boxplot(fpkm,col=as.numeric(pheno_data$sex),las=2,ylab=&#x27;log2(FPKM+1)&#x27;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>单个样本在转录组上的分布</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ballgown::transcriptNames(bg_chrX)[12]</span><br><span class="line"></span><br><span class="line">ballgown::geneNames(bg_chrX)[12]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 绘制箱线图</span><br><span class="line">plot(fpkm[12,] ~ pheno_data$sex, border=c(1,2),</span><br><span class="line">    main=paste(ballgown::geneNames(bg_chrX)[12],&#x27; : &#x27;,</span><br><span class="line">    ballgown::transcriptNames(bg_chrX)[12]),pch=19, xlab=&quot;Sex&quot;,</span><br><span class="line">    ylab=&#x27;log2(FPKM+1)&#x27;)</span><br><span class="line">points(fpkm[12,] ~ jitter(as.numeric(pheno_data$sex)),</span><br><span class="line">    col=as.numeric(pheno_data$sex))</span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p>查看某一基因位置上所有转录组</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plotTranscripts(ballgown::geneIDs(bg_chrX)[2263], bg_chrX, main=c(&#x27;Gene XIST in sample ERR188234&#x27;), sample=c(&#x27;ERR188234&#x27;))</span><br><span class="line">#根据ERR188234.gtf的文件，查出XIST基因所在位置编码2263，进行绘图</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>以性别为区分查看特定基因表达情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plotMeans(&#x27;MSTRG.56&#x27;, bg_chrX_filt,groupvar=&quot;sex&quot;,legend=FALSE)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<p>由于作者精力有限，编写时难免会出现错误和过失，对您的阅读和操作造成的不便请您谅解。如果方便，还请把错误处邮件至本人邮箱，或于公众号处留言，十分感谢！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="https://pic.imgdb.cn/item/625cc849239250f7c53b2990.png" alt=" wechat" style="width: 200px; max-width: 100%;"/>
+    <div>欢迎大家订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6/" rel="tag"># 生物信息学</a>
+          
+            <a href="/tags/RNA-Seq/" rel="tag"># RNA-Seq</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/04/18/%E4%B8%AA%E4%BA%BA%E5%85%AC%E4%BC%97%E5%8F%B7%E5%BC%80%E9%80%9A%E5%95%A6/" rel="next" title="个人公众号开通啦">
+                <i class="fa fa-chevron-left"></i> 个人公众号开通啦
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/04/28/%E5%8F%98%E5%8C%96%E7%9A%84%E4%BA%BA%E7%94%9F/" rel="prev" title="变化的人生">
+                变化的人生 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Flatigers" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="flatig@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AARNA-Seq%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">运行一个RNA-Seq流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">流程设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BF%A1%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E6%90%AD%E5%BB%BA"><span class="nav-number">1.2.</span> <span class="nav-text">生信服务器的搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BF%A1%E7%8E%AF%E5%A2%83%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">1.3.</span> <span class="nav-text">生信环境的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">1.3.1.</span> <span class="nav-text">系统环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%84%E6%BA%90"><span class="nav-number">1.3.2.</span> <span class="nav-text">资源</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%94%9F%E4%BF%A1%E7%8E%AF%E5%A2%83%E4%B8%8A%E6%93%8D%E4%BD%9CRNA-seq%E5%AE%9E%E9%AA%8C"><span class="nav-number">1.4.</span> <span class="nav-text">在生信环境上操作RNA-seq实验</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hisat2-%E5%B0%86reads%E4%B8%8Egenome%E5%8C%B9%E9%85%8D"><span class="nav-number">1.4.1.</span> <span class="nav-text">hisat2:将reads与genome匹配</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#samtools-%E5%B0%86sam%E6%96%87%E4%BB%B6%E8%BD%AC%E6%8D%A2%E4%B8%BAbam%E6%96%87%E4%BB%B6"><span class="nav-number">1.4.2.</span> <span class="nav-text">samtools:将sam文件转换为bam文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stringtie-%E7%BB%84%E8%A3%85%E8%BD%AC%E5%BD%95%E6%9C%AC%E5%B9%B6%E5%AE%9A%E9%87%8F%E8%A1%A8%E8%BE%BE%E5%9F%BA%E5%9B%A0"><span class="nav-number">1.4.3.</span> <span class="nav-text">stringtie:组装转录本并定量表达基因</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stringtie-%E5%90%88%E5%B9%B6%E6%89%80%E6%9C%89%E8%BD%AC%E5%BD%95%E6%9C%AC"><span class="nav-number">1.4.4.</span> <span class="nav-text">stringtie:合并所有转录本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gffcompare-%E6%A3%80%E6%B5%8B%E7%9B%B8%E5%AF%B9%E4%BA%8E%E6%B3%A8%E9%87%8A%E6%96%87%E4%BB%B6%EF%BC%8C%E8%BD%AC%E5%BD%95%E6%9C%AC%E7%9A%84%E7%BB%84%E8%A3%85%E6%83%85%E5%86%B5"><span class="nav-number">1.4.5.</span> <span class="nav-text">gffcompare:检测相对于注释文件，转录本的组装情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stringtie-%E9%87%8D%E6%96%B0%E7%BB%84%E8%A3%85%E8%BD%AC%E5%BD%95%E6%9C%AC%E5%B9%B6%E4%BC%B0%E7%AE%97%E5%9F%BA%E5%9B%A0%E8%A1%A8%E8%BE%BE%E4%B8%B0%E5%BA%A6%EF%BC%8C%E5%B9%B6%E4%B8%BAballgown%E5%88%9B%E5%BB%BA%E8%AF%BB%E5%85%A5%E6%96%87%E4%BB%B6"><span class="nav-number">1.4.6.</span> <span class="nav-text">stringtie:重新组装转录本并估算基因表达丰度，并为ballgown创建读入文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%9F%E8%AE%A1%E6%95%B0%E6%8D%AE%E5%8F%8A%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="nav-number">1.5.</span> <span class="nav-text">统计数据及结果分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86"><span class="nav-number">1.5.1.</span> <span class="nav-text">数据处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.5.2.</span> <span class="nav-text">结果可视化</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flatig_Liu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

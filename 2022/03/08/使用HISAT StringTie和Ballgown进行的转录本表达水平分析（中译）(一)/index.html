@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/assets/safari-pinned-tab.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="生物信息学,翻译文献,RNA-Seq,协议Protocol," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="12本文章基于 DeepL 进行初步翻译，后人工调整部分语法和句式以使其通顺易读。具有相应基础知识的读者可以阅读此篇文章以横向扩充知识： RNA-seq数据分析—方法学文章的实战练习 作者： Mihaela Pertea1,2, Daehwan Kim1, Geo M Pertea1, Jeffrey T Leek3 &amp; Steven L Salzberg1–4  美国马里兰州巴尔摩市约翰">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(一)">
+<meta property="og:url" content="https://flatig.vip/2022/03/08/%E4%BD%BF%E7%94%A8HISAT%20StringTie%E5%92%8CBallgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%AD%E8%AF%91%EF%BC%89(%E4%B8%80)/index.html">
+<meta property="og:site_name" content="Flatig">
+<meta property="og:description" content="12本文章基于 DeepL 进行初步翻译，后人工调整部分语法和句式以使其通顺易读。具有相应基础知识的读者可以阅读此篇文章以横向扩充知识： RNA-seq数据分析—方法学文章的实战练习 作者： Mihaela Pertea1,2, Daehwan Kim1, Geo M Pertea1, Jeffrey T Leek3 &amp; Steven L Salzberg1–4  美国马里兰州巴尔摩市约翰">
+<meta property="og:locale">
+<meta property="og:image" content="https://pic.imgdb.cn/item/622727e05baa1a80ab4d3a15.png">
+<meta property="article:published_time" content="2022-03-08T09:04:31.000Z">
+<meta property="article:modified_time" content="2022-03-09T02:12:45.717Z">
+<meta property="article:author" content="flatig_Liu">
+<meta property="article:tag" content="生物信息学">
+<meta property="article:tag" content="翻译文献">
+<meta property="article:tag" content="RNA-Seq">
+<meta property="article:tag" content="协议Protocol">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.imgdb.cn/item/622727e05baa1a80ab4d3a15.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://flatig.vip/2022/03/08/使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(一)/"/>
+
+
+
+
+
+  <title>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(一) | Flatig</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Flatig</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">我的个人博客站</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://flatig.vip/2022/03/08/%E4%BD%BF%E7%94%A8HISAT%20StringTie%E5%92%8CBallgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%AD%E8%AF%91%EF%BC%89(%E4%B8%80)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Flatig">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(一)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-03-08T17:04:31+08:00">
+                2022-03-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">生物信息学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">本文章基于 DeepL 进行初步翻译，后人工调整部分语法和句式以使其通顺易读。</span><br><span class="line">具有相应基础知识的读者可以阅读此篇文章以横向扩充知识：</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/1f5d13cc47f8">RNA-seq数据分析—方法学文章的实战练习</a></p>
+<p>作者： Mihaela Pertea1,2, Daehwan Kim1, Geo M Pertea1, Jeffrey T Leek3 &amp; Steven L Salzberg1–4</p>
+<blockquote>
+<p>美国马里兰州巴尔摩市约翰-霍普金斯医学院McKusick-Nathans遗传医学研究所计算生物学中心。美国马里兰州巴尔摩市约翰霍普金斯大学惠特工程学院计算机科学系。约翰霍普金斯大学彭博公共卫生学院生物统计学系。美国马里兰州巴尔的摩市约翰霍普金斯大学生物统计系。生物医学工程系，约翰霍普金斯大学，巴尔的摩，马里兰州，美国。通讯作者：S.L.S.（<a href="mailto:&#x73;&#97;&#108;&#122;&#98;&#101;&#x72;&#x67;&#64;&#x6a;&#x68;&#x75;&#x2e;&#x65;&#x64;&#117;">&#x73;&#97;&#108;&#122;&#98;&#101;&#x72;&#x67;&#64;&#x6a;&#x68;&#x75;&#x2e;&#x65;&#x64;&#117;</a>）。</p>
+</blockquote>
+<blockquote>
+<p>2016年8月11日在线发布于Nature; doi:10.1038&#x2F;nprot.2016.095</p>
+</blockquote>
+<blockquote>
+<p>高通量mRNA测序（RNA-seq）已经成为测量和比较各种物种和条件下的基因表达水平的标准方法。RNA-seq实验产生了非常大的、复杂的数据集，需要快速、准确和灵活的软件来将原始读数数据减少到可理解的结果。HISAT（转录本拼接排列的分层索引）、StringTie和Ballgown是免费的、开源的软件工具，用于全面分析RNA-seq实验。它们一起允许科学家将<em>reads</em>与基因组对齐，组装包括新剪接变体的转录本，计算这些转录本在每个样本中的丰度，并比较实验以确定差异表达的基因和转录本。该协议(Protocol)描述了处理大量原始测序<em>reads</em>并创建基因转录本、表达水平以及差异表达基因及转录本的清单的所有必要步骤。该协议的执行时间取决于计算资源，但通常需要不到45分钟的计算机时间。HISAT、StringTie和Ballgown可以从以下网站获得：<br><a target="_blank" rel="noopener" href="http://ccb.jhu.edu/software.shtml">网页链接</a></p>
+</blockquote>
+<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>RNA-seq实验从一组细胞中捕获总的mRNA，然后对该RNA进行测序，以确定哪些基因在这些细胞中是活跃的，或表达的。使用高通量测序机（<em>high-throughput sequencing machines</em>），一个实验可以一次捕获数千个基因的表达水平，而且精确度很高。<br>这些实验产生了大量的原始测序<em>reads</em>，即使是中等规模的实验，其数量也通常在数千万以上。每个基因产生的<em>reads</em>可以作为基因丰度的衡量标准，通过适当的设计，RNA-seq可以检测哪些基因在两个或多个条件下表达水平明显不同。RNA-seq数据可以很容易地检测出未包括在标准注释（<em>standard annotation</em>）中的基因和基因变体，包括非编码RNA基因。使用适当的软件，RNA-seq也可以用来发现单一基因的不同异构体受到不同的调节和表达的条件。</p>
+<p>RNA-seq实验必须用准确、高效的软件进行分析，这些软件是精心设计的，可以处理大多数实验产生的非常大的测序量。分析管道（<em>Analysis Pipeline</em>）在概念上可以分为四个<strong>主要任务</strong>：(i) 将<em>reads</em>与基因组进行比对；(ii) 将比对结果组装成全长的转录本。(iii) 对每个基因和转录本的表达水平进行定量分析；以及（iv）计算不同实验条件下所有基因的表达差异。我们中的一些人以前开发了两个软件工具，<strong>TopHat2</strong>和<strong>Cufflinks5</strong>，它们一起可以完成所有这四项任务，如在早期的协议中所述。最近，我们又开发了三个新的软件工具完成同样的任务，同时运行速度更快，使用的内存更少，提供更准确的整体结果。<strong>HISAT</strong>将RNA-seq读数与基因组进行比对，并发现转录本的剪接位点，同时运行速度远远超过<em>TopHat2</em>，所需的计算机内存也比其他方法少很多。<strong>StringTie</strong>将排列组合成完整和部分的转录本，必要时创建多种异构体（<em>isoform</em>），并估计所有基因和转录本的表达水平。<strong>Ballgown</strong>从<em>StringTie</em>中获取转录本和表达水平，并应用严格的统计方法来确定哪些转录本在两个或多个实验之间有差异表达。我们在此描述了一个使用这些工具进行RNA-seq数据分析的协议；<strong>图1</strong> 显示了该协议中使用的软件，并强调了每个工具所执行的主要步骤。所有的工具都在网上有完整的文档，并由开发者积极维护。</p>
+<p><img src="https://pic.imgdb.cn/item/622727e05baa1a80ab4d3a15.png" alt="图1"></p>
+<blockquote>
+<p>图1｜”新Tuxedo “协议的概述。在一个涉及多个RNA-seq数据集的实验中，首先使用HISAT将<em>reads</em>映射到基因组上（步骤1和2）。参考基因和转录物的注释文件可以作为输入，但这是可选的，如虚线所示。然后将比对结果传递给StringTie（第3步），由它对每个样品中的转录本进行组装和量化。(在另一个协议中，步骤2的排列被直接传递到步骤6，跳过所有的组装步骤。第6步将只估计已知的、有注释的转录本的丰度）。初步组装后，组装好的转录物被一个特殊的StringTie模块合并在一起（第4步），它为所有的样本创建了一个统一的转录本集。StringTie可以在这两个步骤中使用注释文件，如虚线所示。然后，gffcompare程序将基因和转录本与注释进行比较，并报告这一比较的统计数据（第5步）。在第6步，StringTie处理<strong>reads</strong>排列和合并的转录本或参考注释（通过标有 “OR “的标签）。利用这一输入，StringTie在必要时重新估计丰度，并创建新的转录本表以输入到Ballgown。然后，Ballgown比较所有条件下的转录本，并生成差异表达的基因和转录本的表格和图（步骤7-21）。图中的黑线和蓝色弧线分别代表程序的输入和输出。可选的输入用虚线表示。</p>
+</blockquote>
+<h3 id="协议概述"><a href="#协议概述" class="headerlink" title="协议概述"></a>协议概述</h3><p>RNA-seq实验可用于测量许多现象。为了简单起见，这里描述的协议旨在用于许多用户的设计密切对应的类似实验。我们考虑一个比较两种生物条件的实验，如病例与对照、野生型与突变型或疾病与正常的比较。对于每个条件，我们包括六个重复，注意到三个是有效统计结果的最小重复数。该软件将支持许多其他设计，包括时间过程实验（ <em>time-course experiments</em>）和两个以上条件的比较。<br>本协议中使用的例子数据包括人类RNA-seq样本，尽管该协议适用于任何有测序基因组（<em>sequenced genome</em>）的物种，包括小鼠、大鼠、果蝇、拟南芥、酵母和许多其他物种。(一些程序参数可能需要调整以优化内含子较小的基因组的结果）。实验产生的数据文件非常大，这也是高通量RNA-seq实验经常出现的情况；因此，为了让新手更快、更简单地使用该协议，我们提取了一个映射到人类X染色体的<em>reads</em>子集，这是一个基因相对丰富的染色体，横跨151兆字节（Mb），约占基因组的5%。该协议描述了对这些<em>reads</em>的端到端(<em>end-to-end analysis</em>)分析，但它同样适用于完整的数据集，对于这些数据集，它需要明显更多的计算时间。</p>
+<p>这个协议从收集到的所有样本的原始RNA-seq <em>reads</em>开始，并产生一些有用的输出，包括每个样品的基因、转录物和表达水平的列表（<em>lists</em>），显示两种条件下差异表达的基因的表格(<em>table</em>)，以及伴随的统计学意义的测量(<em>accompanying statistical measures of significance</em>)。首先，用<strong>HISAT</strong>将每个样品的<em>reads</em>映射到参考基因组上（图1）。用户可以提供一个有注释的基因位置的文件作为选项，HISAT将使用该文件，但它也将检测注释中缺少的剪接位点(<em>splice sites</em>)。接下来，排列组合被传递给<strong>StringTie</strong>进行转录组装。<strong>StringTie</strong>分别对每个数据集的基因进行组装，在组装时估计每个基因和每个异构体的表达水平。在组装完每个样本后，全套的组装被传递给<strong>StringTie</strong>的合并功能，它将把在任何样本中发现的所有基因结构合并在一起。这一步是必要的，因为一些样本中的转录本可能只被<em>reads</em> 部分覆盖，因此在最初的<strong>StringTie</strong>运行中，它们只有部分版本被组装起来。合并步骤创建了一套在所有样本中都一致的转录本，这样转录本就可以在后续步骤中进行比较。合并后的转录本会被再一次反馈给<strong>StringTie</strong>，这样它就可以用合并后的结构重新估计转录本的丰度。重新估计使用与原始组装相同的算法，但对于转录本结构因合并步骤而改变，可能需要重新分配<em>reads</em>。<strong>StringTie</strong>还为每个转录本提供<strong>Ballgown</strong>需要的额外读数数据。最后，<strong>Ballgown从StringTie</strong>获取所有的转录本和丰度，按实验条件分组，并确定哪些基因和转录本在不同条件下有差异表达。<strong>Ballgown</strong>包括作为<em>R&#x2F;Bioconductor</em>软件包一部分的绘图工具，可以帮助实现结果的可视化。  </p>
+<p>这个协议不需要编程的专业知识，但它确实需要熟悉<strong>Unix命令行界面</strong>和运行基本<strong>R Scripts</strong>的能力。用户需要能够适应从命令行运行程序和在Unix环境中编辑文本文件的操作。</p>
+<h3 id="替代性分析包"><a href="#替代性分析包" class="headerlink" title="替代性分析包"></a>替代性分析包</h3><p><em>HISAT、StringTie和Ballgown</em>提供了一个完整的分析包（”新Tuxedo “包），它从原始读取数据开始，为每个RNA-seq样本产生基因列表和表达水平，以及为整个实验产生差异表达基因列表。其他RNA-seq分析包已经被开发出来，可以代替这些工具，或与这些工具结合使用，最明显的是<strong>TopHat2和Cufflinks</strong>系统（最初的’Tuxedo’包）。对齐步骤(<em>The alignment step</em>)需要一种允许<em>reads</em>跨越内含子且不需要注释文件的拼接对齐算法，对此有几种替代工具可供选择。来自这些其他工具的对准可以作为<em>StringTie</em>的输入。对于转录组的组装和量化步骤，也已经开发出了替代方法。一些方法可以重建转录本，不使用参考基因组，这是一个可以从这个协议中考虑的另一个问题。其他RNA-seq分析程序可以通过使用注释文件的、已知的基因来量化转录本；通过跳过转录本组装步骤，这些程序具有大量的速度优势。我们注意到，即使目前的研究已经相当成熟的生物体，如人类、小鼠和果蝇，蛋白质编码基因、剪接变体和非编码RNA基因的注释也远未完成，这些替代程序不能报告任何新的转录本或剪接变体。</p>
+<p>在所有样品组装完毕后，我们的方案使用<strong>StringTie</strong>来合并转录本，但也可以使用Cufflinks软件包中的<strong>cuffmerge</strong>程序来代替。<br>最后，已经开发了多种用于计算差异表达的工具，这些工具可以作为Ballgown的替代品。这些替代程序的输入要求各不相同，它们可能需要进行数据格式的转换，然后才能与这里的程序一起使用。这种自由选择（<em>customization</em>）超出了本协议的范围，我们建议用户遵循下面描述的协议。我们还注意到，尽管这里介绍的方案可以检<strong>测差异表达的转录本和基因</strong>，但它并不是为了检测差异外显子的使用情况，而其他几个程序（<strong>DEXseq23、rMATS24和MISO25</strong>）是专门为解决这一问题而开发的。</p>
+<h3 id="软件与协议的局限性"><a href="#软件与协议的局限性" class="headerlink" title="软件与协议的局限性"></a>软件与协议的局限性</h3><p>HISAT、StringTie和Ballgown并不是对RNA-seq数据进行基因和转录物表达分析的唯一方法，它们也不会处理所有RNA-seq实验。例如，一些RNA-seq实验可能需要对原始RNA-seq数据进行预处理，以去除污染物、适配体、低质量序列和其他假象(<em>contaminants, adaptors, low-quality sequences and other artifacts</em>)。本协议不包括这种预处理，但诸如<a target="_blank" rel="noopener" href="http://hannonlab.cshl.edu/fastx_toolkit">FASTX工具包</a>和<a target="_blank" rel="noopener" href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc">FastQC</a>等工具可以确保向初始拼接比对步骤提供高质量的数据。我们假定了RNA-seq数据是在<strong>Illumina</strong>测序仪上产生的，但如果是来自第三代序列的数据量大，错误率高的<em>reads</em>，比如来自<strong>Pacific Biosciences</strong>或牛津<strong>Nanopore</strong>的测序数据，可能需要不同的软件，尤其是在对齐步骤。</p>
+<p><strong>Ballgown</strong>可以用来从几个汇编程序中加载数据。<br>包括<strong>StringTie、Cufflinks5和RSEM17</strong>；但其他转录组组装方法产生的输出结果与Ballgown不兼容。这些方法也主要是在转录本水平上使用，尽管<strong>Bioconductor</strong>对象允许应用任何Bioconductor包进行基因或外显子水平的分析。请注意，Ballgown的默认参数是在假设样本量不大的情况下创建的，范围从三个到几百个。然而，如果用户想以本协议所描述以外的方式应用该软件，可以对参数进行调整，以适应广泛的特定情况。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="https://pic.imgdb.cn/item/625cc849239250f7c53b2990.png" alt=" wechat" style="width: 200px; max-width: 100%;"/>
+    <div>欢迎大家订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6/" rel="tag"># 生物信息学</a>
+          
+            <a href="/tags/%E7%BF%BB%E8%AF%91%E6%96%87%E7%8C%AE/" rel="tag"># 翻译文献</a>
+          
+            <a href="/tags/RNA-Seq/" rel="tag"># RNA-Seq</a>
+          
+            <a href="/tags/%E5%8D%8F%E8%AE%AEProtocol/" rel="tag"># 协议Protocol</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/02/27/%E4%BD%A0%E5%A5%BD%E5%95%8A%EF%BC%8C%E4%B8%96%E7%95%8C/" rel="next" title="你好啊，世界">
+                <i class="fa fa-chevron-left"></i> 你好啊，世界
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/03/09/%E4%BD%BF%E7%94%A8HISAT%20StringTie%E5%92%8CBallgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%EF%BC%88%E4%B8%AD%E8%AF%91%EF%BC%89(%E4%BA%8C)/" rel="prev" title="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(二)">
+                使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(二) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Flatigers" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="flatig@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E8%AE%AE%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">协议概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%BF%E4%BB%A3%E6%80%A7%E5%88%86%E6%9E%90%E5%8C%85"><span class="nav-number">3.</span> <span class="nav-text">替代性分析包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E4%B8%8E%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">软件与协议的局限性</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flatig_Liu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
