@@ -92,7 +92,7 @@
 <meta property="og:image" content="https://pic.imgdb.cn/item/62ba6a3f1d64b0706634543c.png">
 <meta property="og:image" content="https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png">
 <meta property="article:published_time" content="2022-06-28T01:53:06.000Z">
-<meta property="article:modified_time" content="2022-07-09T01:16:36.811Z">
+<meta property="article:modified_time" content="2022-07-09T01:27:09.535Z">
 <meta property="article:author" content="flatig_Liu">
 <meta property="article:tag" content="开发">
 <meta property="article:tag" content="Linux">
@@ -393,16 +393,17 @@
 <p>有些电脑可能会因为安全启动而无法从U盘启动系统。如果出现这种情况，请根据自己电脑的品牌或主板，查找自己的电脑如何进入<strong>UEFI固件设置界面</strong>，如我的电脑需在开机界面按<strong>F10</strong>键。在UEFI界面，关闭<strong>安全启动</strong>。</p>
 <h3 id="开始安装"><a href="#开始安装" class="headerlink" title="开始安装"></a>开始安装</h3><h4 id="将ISO文件写入U盘"><a href="#将ISO文件写入U盘" class="headerlink" title="将ISO文件写入U盘"></a>将ISO文件写入U盘</h4><p>打开Rufus或你自己的启动盘制作工具，这里以Rufus为例。</p>
 <p><img src="https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png"></p>
-<p>选择你的U盘和刚下载的iso文件，不需要更改其他设置，直接开始写入。若询问以要以哪种方式写入（iso或dd，dd为Linux上主要用于转换和输出文件的命令），推荐选择iso模式。然后静静等待写入完成。</p>
+<p>选择你的U盘和刚下载的iso文件，不需要更改其他设置，直接开始写入。若询问要以哪种方式写入（iso或dd，dd为Linux上主要用于转换和输出文件的命令），推荐选择iso模式。然后静静等待写入完成。</p>
 <p>完成之后，就可以开始下一步安装了。</p>
 <h4 id="从U盘启动电脑并安装"><a href="#从U盘启动电脑并安装" class="headerlink" title="从U盘启动电脑并安装"></a>从U盘启动电脑并安装</h4><p>将U盘插拔一次，以保证电脑正确识别U盘。然后关闭电脑，开机时按F12（不同电脑可能不同）进入引导配置界面。选择U盘引导，启动。<br>进入Grub界面，直接选择第一个选项进入，即可进入Debian安装程序。<br>之后根据安装提示进行安装即可。</p>
-<h4 id="安装完成"><a href="#安装完成" class="headerlink" title="安装完成"></a>安装完成</h4><p>在安装流程结束之后，根据提示，进行重启。等待电脑电源指示灯熄灭后，拔掉U盘，然后静待开机。在此之后每次启动电脑，开机前均会进入Grub界面，可以在Grub界面选择你想进入的系统。Grub为Debian默认引导所必须的，若要直接进入Windows，可在UEFI配置引导，将Windows Boot Manager作为首选引导项。</p>
+<h4 id="安装完成"><a href="#安装完成" class="headerlink" title="安装完成"></a>安装完成</h4><p>在安装流程结束之后，根据提示，进行重启。等待电脑电源指示灯熄灭后，拔掉U盘，然后静待开机。在此之后每次启动电脑，开机前均会进入Grub界面，可以在Grub界面选择你想进入的系统。Grub为Debian默认引导所必需的，若要直接进入Windows，可在UEFI配置引导，将Windows Boot Manager作为首选引导项。</p>
 <h3 id="问题及注意"><a href="#问题及注意" class="headerlink" title="问题及注意"></a>问题及注意</h3><p>Debian的发行版更新周期一般为2年，即每两年正式发布一次系统。例如，19 年 7 月的 Debian 10 “buster” 到 21 年 8 月的 Debian 11 “Bullseye”。<br>更新周期较长主要会带来硬件驱动兼容问题。我在安装时，遇到GPU，USB串口和网卡等不能正确识别的情况，甚至无法正常启动系统。<br><strong>解决方案</strong>：</p>
 <ul>
 <li>可以尝试安装使用Debian-testing分支，一般不会有驱动问题</li>
 <li>若只有网卡声卡等驱动出现问题，不影响系统的正常操作，可以在GitHub或硬件提供商处找到相应的硬件驱动，然后编译或安装、</li>
 <li>放弃安装Debian，转向其他Linux（Arch Linux, Fedora, Open SUSE等），基于需求甚至可以使用WSL</li>
 </ul>
+<p>上述安装流程也可适用于其他系统的安装。​</p>
 
       
     </div>
