@@ -79,15 +79,15 @@
 
 
 
-<meta name="description" content="Linux挂载新home分区方法；Deepin 20.7升级问题推荐体验Deepin LinuxDeepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运行大部分Windows和Andro">
+<meta name="description" content="字数：1711 阅读时长：5分钟 Linux挂载新home分区方法；Deepin 20.7升级问题推荐体验Deepin LinuxDeepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Deepin20.7升级问题，Linux扩容home分区">
 <meta property="og:url" content="https://flatig.vip/2022/09/03/Deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98%EF%BC%8CLinux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/index.html">
 <meta property="og:site_name" content="Flatig">
-<meta property="og:description" content="Linux挂载新home分区方法；Deepin 20.7升级问题推荐体验Deepin LinuxDeepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运行大部分Windows和Andro">
+<meta property="og:description" content="字数：1711 阅读时长：5分钟 Linux挂载新home分区方法；Deepin 20.7升级问题推荐体验Deepin LinuxDeepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运">
 <meta property="og:locale">
 <meta property="article:published_time" content="2022-09-02T16:35:46.000Z">
-<meta property="article:modified_time" content="2022-09-03T03:47:50.870Z">
+<meta property="article:modified_time" content="2022-09-03T03:52:53.604Z">
 <meta property="article:author" content="flatig_Liu">
 <meta property="article:tag" content="开发">
 <meta property="article:tag" content="Linux">
@@ -355,7 +355,9 @@
       
 
       
-        <h2 id="Linux挂载新home分区方法；Deepin-20-7升级问题"><a href="#Linux挂载新home分区方法；Deepin-20-7升级问题" class="headerlink" title="Linux挂载新home分区方法；Deepin 20.7升级问题"></a>Linux挂载新home分区方法；Deepin 20.7升级问题</h2><h3 id="推荐体验Deepin-Linux"><a href="#推荐体验Deepin-Linux" class="headerlink" title="推荐体验Deepin Linux"></a>推荐体验Deepin Linux</h3><p>Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运行大部分Windows和Android应用，可以说是Deepin让大部分人开始转移到国内开发者开发的Linux系统（虽然国内主导开发的Linux没几个）。</p>
+        <p>字数：1711</p>
+<p>阅读时长：5分钟</p>
+<h2 id="Linux挂载新home分区方法；Deepin-20-7升级问题"><a href="#Linux挂载新home分区方法；Deepin-20-7升级问题" class="headerlink" title="Linux挂载新home分区方法；Deepin 20.7升级问题"></a>Linux挂载新home分区方法；Deepin 20.7升级问题</h2><h3 id="推荐体验Deepin-Linux"><a href="#推荐体验Deepin-Linux" class="headerlink" title="推荐体验Deepin Linux"></a>推荐体验Deepin Linux</h3><p>Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运行大部分Windows和Android应用，可以说是Deepin让大部分人开始转移到国内开发者开发的Linux系统（虽然国内主导开发的Linux没几个）。</p>
 <p>最近在使用Deepin的过程钟出现了一个有趣的问题：将系统版本从Deepin 20.6升级到Deepin20.7之后，无限循环在登录页面无法进入桌面。后面发现这件事与之前做的另一件事有关系，从头开始说起。</p>
 <h3 id="Linux挂载新home分区"><a href="#Linux挂载新home分区" class="headerlink" title="Linux挂载新home分区"></a>Linux挂载新home分区</h3><p>在初装Deepin时，我在我的笔记本上压缩出了60G的空间来装它（挂载 &#x2F; 和 &#x2F;home）。我只是想用它来学习Linux，同时作为Android开发的环境（Linux上要比Windows快很多，至少在我的电脑上是这样的），在安装完必要的环境并且工作一段时间后，还剩余将尽20G的空间。</p>
 <p>但在后来，我发现Linux上做开发是真的爽（主要是懒，Linux上玩游戏需要一定成本），搭配使用zsh（一款shell，Linux默认为bash）可以省去一些琐碎的步骤，于是渐渐地我将IDEA，PyCharm项目全部转移到Linux，后来学习Rust又安装了Clion。</p>
