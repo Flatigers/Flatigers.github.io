@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/assets/safari-pinned-tab.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Flatig!" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="字数：2402 阅读时长：5 min 面向对象思想：对象，实例和实例化（Java表述）面向对象编程(Object-Oriented Programming)以对象为程序核心，可以实现多态，代码复用性等，是一种能帮助开发人员开发出健壮优秀程序的哲学思想。 Java是一门良好支持面向对象特性的语言，可以说它几乎就是“对象的”，因此详细了解面向对象的意义及特性对于Java开发人员来说极为重要。本文将介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面向对象思想：对象和实例-Java表述">
+<meta property="og:url" content="https://flatig.vip/2022/09/30/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%EF%BC%9A%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%AE%9E%E4%BE%8B-Java%E8%A1%A8%E8%BF%B0/index.html">
+<meta property="og:site_name" content="Flatig">
+<meta property="og:description" content="字数：2402 阅读时长：5 min 面向对象思想：对象，实例和实例化（Java表述）面向对象编程(Object-Oriented Programming)以对象为程序核心，可以实现多态，代码复用性等，是一种能帮助开发人员开发出健壮优秀程序的哲学思想。 Java是一门良好支持面向对象特性的语言，可以说它几乎就是“对象的”，因此详细了解面向对象的意义及特性对于Java开发人员来说极为重要。本文将介绍">
+<meta property="og:locale">
+<meta property="og:image" content="https://flatig.vip/home/flatig/Desktop/%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20220930172822.png">
+<meta property="article:published_time" content="2022-09-30T15:01:47.000Z">
+<meta property="article:modified_time" content="2022-09-30T15:02:35.812Z">
+<meta property="article:author" content="flatig_Liu">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://flatig.vip/home/flatig/Desktop/%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20220930172822.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://flatig.vip/2022/09/30/面向对象思想：对象和实例-Java表述/"/>
+
+
+
+
+
+  <title>面向对象思想：对象和实例-Java表述 | Flatig</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Flatig</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">我的个人博客站</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://flatig.vip/2022/09/30/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%EF%BC%9A%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%AE%9E%E4%BE%8B-Java%E8%A1%A8%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Flatig">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">面向对象思想：对象和实例-Java表述</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-30T23:01:47+08:00">
+                2022-09-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>字数：2402</p>
+<p>阅读时长：5 min</p>
+<h3 id="面向对象思想：对象，实例和实例化（Java表述）"><a href="#面向对象思想：对象，实例和实例化（Java表述）" class="headerlink" title="面向对象思想：对象，实例和实例化（Java表述）"></a>面向对象思想：对象，实例和实例化（Java表述）</h3><p>面向对象编程(Object-Oriented Programming)以对象为程序核心，可以实现多态，代码复用性等，是一种能帮助开发人员开发出健壮优秀程序的哲学思想。</p>
+<p>Java是一门良好支持面向对象特性的语言，可以说它几乎就是“对象的”，因此详细了解面向对象的意义及特性对于Java开发人员来说极为重要。本文将介绍Java中关于对象和实例的概念。</p>
+<p>我在查阅某些资料时，曾被“对象实例化”等概念迷惑，本文也将区分不同的几个概念。</p>
+<h3 id="类-Class"><a href="#类-Class" class="headerlink" title="类 Class"></a>类 Class</h3><p>类是一种 <strong>抽象</strong> 的概念，跟它的名字一样，看到“类”应该有“一类东西”这样的感觉。实际在设计上，类就是代表着某一类东西，或者说它是某些对象或物品的抽象。比如，人类就是一个“类”，植物也是一个“类”，流体是一个“类”，它们都是抽象的名词，不是具体的事物，而是对<strong>一类事物的逻辑抽象</strong>。</p>
+<p>这类似于<strong>分类</strong>，实际上分类对理解类的概念很重要！对每个实际的物品，人们都可以想出一个它属于的类型，然后把它归于其中。假设某人创造了世界上独一无二的变异大蟑螂，尽管只有一只，它仍然有自己的类，即“变异大蟑螂类”（随这个发明者自己起名字）。</p>
+<p>那么为什么能把这一类东西抽象出来呢？这是因为这些东西都具有相同的某些特征，人都是高级灵长类动物，有两个眼睛两只手，发达的大脑等等。这些都是人类的特征，我们叫做“<strong>类的属性</strong>”。它们也可以做一些事，人也可以跑步，也可以制作某些东西和使用东西，会说出一段话等等，这些都是人类的行为，我们叫做“<strong>类的行为</strong>”。</p>
+<p>在面向对象的程序设计中，我们把类具有的属性称作 “<strong>Field</strong>“（域，字段或成员变量），把类的行为称作 “<strong>Method</strong>“（类的方法，某些语言可能称作函数）。在程序中定义一个类，需要指定类的名称，它具有的属性和方法（是什么，可以做什么）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 为了便于讲述，下面的程序省略了很多细节</span></span><br><span class="line"><span class="comment">// 如：修饰符，构造器等</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span> &#123;</span><br><span class="line">    <span class="comment">// 这里定义了类的域</span></span><br><span class="line">    <span class="type">int</span> a_number;</span><br><span class="line">    <span class="type">int</span> b_number;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 这里定义了类的方法</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">give_number</span><span class="params">(<span class="type">int</span> a_num, <span class="type">int</span> b_num)</span> &#123;</span><br><span class="line">        a_number = a;</span><br><span class="line">        b_number = b;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">do_something</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">//do something here!</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在定义完类之后，你的程序就可以使用它，就像你使用 int 一样：可以定义一个int的变量，你也可以弄出一个 MyClass 的变量，应该说是MyClass类的一个对象。</p>
+<h3 id="对象-Object"><a href="#对象-Object" class="headerlink" title="对象 Object"></a>对象 Object</h3><p>**对象(Object)**，按照原意其实应该翻译为“东西”，这特指那些存在的事物。对象与类是对应的，比如张三是人类，Tom是猫类，电脑是电子产品类，拖鞋是衣物类一样。如果我们要弄出一个属于MyClass类的对象，那么这个对象就是MyClass类（废话）。</p>
+<p>Java中要创造一个类的对象，需要使用 <strong>new 关键字</strong>。JVM遇到 new 时将会进行类加载，空间分配，自动初始化域等一系列过程，在这里我们只需要知道，new 相当于在你的程序世界中腾出了一块空间，在这块刚刚合适的空间上创造了某一类的对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 不讨论使用反射、代理、反序列化等一系列创造对象的技术</span></span><br><span class="line"><span class="comment">// 我们用最一般，最正常的方式</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// new了一个MyClass类的对象并让它调用方法做一些行为</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">MyClass</span>().do_something();</span><br><span class="line"></span><br><span class="line"><span class="comment">// new了一个MyClass类的对象</span></span><br><span class="line"><span class="comment">// 并用MyClass类型的变量myClass代表这个对象</span></span><br><span class="line"><span class="comment">// 然后通过myClass变量调用方法做一些行为</span></span><br><span class="line"><span class="type">MyClass</span> <span class="variable">myClass</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyClass</span>();</span><br><span class="line">myClass.do_something();</span><br></pre></td></tr></table></figure>
+
+<p>正如前面说的，类其实可以看做是<strong>分类</strong>，很自然而然地会出现“子类”的现象，子类是具有父类（子类-父类，派生类-超类，有一系列叫法表示相同含义）的属性的，比如人类肯定具有动物的属性，可以做出同样的行为（取决于你会不会做）。注意，不要拿某人和某鱼比较，因为鱼也是动物的子类，鱼并不代表动物，它和人是动物的两个分支，这里的动物是具有所有动物都有的属性的，比如会自己动，具体参见生物分类学。</p>
+<p>面向对象编程中也有类似的概念，即<strong>继承，子类会继承父类的所有域和方法</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">YourClass</span> <span class="keyword">extends</span> <span class="title class_">MyClass</span>&#123;</span><br><span class="line">    <span class="type">int</span> c_number;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">give_c</span><span class="params">(<span class="type">int</span> num)</span> &#123;</span><br><span class="line">        c_number = num;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在YourClass继承了MyClass，它的效果看上去就跟下面这样一样（只是为了说明MyClass也具有这些域和方法，实际上完全<strong>不</strong>是！）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">YourClass</span> <span class="keyword">extends</span> <span class="title class_">MyClass</span>&#123;</span><br><span class="line">    <span class="type">int</span> a_number;</span><br><span class="line">    <span class="type">int</span> b_number;</span><br><span class="line">    <span class="type">int</span> c_number;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">give_c</span><span class="params">(<span class="type">int</span> num)</span> &#123;</span><br><span class="line">        c_number = num;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">give_number</span><span class="params">(<span class="type">int</span> a_num, <span class="type">int</span> b_num)</span> &#123;</span><br><span class="line">        a_number = a;</span><br><span class="line">        b_number = b;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">do_something</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">//do something here!</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="实例-Instance-和实例化"><a href="#实例-Instance-和实例化" class="headerlink" title="实例 Instance 和实例化"></a>实例 Instance 和实例化</h3><p>我阅读了一些网上的中文文章，发现了一些奇怪的词语，比如“<strong>对象实例化</strong>”这个词，并产生了一些误解，这里再详细介绍一遍。</p>
+<p><strong>Instance</strong> 就是例子的意思，这里译为实例没有任何不妥。它是对于对象而言的，比如人类，假设你在向外星人介绍人类，它们要求你举一个例子，你说张三就是个例子！现在把名词换过来，即张三这个人是人类的一个实例！而通过对象与类的概念可以知道，张三也是人类的一个对象！所以说，<strong>某个类的实例就是这个类的对象</strong>，那么我们创建某个类的对象的<strong>过程</strong>，就说成是创建这个类的实例。其实它们有一个很重要的区别，看下一个小标题！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">MyClass</span> <span class="variable">myClass2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyClass</span>();</span><br><span class="line"><span class="type">YourClass</span> <span class="variable">yourClass2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">YourClass</span>();</span><br></pre></td></tr></table></figure>
+
+<p>上述代码可以说成创建了这两个类的对象，也可以说成进行了这两个类的实例化，所以确切来说，<strong>应该讲成“类实例化”</strong>而不是“对象实例化”。</p>
+<h3 id="实例和对象的重要区别"><a href="#实例和对象的重要区别" class="headerlink" title="实例和对象的重要区别"></a>实例和对象的重要区别</h3><p>在我们的表述中，对象这个词是很严格的，它和类是<strong>严格对应的关系</strong>，张三是人类的对象这点是绝对的，myClass2 对象是 MyClass类的对象这点也是绝对的，yourClass2 对象更是 YourClass类的对象，再没有别的关系。</p>
+<p>等等？！YourClass类是MyCLass类的子类啊，那么yourClass2为什么不能是MyClass类的对象呢（这里可能有点晕，注意看好对象和类这几个字）？</p>
+<p>因为 <strong>继承</strong>，它们的区别才显现出来。</p>
+<p>要知道，对象关系，比实例关系更<strong>严格</strong>。用什么类，就会创造出什么类的对象，这是严格的“ <strong>是</strong>” 和“一一对应”的关系。</p>
+<p>而实例，就跟它的意思“<strong>例子</strong>”一样，要宽容很多。注意看这张图！</p>
+<p><img src="/home/flatig/Desktop/%E6%88%AA%E5%9B%BE_%E9%80%89%E6%8B%A9%E5%8C%BA%E5%9F%9F_20220930172822.png" alt="截图_选择区域_20220930172822"></p>
+<p>这张图中，我们把丁香和迎春花看做是两个具体的<strong>对象</strong>（实际不是这样的，假设你面前存在这两朵花就行），丁香就是丁香属类的对象，迎春花就是茉莉属类的对象。如果我让你分别<strong>举一个丁香属类和茉莉属类的例子</strong>，你肯定会毫不犹豫地说出丁香和迎春花。但现在，如果我让你举一个木犀科类的例子呢，没错，丁香和迎春花就是木犀科类的例子！就像我让你举一个动物的例子，你会说出某人张三，某王八李四，某河豚王五等等，不管它们怎么样，反正都是动物！</p>
+<p>其实， 实例 和 对象 的区别就是“<strong>举例子的分类</strong>” 和 “<strong>实际就是的对应</strong>” 的区别。</p>
+<p>在Java中，我们可以通过以下代码实际反应出来</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 先实例化两个类的两个对象</span></span><br><span class="line"><span class="type">MyClass</span> <span class="variable">myClass3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyClass</span>();</span><br><span class="line"><span class="type">YourClass</span> <span class="variable">yourClass3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">YourClass</span>();</span><br><span class="line"></span><br><span class="line"><span class="type">boolean</span> <span class="variable">a</span> <span class="operator">=</span> myClass3.getClass() == yourClass3.getClass();</span><br><span class="line"><span class="type">boolean</span> <span class="variable">b</span> <span class="operator">=</span> myClass3 instanceOf MyClass;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">c</span> <span class="operator">=</span> myClass3 instanceOf YourClass;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">d</span> <span class="operator">=</span> yourClass3 instanceOf YourClass;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">e</span> <span class="operator">=</span> yourClass3 instanceOf MyClass;</span><br><span class="line"></span><br><span class="line"><span class="comment">// a, b, c, d, e 的值分别为</span></span><br><span class="line"><span class="comment">// false, true, false, true, true</span></span><br></pre></td></tr></table></figure>
+
+<p>因为 YourClass 类是 MyClass 类的<strong>子类</strong>，就跟上面分类的例子一样， yourClass3 这个对象即是 MyClass 类的实例，又是 YourClass 类的实例，但它始终只是 YourClass 类的对象。</p>
+<p>完。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="https://pic.imgdb.cn/item/625cc849239250f7c53b2990.png" alt=" wechat" style="width: 200px; max-width: 100%;"/>
+    <div>欢迎大家订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/09/15/TimSort%E2%80%94%E6%9C%80%E5%BF%AB%E7%9A%84%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="next" title="TimSort—最快的排序算法">
+                <i class="fa fa-chevron-left"></i> TimSort—最快的排序算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Flatigers" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="flatig@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%EF%BC%9A%E5%AF%B9%E8%B1%A1%EF%BC%8C%E5%AE%9E%E4%BE%8B%E5%92%8C%E5%AE%9E%E4%BE%8B%E5%8C%96%EF%BC%88Java%E8%A1%A8%E8%BF%B0%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">面向对象思想：对象，实例和实例化（Java表述）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB-Class"><span class="nav-number">2.</span> <span class="nav-text">类 Class</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1-Object"><span class="nav-number">3.</span> <span class="nav-text">对象 Object</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B-Instance-%E5%92%8C%E5%AE%9E%E4%BE%8B%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">实例 Instance 和实例化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%92%8C%E5%AF%B9%E8%B1%A1%E7%9A%84%E9%87%8D%E8%A6%81%E5%8C%BA%E5%88%AB"><span class="nav-number">5.</span> <span class="nav-text">实例和对象的重要区别</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">flatig_Liu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
