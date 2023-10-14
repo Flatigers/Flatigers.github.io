@@ -1,0 +1,15 @@
+# Base configuration
+
+title = "flatig-我的个人博客站"
+baseURL = "https://flatig.vip/"
+theme = "FixIt"
+
+# ["en", "zh-cn", "fr", "pl", ...]
+defaultContentLanguage = "zh-cn"
+# ["en", "zh-CN", "fr", "pl", ...]
+languageCode = "zh-CN"
+hasCJKLanguage = true
+
+enableEmoji = true
+enableGitInfo = true
+summaryLength = 150

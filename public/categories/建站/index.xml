@@ -1,0 +1,265 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>建站 - 分类 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/categories/%E5%BB%BA%E7%AB%99/</link>
+    <description>建站 - 分类 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>chineseliujiayi691@gmail.com (flatig)</managingEditor>
+      <webMaster>chineseliujiayi691@gmail.com (flatig)</webMaster><lastBuildDate>Sun, 10 Jul 2022 10:55:19 &#43;0000</lastBuildDate><atom:link href="https://flatig.vip/categories/%E5%BB%BA%E7%AB%99/" rel="self" type="application/rss+xml" /><item>
+  <title>手把手教你搭建自己的静态博客网站—使用Hexo与Git</title>
+  <link>https://flatig.vip/posts/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E7%BD%91%E7%AB%99%E4%BD%BF%E7%94%A8hexo%E4%B8%8Egit/</link>
+  <pubDate>Sun, 10 Jul 2022 10:55:19 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E7%BD%91%E7%AB%99%E4%BD%BF%E7%94%A8hexo%E4%B8%8Egit/</guid>
+  <description><![CDATA[<p>全文字数：3354
+阅读时长：15min
+文章类型：教程</p>
+<h3 id="介绍">介绍</h3>
+<hr>
+<p>这可能是你见过<strong>最清楚的</strong>，使用 <strong>GitHub</strong> 或 <strong>Gitee</strong> 与 <strong>Hexo</strong>搭建个人博客网站的教程，即使是小白，看不太懂某些概念，按照文中的方法流程操作，也可以完成网站的搭建。此篇教程的目的是搭建完成自己的博客并让它可以运行，更高级的定制操作将在后面介绍</p>
+<p>编写时间为2022/7/10，教程中所用工具与网站以当前为准。</p>
+<h4 id="基础">基础</h4>
+<p>首先介绍一下这几个概念。</p>
+<h5 id="静态网站">静态网站</h5>
+<p>按照网站的组成和架构，可以将网站分为 静态网站和动态网站。它的<strong>静态</strong>体现在，用户访问的是完全固定的代码，除非网站的开发者做出一些更改，不然用户接收到的内容<strong>永远不会改变</strong>。二者主要有这样几个区别：</p>
+<ul>
+<li>源代码。静态网站代码均是由 <strong>HTML/CSS</strong> 等静态标记语言组成的。而动态网站还会使用到 <strong>JavaScript</strong>，<strong>PHP</strong> 等语言。</li>
+<li>组成。静态网站只有<strong>前端页面</strong>，也即用户能看到的部分。动态网站具有<strong>数据库</strong>（最主要的区别之一），<strong>用户交互功能</strong>等。</li>
+<li>托管方式。访问静态网站一般只需访问其 <strong>index.html</strong> 以及与其相关的一系列文件，因此托管静态网站只需要一个能让用户直接访问到<strong>这些</strong>（百度网盘这些单文件访问不行，除非你只有一个index.html）文件的“东西”，甚至可以是经过内网穿透和映射的NAS。而动态网站则需要一个完整的服务器，以实现动态交互功能。</li>
+<li>功能。静态网站的主要功能是，提供一些可以让用户看到的信息。动态网站则具有，与用户交换数据，动态访问与数据安全性等。</li>
+</ul>
+<h5 id="githubgitee">GitHub/Gitee</h5>
+<p>GitHub与Gitee均是基于 <strong>git</strong> 的代码托管平台（GitHub是全球使用最多的开源平台）。利用它们提供的  <strong>Pages功能</strong>，可以满足我们托管静态网站的需求，最重要的是，它们是<strong>免费</strong>的！</p>
+<p>利用它们搭建静态网站需要频繁使用到git，不会使用的读者有必要了解一下git，参照以下链接：</p>
+<p><a href="https://www.runoob.com/git/git-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Git教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+<p>由于GitHub目前的访问不太稳定，有时甚至无法访问，因此本教程还会介绍如何使用Gitee搭建博客。</p>
+<h5 id="hexo">Hexo</h5>
+<p>Hexo是一款简洁、高效的博客框架，使用Node.js 编写。目前多数托管在GitHub上的博客均使用Hexo。</p>
+<p>Hexo使用<strong>Markdown</strong> 渲染引擎解析文章。**用户使用Markdown书写文章内容，Hexo 将其渲染成网页。**Hexo 有很多主题供你选择。</p>
+<p>Markdown是一种轻量级的标记语言，或者说是排版语言，人们可以使用Markdown<strong>快速编写具有一定排版的文章</strong>，您现在正在阅读的这篇文章就是由Markdown写出的。Markdown的使用类似于Word，但它更能让你专注于内容写作。Markdown的学习较简单，不了解的读者有必要了解一下，参照以下链接：</p>
+<p><a href="https://www.runoob.com/markdown/md-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Markdown教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+<h4 id="原理">原理</h4>
+<p>用户访问一个网站，其大致流程是：</p>
+<ol>
+<li>在浏览器<strong>输入域名</strong>，按下回车 。</li>
+<li>经过一系列的<strong>DNS信息查询</strong>步骤，得到服务器的<strong>IP地址。</strong></li>
+<li>通过得到的IP与端口，经过三次握手，与服务器建立<strong>TCP连接</strong>（不出意外的话，QUIC将在未来取代TCP）。</li>
+<li>通过<strong>HTTP/HTTPS协议</strong>请求网页内容，若通过，服务器便回复“OK”并下发网页内容。</li>
+<li>浏览器得到HTML内容，将其<strong>解析渲染</strong>，成为用户看到的网页。</li>
+</ol>
+<p>我们使用GitHub或Gitee创建静态网页并没有涉及到服务器的搭建和处理，我们只需要关心我们网站内容的建设，这是一个<strong>纯前端</strong>的工作，而与客户端沟通等工作便交予服务器。等等，<strong>我们的服务器呢？</strong></p>
+<p>在这里，GitHub和Gitee的Pages服务便解决了我们的服务器需要的工作。当用户访问特定的域名时，经过DNS服务器获取IP后指向GitHub/Gitee的Pages服务器，并与之建立连接，当客户端发送请求时，服务器将找到在万千数据中相对应的，然后返回我们的网页给用户。<strong>那我们的网页要放在哪里呢？</strong></p>
+<p>我们只需要在GitHub/Gitee上创建一个<strong>仓库</strong>，将我们的网页代码放在上面就可以了（首页还是永远的index.html），我们在里面写什么，看到的网页就是什么。由于GitHub/Gitee Pages的服务基于我们创建的代码仓库，<strong>因此我们只能在上面创建静态网站。</strong></p>
+<p>也就是说，在GitHub/Gitee上做一些配置，就相当于我们把服务器创建好了，后面怎么创建网页内容完全是我们的自由。那么<strong>Hexo是干什么的？</strong></p>
+<p>Hexo如前面所说，就是一款博客框架，它的作用是帮我们创建出比较精美的博客网页，我们不需要再去学习HTML5之类的新的语言，把它交给前端，我们再去做属于自己的工作（如果你是一名前端工程师，完全可以尝试自己写出一个漂亮的网页）。</p>
+<p>我们总体的<strong>流程</strong>就是：</p>
+<ol>
+<li>使用Hexo或自己<strong>编写</strong>，在电脑本地<strong>生成</strong>静态网站文件。</li>
+<li>使用git或Hexo deploy（基于git），将文件<strong>同步</strong>到我们的代码仓库。（你甚至可以<strong>直接上传</strong>到仓库，只要不嫌麻烦）</li>
+<li>在服务配置好的情况下，我们的网站便可以<strong>访问</strong>了。</li>
+</ol>
+<h4 id="准备工作">准备工作</h4>
+<p>这里对使用本教程的方法创建网站所需的内容列一清单，工具的Windows版本<strong>官方</strong>下载链接在下，Linux可使用apt自行安装。</p>
+<p><strong>基础知识</strong>：</p>
+<ul>
+<li>Git的使用（用于向GitHub或Gitee提交文件）<a href="https://www.runoob.com/git/git-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Git教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li>Markdown（学习简单，用于编写文章和内容）<a href="https://www.runoob.com/markdown/md-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Markdown教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+</ul>
+<p><strong>需要工具</strong>：</p>
+<ul>
+<li>
+<p>一台电脑</p>
+</li>
+<li>
+<p>Git（安装适用于自己系统的版本）<a href="https://git-scm.com/downloads"target="_blank" rel="external nofollow noopener noreferrer">Git——下载<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+</li>
+<li>
+<p>Node.js （用于安装和使用 Hexo）<a href="https://nodejs.org/en/download/"target="_blank" rel="external nofollow noopener noreferrer">Node.js——下载<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+</li>
+<li>
+<p>Hexo （博客搭建核心工具）</p>
+</li>
+</ul>
+<p><strong>需要完成的操作</strong>：</p>
+<ul>
+<li>注册GitHub或Gitee账号</li>
+<li>在电脑上创建一个用于存放你的博客的文件夹（路径最好全英文，否则可能有意想不到的错误发生）</li>
+</ul>
+<h3 id="开始">开始</h3>
+<hr>
+<p>下面是安装和创建博客的全步骤。</p>
+<h4 id="配置hexo">配置Hexo</h4>
+<p>这一步将先创建网站的<strong>基本框架</strong>。</p>
+<p>首先<strong>安装Git，Node.js</strong>。Windows在安装时注意勾选 &ldquo;Add To Path&rdquo;，以全局使用。</p>
+<p>在安装完成后，打开命令行，分别输入git，node，若无报错且出现版本信息，即为安装成功。</p>
+<p>创建一个专用于博客的文件夹，其路径名应是全英文。在该文件夹下打开命令行，输入如下命令。</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">npm install hexo-cli -g
+</span></span><span class="line"><span class="cl"><span class="c1"># 全局安装hexo</span>
+</span></span><span class="line"><span class="cl">hexo init blog
+</span></span><span class="line"><span class="cl"><span class="c1"># 初始化创建blog文件夹</span>
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> blog
+</span></span><span class="line"><span class="cl"><span class="c1"># 移动到blog文件夹</span>
+</span></span><span class="line"><span class="cl">npm install
+</span></span><span class="line"><span class="cl"><span class="c1"># 初始化</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在执行完所有命令后，博客的本地文件就已经搭建完成了。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca684cf54cd3f937f15c69.png" data-thumbnail="https://pic.imgdb.cn/item/62ca684cf54cd3f937f15c69.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca684cf54cd3f937f15c69.png</h2>"></a></p>
+<p>这时候，我们可以再输入以下命令以在本地<strong>预览</strong>我们的网站内容。</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hexo server
+</span></span><span class="line"><span class="cl"><span class="c1"># 或 hexo s</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在输入后，按住Ctrl点击出现的链接即可跳转到浏览器。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca6917f54cd3f937f22d8a.png" data-thumbnail="https://pic.imgdb.cn/item/62ca6917f54cd3f937f22d8a.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca6917f54cd3f937f22d8a.png</h2>"></a></p>
+<p>如果出现这样的界面，那恭喜你，你已经做好自己的网站了，接下来只差修改内容和让别人看到他，预览完毕后可按 Ctrl + C 结束。</p>
+<h4 id="配置本地git">配置本地Git</h4>
+<p>首先注册GitHub/Gitee账号，取决于你要使用哪个平台。</p>
+<p>打开<strong>Git bash</strong>，输入如下命令。</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git config --global user.name <span class="s2">&#34;你的GitHub/Gitee用户名&#34;</span>
+</span></span><span class="line"><span class="cl">git config --global user.email <span class="s2">&#34;你的GitHub/Gitee注册邮箱&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 用于配置本地用户信息</span>
+</span></span><span class="line"><span class="cl">ssh-keygen -t rsa -C <span class="s2">&#34;你的GitHub/Gitee注册邮箱&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 用于生成SSH Key，之后出现三个选项，直接回车即可</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>由于你的本地 Git 仓库和 GitHub/Gitee 仓库之间的传输是通过<strong>SSH加密</strong>的，所以我们需要配置验证信息。Git通过<strong>非对称加密的公钥与私钥</strong>来完成加密，公钥放置在远程库（GitHub/Gitee）上，私钥放置在客户端上。每次同步都需要输入账号密码验证推送用户是否是合法用户，为了省去每次输入密码的步骤，在这里采用SSH。当进行推送时，Git会匹配公钥私钥是否合法，若匹配成功则允许推送。</p>
+<p>我们的SSH公钥私钥文件默认存放在 <strong>C:\Users\你的用户名\.ssh\</strong> 路径下（Linux默认在 /home/.ssh 下）。</p>
+<h4 id="配置githubgitee">配置GitHub/Gitee</h4>
+<h5 id="gitee-版">Gitee 版</h5>
+<p>在登陆后，首先打开个人设置中的SSH公钥设置，打开我们在SSH公钥文件夹下的 <strong>id_rsa.pub</strong> 文件，将其内容全部复制，粘贴到公钥处。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7493f54cd3f937ffc93c.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7493f54cd3f937ffc93c.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7493f54cd3f937ffc93c.png</h2>"></a></p>
+<p>然后在git bash 或 shell中输入如下代码判断是否成功：</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca78c3f54cd3f93705487e.png" data-thumbnail="https://pic.imgdb.cn/item/62ca78c3f54cd3f93705487e.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca78c3f54cd3f93705487e.png</h2>"></a></p>
+<p>这样我们就可以使用Git直接同步仓库内容了。</p>
+<p>之后在Gitee中创建一个仓库，仓库名称可以随意选取，但仓库路径<strong>需要与你的用户名相同</strong>，这样才可以用于创建网站。</p>
+<p>此外，我们还需要添加Readme文件，其他不做要求。</p>
+<!-- raw HTML omitted -->
+<p>在此步骤之后，复制仓库的SSH地址。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7a07f54cd3f937073e1c.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7a07f54cd3f937073e1c.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7a07f54cd3f937073e1c.png</h2>"></a></p>
+<p>然后我们就可以打开 <strong>blog</strong> 文件夹了，打开里面的 <strong>_config.yml</strong> 文件，在其末尾修改编辑如下内容：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">deploy</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 若之后出错，可用单引号括起git，即 &#39;git&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">git@gitee.com:flatig/blog.git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 这里是你刚刚复制的地址</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l">main</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 仓库分支，gitee一般为master，可在仓库首页查看</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑完毕保存之后，即可进入下一步骤。</p>
+<hr>
+<h5 id="github版">GitHub版</h5>
+<p>在登陆后，首先打开 Settings 中的 SSH and GPG keys，打开我们在SSH公钥文件夹下的 <strong>id_rsa.pub</strong> 文件，将其内容全部复制，粘贴到公钥处。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7728f54cd3f93702f8a5.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7728f54cd3f93702f8a5.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7728f54cd3f93702f8a5.png</h2>"></a></p>
+<p>然后在git bash 或 shell中输入如下代码判断是否成功：</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7882f54cd3f93704de9f.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7882f54cd3f93704de9f.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7882f54cd3f93704de9f.png</h2>"></a></p>
+<p>这样我们就可以使用Git直接同步仓库内容了。</p>
+<p>之后在GitHub中创建一个仓库，仓库名要求这样的格式： <strong>用户名.github.io</strong></p>
+<p>此外其他不做要求。在此步骤之后，复制仓库的SSH地址。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7a4bf54cd3f937079e63.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7a4bf54cd3f937079e63.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7a4bf54cd3f937079e63.png</h2>"></a></p>
+<p>然后我们就可以打开 <strong>blog</strong> 文件夹了，打开里面的 <strong>_config.yml</strong> 文件，在其末尾修改编辑如下内容：</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">deploy</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 若之后出错，可用单引号括起git，即 &#39;git&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">git@github.com:Flatigers/Flatigers.github.io.git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 这里是你刚刚复制的地址</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l">main</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 仓库分支，GitHub一般为main，可在仓库首页查看</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑完毕保存之后，即可进入下一步骤。</p>
+<h4 id="同步到githubgitee">同步到GitHub/Gitee</h4>
+<p>在完成上述所有操作后，在 blog 文件夹下打开终端或shell，输入如下命令：</p>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">npm install hexo-deployer-git --save
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装Hexo的git同步插件</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在完成之后，输入如下命令，将仓库同步：</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hexo clean
+</span></span><span class="line"><span class="cl"><span class="c1"># 清除旧文件，可以简写为 hexo c</span>
+</span></span><span class="line"><span class="cl">hexo generate
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成新文件，可以简写为 hexo g</span>
+</span></span><span class="line"><span class="cl">hexo deploy
+</span></span><span class="line"><span class="cl"><span class="c1"># 推送并同步，可以简写为 hexo d</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># hexo新版本默认deploy前自动generate，故可省略hexo g</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 以上命令可以同时简写为：</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># hexo c | hexo d</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在同步完成之后，打开你的 GitHub/Gitee 仓库，你会看到多出了许多文件。</p>
+<p><strong>使用GitHub的用户，此时已经可以访问到自己的网站了，只需要在浏览器输入 用户名.github.io</strong></p>
+<p>使用Gitee的用户，还需要开启Pages服务。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca802ef54cd3f937102504.png" data-thumbnail="https://pic.imgdb.cn/item/62ca802ef54cd3f937102504.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca802ef54cd3f937102504.png</h2>"></a></p>
+<p>若出现问题，可以选择<strong>强制启动HTTPS</strong>，之后便可以通过提供的域名访问了。</p>
+<h3 id="完成">完成</h3>
+<hr>
+<p>到这里已经基本完成了整个网站的搭建工作。</p>
+<p>此外，还有一些别的操作，如绑<strong>定高级域名，更换主题，设置评论区，自定义404</strong>等，这些可以在<strong>Hexo的官方文档</strong>中找到，这里后续有可能会继续更新。</p>
+<p>继续探索多彩的网络世界吧！</p>
+]]></description>
+</item>
+</channel>
+</rss>

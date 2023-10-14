@@ -1,0 +1,8 @@
+# (https://gohugo.io/content-management/syntax-highlighting)
+[highlight]
+# false needed (https://github.com/hugo-fixit/FixIt/issues/43)
+noClasses = false
+guessSyntax = true
+codeFences = true
+lineNos = true
+lineNumbersInTable = true

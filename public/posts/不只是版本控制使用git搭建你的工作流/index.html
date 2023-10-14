@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+    <meta name="robots" content="noodp" />
+    <title>不只是版本控制：使用Git搭建你的工作流 - flatig-我的个人博客站</title><meta name="author" content="flatig">
+<meta name="author-link" content="https://github.com/Flatigers">
+<meta name="description" content="全文字数：5241 阅读时长：15分钟 开始 在2021 Stack Overflow 最受欢迎的工具调查排名中，有超过90%的开发者选择git，它如今已成为开发人员的基本技能和工作时首选的版本控制系统。本文将介绍git的基本概念和常用操作，教你使用git快速完成自己的工作流。 本文只介绍基本操作和概念，若想对git有更详细的了解，请" /><meta name="keywords" content='教程, Git, 版本控制' /><meta itemprop="name" content="不只是版本控制：使用Git搭建你的工作流">
+<meta itemprop="description" content="全文字数：5241 阅读时长：15分钟 开始 在2021 Stack Overflow 最受欢迎的工具调查排名中，有超过90%的开发者选择git，它如今已成为开发人员的基本技能和工作时首选的版本控制系统。本文将介绍git的基本概念和常用操作，教你使用git快速完成自己的工作流。 本文只介绍基本操作和概念，若想对git有更详细的了解，请"><meta itemprop="datePublished" content="2022-08-24T23:48:27+00:00" />
+<meta itemprop="dateModified" content="2022-08-24T23:48:27+00:00" />
+<meta itemprop="wordCount" content="6276"><meta itemprop="image" content="https://flatig.vip/images/logo.png"/>
+<meta itemprop="keywords" content="教程,Git,版本控制," /><meta property="og:title" content="不只是版本控制：使用Git搭建你的工作流" />
+<meta property="og:description" content="全文字数：5241 阅读时长：15分钟 开始 在2021 Stack Overflow 最受欢迎的工具调查排名中，有超过90%的开发者选择git，它如今已成为开发人员的基本技能和工作时首选的版本控制系统。本文将介绍git的基本概念和常用操作，教你使用git快速完成自己的工作流。 本文只介绍基本操作和概念，若想对git有更详细的了解，请" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" /><meta property="og:image" content="https://flatig.vip/images/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-08-24T23:48:27+00:00" />
+<meta property="article:modified_time" content="2022-08-24T23:48:27+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://flatig.vip/images/logo.png"/>
+
+<meta name="twitter:title" content="不只是版本控制：使用Git搭建你的工作流"/>
+<meta name="twitter:description" content="全文字数：5241 阅读时长：15分钟 开始 在2021 Stack Overflow 最受欢迎的工具调查排名中，有超过90%的开发者选择git，它如今已成为开发人员的基本技能和工作时首选的版本控制系统。本文将介绍git的基本概念和常用操作，教你使用git快速完成自己的工作流。 本文只介绍基本操作和概念，若想对git有更详细的了解，请"/>
+<meta name="application-name" content="Flatig 博客站">
+<meta name="apple-mobile-web-app-title" content="Flatig 博客站"><meta name="theme-color" data-light="#ffffff" data-dark="#252627" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" /><link rel="prev" href="https://flatig.vip/posts/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E7%BD%91%E7%AB%99%E4%BD%BF%E7%94%A8hexo%E4%B8%8Egit/" /><link rel="next" href="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "不只是版本控制：使用Git搭建你的工作流",
+    "inLanguage": "zh-CN",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https:\/\/flatig.vip\/posts\/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81\/"
+    },"genre": "posts","keywords": "教程, Git, 版本控制","wordcount":  6276 ,
+    "url": "https:\/\/flatig.vip\/posts\/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81\/","datePublished": "2022-08-24T23:48:27+00:00","dateModified": "2022-08-24T23:48:27+00:00","publisher": {
+      "@type": "Organization",
+      "name": "flatig","logo": "https:\/\/flatig.vip\/images\/logo.png"},"author": {
+        "@type": "Person",
+        "name": "flatig"
+      },"description": ""
+  }
+  </script></head>
+  <body data-header-desktop="sticky" data-header-mobile="auto"><script>(window.localStorage?.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('data-theme', 'dark');</script><div class="wrapper" data-page-style="normal"><header class="desktop animate__faster" id="header-desktop">
+  <div class="header-wrapper" data-github-corner="right">
+    <div class="header-title">
+      <a href="/" title="flatig-我的个人博客站"><img loading="lazy" src="/images/logo.svg" srcset="/images/logo.svg, /images/logo.svg 1.5x, /images/logo.svg 2x" sizes="auto" data-title="flatig-我的个人博客站" data-alt="flatig-我的个人博客站" class="logo" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span class="header-title-text">Flatig</span></a><span id="typeit-header-subtitle-desktop" class="typeit header-subtitle"></span></div>
+    <nav>
+      <ul class="menu"><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/posts/"
+                
+                
+              ><i class="fa-solid fa-archive fa-fw fa-sm" aria-hidden="true"></i> 文章</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/categories/"
+                
+                
+              ><i class="fa-solid fa-th fa-fw fa-sm" aria-hidden="true"></i> 分类</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/tags/"
+                
+                
+              ><i class="fa-solid fa-tags fa-fw fa-sm" aria-hidden="true"></i> 标签</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/tags/"
+                
+                
+              ><i class="fa-solid fa-book fa-fw fa-sm" aria-hidden="true"></i> 文档</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/friends/"
+                
+                
+              ><i class="fa-solid fa-users fa-fw fa-sm" aria-hidden="true"></i> 友链</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/about/"
+                
+                
+              ><i class="fa-solid fa-user-tie fa-fw fa-sm" aria-hidden="true"></i> 关于</a></li><li class="menu-item delimiter"></li><li class="menu-item search" id="search-desktop">
+            <input type="text" placeholder="Search something" id="search-input-desktop">
+            <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+              <i class="fa-solid fa-search fa-fw" aria-hidden="true"></i>
+            </a>
+            <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+              <i class="fa-solid fa-times-circle fa-fw" aria-hidden="true"></i>
+            </a>
+            <span class="search-button search-loading" id="search-loading-desktop">
+              <i class="fa-solid fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+            </span>
+          </li><li class="menu-item theme-switch" title="切换主题">
+          <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+        </li></ul>
+    </nav>
+  </div>
+</header><header class="mobile animate__faster" id="header-mobile">
+  <div class="header-container">
+    <div class="header-wrapper">
+      <div class="header-title">
+        <a href="/" title="flatig-我的个人博客站"><img loading="lazy" src="/images/logo.svg" srcset="/images/logo.svg, /images/logo.svg 1.5x, /images/logo.svg 2x" sizes="auto" data-title="/images/logo.svg" data-alt="/images/logo.svg" class="logo" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span class="header-title-text">Flatig</span></a><span id="typeit-header-subtitle-mobile" class="typeit header-subtitle"></span></div>
+      <div class="menu-toggle" id="menu-toggle-mobile">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <nav>
+      <ul class="menu" id="menu-mobile"><li class="search-wrapper">
+            <div class="search mobile" id="search-mobile">
+              <input type="text" placeholder="Search something" id="search-input-mobile">
+              <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                <i class="fa-solid fa-search fa-fw" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                <i class="fa-solid fa-times-circle fa-fw" aria-hidden="true"></i>
+              </a>
+              <span class="search-button search-loading" id="search-loading-mobile">
+                <i class="fa-solid fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+              </span>
+            </div>
+            <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+              取消
+            </a>
+          </li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/posts/"
+                  
+                  
+                ><i class="fa-solid fa-archive fa-fw fa-sm" aria-hidden="true"></i> 文章</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/categories/"
+                  
+                  
+                ><i class="fa-solid fa-th fa-fw fa-sm" aria-hidden="true"></i> 分类</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/tags/"
+                  
+                  
+                ><i class="fa-solid fa-tags fa-fw fa-sm" aria-hidden="true"></i> 标签</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/tags/"
+                  
+                  
+                ><i class="fa-solid fa-book fa-fw fa-sm" aria-hidden="true"></i> 文档</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/friends/"
+                  
+                  
+                ><i class="fa-solid fa-users fa-fw fa-sm" aria-hidden="true"></i> 友链</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/about/"
+                  
+                  
+                ><i class="fa-solid fa-user-tie fa-fw fa-sm" aria-hidden="true"></i> 关于</a></li><li
+              class="menu-item text-center"
+            ><a
+                  class="menu-link"
+                  href="https://github.com/Flatigers"
+                  title="GitHub"
+                  rel="noopener noreferrer" target="_blank"
+                ><i class='fa-brands fa-github fa-fw' aria-hidden='true'></i> </a></li><li class="menu-item menu-system">
+          <span class="menu-system-item theme-switch" title="切换主题"><i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i></span></li>
+      </ul>
+    </nav>
+  </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+  </div>
+  <div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+  </div><nav aria-label="breadcrumb" class="breadcrumb-container sticky">
+    <ol class="breadcrumb"><li class="breadcrumb-item"><a href="/posts/" title="Posts">Posts</a></li><li class="breadcrumb-item active" aria-current="page">不只是版本控制：使用Git搭建你的工作流</li>
+    </ol>
+  </nav><main class="container"><aside class="toc" id="toc-auto"><h2 class="toc-title">目录&nbsp;<i class="toc-icon fa-solid fa-angle-down fa-fw" aria-hidden="true"></i></h2>
+      <div class="toc-content" id="toc-content-auto"></div></aside>
+
+  <aside class="aside-custom">
+    </aside>
+
+  <article class="page single">
+    <div class="header"><h1 class="single-title animate__animated animate__flipInX"><span>不只是版本控制：使用Git搭建你的工作流</span>
+      </h1></div><div class="post-meta">
+      <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Flatigers" title="作者"target="_blank" rel="external nofollow noopener noreferrer author" class="author"><img loading="lazy" src="https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp" srcset="https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp, https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp 1.5x, https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp 2x" sizes="auto" data-title="flatig" data-alt="flatig" class="avatar" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/>&nbsp;flatig</a></span>
+          <span class="post-category">收录于 <a href="/categories/git/"><i class="fa-regular fa-folder fa-fw" aria-hidden="true"></i> Git</a></span></div>
+      <div class="post-meta-line"><span title="发布于 2022-08-24 23:48:27"><i class="fa-regular fa-calendar-alt fa-fw me-1" aria-hidden="true"></i><time datetime="2022-08-24">2022-08-24</time></span>&nbsp;<span title="更新于 2022-08-24 23:48:27"><i class="fa-regular fa-edit fa-fw me-1" aria-hidden="true"></i><time datetime="2022-08-24">2022-08-24</time></span>&nbsp;<span title="6276 字"><i class="fa-solid fa-pencil-alt fa-fw me-1" aria-hidden="true"></i>约 6300 字</span>&nbsp;<span><i class="fa-regular fa-clock fa-fw me-1" aria-hidden="true"></i>预计阅读 13 分钟</span>&nbsp;</div>
+    </div><div class="details toc" id="toc-static" data-kept="false">
+        <div class="details-summary toc-title">
+          <span>目录</span>
+          <span><i class="details-icon fa-solid fa-angle-right" aria-hidden="true"></i></span>
+        </div>
+        <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#开始">开始</a></li>
+    <li><a href="#安装配置">安装配置</a></li>
+    <li><a href="#一些概念">一些概念</a>
+      <ul>
+        <li><a href="#版本控制">版本控制</a></li>
+        <li><a href="#分布式版本控制系统">分布式版本控制系统</a></li>
+        <li><a href="#存储文件快照">存储文件快照</a></li>
+        <li><a href="#git的一些特点">git的一些特点</a></li>
+        <li><a href="#git-bash">Git Bash</a></li>
+      </ul>
+    </li>
+    <li><a href="#全局配置">全局配置</a></li>
+    <li><a href="#工作区">工作区</a></li>
+    <li><a href="#使用git">使用Git</a>
+      <ul>
+        <li><a href="#创建仓库">创建仓库</a></li>
+        <li><a href="#检查文件状态">检查文件状态</a></li>
+        <li><a href="#跟踪暂存文件">跟踪、暂存文件</a></li>
+        <li><a href="#忽略掉某些文件">忽略掉某些文件</a></li>
+        <li><a href="#查看修改">查看修改</a></li>
+        <li><a href="#提交到本地仓库">提交到本地仓库</a></li>
+        <li><a href="#移动移除文件">移动、移除文件</a></li>
+        <li><a href="#查看提交历史">查看提交历史</a></li>
+        <li><a href="#撤销操作">撤销操作</a></li>
+        <li><a href="#远程仓库">远程仓库</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+      </div><div class="content" id="content" data-end-flag="-- ~ --"><div class="details admonition warning open">
+      <div class="details-summary admonition-title">
+        <i class="icon fa-solid fa-exclamation-triangle fa-fw" aria-hidden="true"></i>警告<i class="details-icon fa-solid fa-angle-right fa-fw" aria-hidden="true"></i>
+      </div>
+      <div class="details-content">
+        <div class="admonition-content">本文最后更新于 2022-08-24，文中内容可能已过时。</div>
+      </div>
+    </div><p>全文字数：5241</p>
+<p>阅读时长：15分钟</p>
+<h2 id="开始">开始</h2>
+<p>在2021 <strong>Stack Overflow</strong> 最受欢迎的工具调查排名中，有超过90%的开发者选择<strong>git</strong>，它如今已成为开发人员的基本技能和工作时首选的版本控制系统。本文将介绍git的基本概念和常用操作，教你使用git快速完成自己的工作流。</p>
+<p>本文只介绍<strong>基本</strong>操作和概念，若想对git有更详细的了解，请到git官网（https://git-scm.com）获取更多细节。推荐到官网阅读并下载 <strong>Pro Git</strong> 中文版阅读（https://book.git-scm.com/book/zh/v2）。有时网络不太好，你可以在公众号消息界面发送 <em><strong>ProGit</strong></em> 即可获得文章编写时的最新<strong>pdf</strong>文件。</p>
+<p><strong>git</strong>(/ɡɪt/)是一个分布式版本控制软件软件，最初由<strong>Linus Torvalds</strong>创作，于2005年以GPL许可协议发布。最初目的是为了更好地管理Linux内核开发而设计。</p>
+<blockquote>
+<p>历史（Wikipedia）</p>
+<p>自2002年开始，Linus Torvalds决定使用BitKeeper作为Linux内核主要的版本控制系统用以维护代码。因为BitKeeper为专有软件，这个决定在社群中长期遭受质疑。在Linux社群中，特别是理查德·斯托曼与自由软件基金会的成员，主张应该使用开放源代码的软件来作为Linux内核的版本控制系统。Linus曾考虑过采用现成软件作为版本控制系统（例如Monotone），但这些软件都存在一些问题，特别是性能不佳。现成的方案，如CVS的架构，受到Linus的批评。</p>
+<p>2005年，Andrew Tridgell写了一个简单程序，可以连接BitKeeper的仓库，BitKeeper著作权拥有者拉里·麦沃伊认为Andrew对BitKeeper内部使用的协议进行逆向工程，决定收回无偿使用BitKeeper的许可。Linux内核开发团队与BitMover公司进行磋商，但无法解决他们之间的歧见。Linus决定自行开发版本控制系统替代BitKeeper，以<strong>十天</strong>的时间编写出git第一个版本。</p>
+</blockquote>
+<h2 id="安装配置">安装配置</h2>
+<ul>
+<li>Linux</li>
+</ul>
+<p>在Linux上可以方便地通过自己系统的软件包管理器安装 git，如：</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Debian:</span>
+</span></span><span class="line"><span class="cl">sudo apt install git
+</span></span><span class="line"><span class="cl"><span class="c1"># Fedora:</span>
+</span></span><span class="line"><span class="cl">sudo yum install git
+</span></span><span class="line"><span class="cl"><span class="c1"># Arch Linux:</span>
+</span></span><span class="line"><span class="cl">sudo pacman -S git
+</span></span><span class="line"><span class="cl"><span class="c1"># ......</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Windows</li>
+</ul>
+<p>Windows下的安装一般选择直接到官网下载适合自己系统的版本（https://book.git-scm.com/download/win）。</p>
+<p>若有winget（Windows下的包管理器），也可以使用：</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">winget</span> <span class="n">install</span> <span class="p">-</span><span class="n">-id</span> <span class="n">Git</span><span class="p">.</span><span class="py">Git</span> <span class="n">-e</span> <span class="p">-</span><span class="n">-source</span> <span class="n">winget</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>macOS</li>
+</ul>
+<p>一般使用HomeBrew或MacPorts：</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># HomeBrew:</span>
+</span></span><span class="line"><span class="cl">brew install git
+</span></span><span class="line"><span class="cl"><span class="c1"># MacPorts:</span>
+</span></span><span class="line"><span class="cl">sudo port install git</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="一些概念">一些概念</h2>
+<h3 id="版本控制">版本控制</h3>
+<p>我们使用git，主要是将它作为一个版本控制工具，那么什么是版本控制？</p>
+<p>在手机上安装完软件后，我们经常需要对它们进行升级，或者说<strong>版本更新</strong>。旧版和新版软件最明显的区别是什么？就是它们的版本号不同。而一般来说，每个版本对应的软件包，它们在界面、功能、体验等方面总有一些差别，除非开发者故意拿一套不变的代码糊弄。同样的，在实际开发过程中，总是要对程序做修改，导致文件前后发生变化。我们把这些软件包，源代码，或者说<strong>文件</strong>的不同“内容”，叫做不同的<strong>版本</strong>，可以写个版本号来表示。而<strong>版本控制</strong>，就是用来记录一个或多个文件内容（版本）变化的系统。</p>
+<p>开发程序的过程中，我们用版本控制工具来管理程序的源代码文件。但几乎所有版本控制工具都可以拿来管理 <strong>所有文件</strong> 的版本。我们可以用它来管理 .kt, .cpp, .rs, .docx, .xlsx, .txt, .png 甚至 .mp4文件。</p>
+<p>我们<strong>为什么需要版本控制</strong>呢？假设你是一位装修设计师，正在设计一个房间，本来房间的基本架构都做好了，某天你突然想改装一下卫生间，之后又想改装一下飘窗，后面发现这样会弄坏承重墙和楼下邻居的天花板，由于你改得一团糟，很难再改回去了。这时如果你使用了版本控制，你可以<strong>很轻松</strong>地恢复到原来的样子，通常这样比<strong>备份多个文件</strong>更方便。</p>
+<h3 id="分布式版本控制系统">分布式版本控制系统</h3>
+<p>分布式是相对于集中式而言的，它们是描述多人协作的版本控制方式的。假设要开发一个大型软件，这个软件要求连接互联网，可以与人对话，会根据用户手机壳颜色更换主题（/手动滑稽），显然一个人不太可能精通所有方面，所以需要很多人同时开发，写好自己的代码然后合并在一个软件里面。</p>
+<p>集中式指的是，这个软件的代码存放在一个中心服务器上，即它的仓库是在一个地方统一管理的，每个程序员在开发时都要连接这个服务器，取出最新的文件然后开发再上传。你可以看到这个软件每个人开发的最新情况是什么样的，也可以在别人把服务器卡死不能工作的时候回家休息一段时间。</p>
+<p>分布式，则指的是这个软件的完整代码，分布在每一个开发人员手上，即每个人都需要有这个软件的完整仓库。分布式一般会设置一个仓库作为中心仓库，存放目前开发的主线（应该是用来作为代码交换的中心），在每次工作结束之后，每个人只需要提交自己的改动即可，同时再同步一下别人的改动。你可以按照自己的想法完全修改这个仓库，可以在公司停电的情况下在自家工作，也可以在克隆仓库时花一个多小时（一般只在第一次，且大多数都在几分钟）。</p>
+<h3 id="存储文件快照">存储文件快照</h3>
+<p>不同于CVS等版本控制工具，git对待数据的方式是直接记录文件的快照（某个版本的文件本身），而不是记录文件的变化（这是<strong>基于差异</strong>的版本控制系统 <strong>delta-based</strong>）。</p>
+<p>具体来说，基于差异的控制方式是，只记录每次的改动：假设你有一个香蕉，某天你在香蕉上贴了标签，这作为一个版本，之后你又在香蕉上打蜡，再作为一个版本。那么你现有的三个版本是这样记录的，一个香蕉， 香蕉上贴了标签， 香蕉上打了蜡。</p>
+<p>而git则是记录每次的文件本身：还是这根香蕉，使用git记录的话，这三个版本则是这样的，一个香蕉，一个贴了标签的香蕉，一个贴了标签并打了蜡的香蕉。</p>
+<h3 id="git的一些特点">git的一些特点</h3>
+<ul>
+<li>
+<p>几乎都在本地执行。git中绝大多数操作只需要访问本地资源，一般不需要互联网或其他计算机的信息，这让它在工作时具有令人极其舒服的快速。</p>
+</li>
+<li>
+<p>文件完整性校验。git中所有的数据在存储前都会计算SHA-1值，然后通过哈希值来引用，而不是文件名。这样，你就无法在git不知情的情况下修改文件及内容。同样，git也会发现你在传输过程中发生的信息丢失或文件损坏。</p>
+</li>
+<li>
+<p>一般只添加数据。我们执行的git操作几乎只向数据库中添加数据，而很难<strong>从数据库中</strong>删除数据，它几乎不会执行任何可能导致文件不能回复的操作，这让它更加安全。</p>
+</li>
+</ul>
+<h3 id="git-bash">Git Bash</h3>
+<p>在Linux/macOS上，运行git只需要在终端执行 <code>git [commands命令] [arguments参数]</code> 之类的命令即可。在Windows下，会提供 <em><strong>git bash</strong></em> 工具，使用 git bash 可以保持命令的一致性。本文的所有git命令均可以在不同平台运行。</p>
+<h2 id="全局配置">全局配置</h2>
+<p>版本控制系统需要知道每次都是谁对文件做了修改，因此你需要为git配置你的一些信息，每台计算机（严格说是某个计算机的某个系统中的某个用户）只需要<strong>全局配置</strong>一次，今后的版本控制都将<strong>默认</strong>使用全局配置，你也可以在特定仓库中使用不同的配置。</p>
+<p>进行全局配置的工具为 <code>git config</code>，git将配置存储在一些文件中：</p>
+<ul>
+<li>
+<p>Linux/macOS：</p>
+<ol>
+<li>
+<p>系统配置文件： <em><strong>/etc/gitconfig</strong></em></p>
+<p>使用 <code>git config --system</code> 进行读写。</p>
+</li>
+<li>
+<p>全局配置文件： <em><strong>~/.gitconfig  或  ~/.config/git/config</strong></em></p>
+</li>
+</ol>
+<p>使用 <code>git config --global</code> 进行读写。</p>
+<ol start="3">
+<li>
+<p>仓库配置文件：<em><strong>仓库/.git/config</strong></em></p>
+<p>使用 <code>git config --local</code> 进行读写，前提是你已经在此仓库中。</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Windows（使用命令同上）</p>
+<ol>
+<li>系统配置文件：<em><strong>C:\ProgramFiles\Git\etc\gitconfig</strong></em> （在你的Git安装目录下寻找）</li>
+<li>全局配置文件：<em><strong>C:\Users\用户名.gitconfig</strong></em></li>
+<li>仓库配置文件：<em><strong>仓库\.git\gitconfig</strong></em></li>
+</ol>
+</li>
+</ul>
+<p>大多数情况下，我们只需要关注<strong>全局配置文件</strong>，在极少数的情况下会配置仓库配置文件。以下为配置的命令：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看现有配置</span>
+</span></span><span class="line"><span class="cl">git config --list
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 配置用户信息，默认全局配置</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可使用 --local 代替 --global 来进行仓库配置</span>
+</span></span><span class="line"><span class="cl">git config --global user.name <span class="s2">&#34;你的用户名&#34;</span>
+</span></span><span class="line"><span class="cl">git config --global user.email 你的邮箱@mail.com</span></span></code></pre></td></tr></table>
+</div>
+</div><p>只需要输入两行命令就可以完成配置，之后就可以使用git来工作了。</p>
+<h2 id="工作区">工作区</h2>
+<p>在git中，文件存在三种状态：</p>
+<ul>
+<li>已修改  modified</li>
+<li>已暂存  staged</li>
+<li>已提交  committed</li>
+</ul>
+<p>与之对应，git项目就会有三个阶段：</p>
+<ul>
+<li>工作区  working directory</li>
+<li>暂存区  staging area (Index)</li>
+<li>git仓库  .git repository</li>
+</ul>
+<p>需要知道的是，你的仓库就是在 项目 .git 文件夹下的一些内容，当你克隆仓库时，你不需要复制克隆别的文件，克隆的只是 .git文件夹。</p>
+<p><strong>工作区</strong>就是你本来的项目文件，它在.git文件夹外。严格来说，在你使用git管理你的项目文件后，之前的项目文件就应该看做是从.git仓库的某个特定版本的数据库中提取出来的文件，放在磁盘上以供修改使用。</p>
+<p><strong>暂存区</strong>是一个文件，按git的术语也可以叫做索引（Index），它一般放在.git文件夹下，保存了下次将要提交的文件列表信息。比如，你对工作区中的a文件做了修改，那么在你保存后，暂存区中就会记录a文件已经修改，准备下次提交，你可以手动选择是否提交。</p>
+<p><strong>git仓库</strong>是你提交的内容，你的本地仓库，它在.git文件夹下，存放项目元数据和对象数据库。</p>
+<h2 id="使用git">使用Git</h2>
+<p>这里将从头开始创建一个git仓库，并在实际操作中学习如何使用git工作。</p>
+<h3 id="创建仓库">创建仓库</h3>
+<p>在本地创建仓库有两种方式：</p>
+<ul>
+<li>将一个本地目录转换为git仓库：</li>
+</ul>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 新建文件夹作为仓库</span>
+</span></span><span class="line"><span class="cl">mkdir my_git
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> my_git
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git init 		<span class="c1"># git init 命令将初始化一个本地仓库</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>从其他计算机或服务器克隆一个git仓库：</li>
+</ul>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 从url地址克隆一个git仓库</span>
+</span></span><span class="line"><span class="cl">git clone <span class="o">[</span>url<span class="o">]</span> <span class="o">(</span>rename<span class="o">)</span>  <span class="c1">#可以选择添加rename参数更改目录名</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在创建一个git仓库后，对应目录下会出现一个 .git 目录，这里面含有你初始化git仓库所有必要的文件，它是git仓库的骨干。</p>
+<h3 id="检查文件状态">检查文件状态</h3>
+<p>你工作目录下的文件只有两种状态：<strong>已跟踪</strong> 和 <strong>未跟踪</strong>，它们的区别是是否纳入版本控制。对于已跟踪的文件，git知道要记录它们的版本变化。通过以下命令查看当前文件是否跟踪：</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git status
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果有未跟踪的文件你将在Untracked files中看到</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 你还可以看到在暂存区未提交的文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用以下命令查看更简略的信息</span>
+</span></span><span class="line"><span class="cl">git status -s
+</span></span><span class="line"><span class="cl">git status --short
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用 git ststis -s 时：</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## ??表示未跟踪的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##  A表示新添加到暂存区的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##  M表示修改后的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##   注意，状态码包含两个字符，左侧表示暂存区，右侧表示工作区</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## MM表示文件已修改并暂存，暂存后又做了修改，后做的修改未暂存</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## A 表示已修改且已暂存</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="跟踪暂存文件">跟踪、暂存文件</h3>
+<p>在创建仓库之后，我们需要将项目文件添加到版本控制。</p>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 使用git add 跟踪未跟踪的文件，可以使用通配符</span>
+</span></span><span class="line"><span class="cl">git add files 		<span class="c1"># 跟踪files文件</span>
+</span></span><span class="line"><span class="cl">git add .			<span class="c1"># 跟踪所有文件</span>
+</span></span><span class="line"><span class="cl">git add src			<span class="c1"># 跟踪src目录下的所有文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 在文件修改后，再次使用add命令会将文件添加到暂存区</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 修改文件后及时运行git add命令是一个良好的习惯</span>
+</span></span><span class="line"><span class="cl">git add .</span></span></code></pre></td></tr></table>
+</div>
+</div><p>需要注意的是，只有对文件进行跟踪，才可以使用git进行版本控制。每次修改完成后，应该再次使用add将文件添加到暂存区。</p>
+<h3 id="忽略掉某些文件">忽略掉某些文件</h3>
+<p>通常来说，为了方便我们会直接运行 git add 命令来将项目所有文件纳入跟踪并添加到暂存区。但有时候，会有一些本地配置文件或生成的中间文件（如gcc编译的目标文件），我们并不需要将其纳入版本控制，但一个一个进行add又有些麻烦。</p>
+<p>这种情况下，我们可以在项目根目录（事实上可以在项目内的任何一个目录创建，以起到分别对目录管理）创建一个 <em><strong>.gitignore</strong></em> 文件，在里面列出要忽略的文件格式。</p>
+<p>.gitignore文件的格式规范可查看官方文档，这里是一些常用的示例：</p>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 忽略所有的 .a 文件</span>
+</span></span><span class="line"><span class="cl">*.a
+</span></span><span class="line"><span class="cl"><span class="c1"># 跟踪所有的 lib.a 文件，这会覆盖之前忽略 .a 文件对 lib.a 文件的影响</span>
+</span></span><span class="line"><span class="cl">!lib.a
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略当前目录下的 TODO 文件</span>
+</span></span><span class="line"><span class="cl">/TODO
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略所有目录下名为 build 的文件夹</span>
+</span></span><span class="line"><span class="cl">build/
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略 app 文件夹下的 build 文件夹</span>
+</span></span><span class="line"><span class="cl">app/build/</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="查看修改">查看修改</h3>
+<p>可以使用 git statue 命令查看文件的修改状态，有时在向仓库提交前我们要查看一些详细的信息，比如某一行修改的具体内容，这时候就可以使用 git diff：</p>
+<div class="highlight" id="id-10"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看尚未暂存的文件的变化：</span>
+</span></span><span class="line"><span class="cl">git diff 
+</span></span><span class="line"><span class="cl"><span class="c1"># 修改的部分是与上次已暂存的文件相比较</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看已暂存的文件的变化：</span>
+</span></span><span class="line"><span class="cl">git diff --staged
+</span></span><span class="line"><span class="cl">git diff --cached 		<span class="c1"># 与上面一条同义</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#修改的部分是与上次已提交到git仓库的文件相比较</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="提交到本地仓库">提交到本地仓库</h3>
+<p>当把所有修改完成的文件提交到暂存区后，就可以提交到本地仓库了。在此之前，请务必确认所有已修改或新建的文件都有 add 过，可以使用git status查看，否则提交的时候变化不会被包含在里面。使用如下命令进行提交：</p>
+<div class="highlight" id="id-11"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 提交到本地仓库</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 提交之前确定运行 git add</span>
+</span></span><span class="line"><span class="cl">git commit
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令会打开文本编辑器，你需要在里面填写提交说明</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 良好的提交声明会让版本管理更加有效</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git commit -m <span class="s2">&#34;Commit Message&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令可以很方便地书写提交信息，更加方便，适合短说明文本</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git commit -a
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令，git会自动对所有已跟踪的文件执行 git add，使命令更简洁</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>要注意，提交到仓库的是暂存区的文件快照，如果工作区的修改未提交到暂存区，将会造成遗漏。</p>
+<h3 id="移动移除文件">移动、移除文件</h3>
+<p>有时，我们需要git停止对某一文件的跟踪，或者删除某些错误提交到版本库中的文件，或是移动某些文件的位置，这时就需要用到：</p>
+<div class="highlight" id="id-12"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 移除文件</span>
+</span></span><span class="line"><span class="cl">git rm file
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令会删除工作区的本地文件，并撤销git对其的版本跟踪</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git rm -f file
+</span></span><span class="line"><span class="cl"><span class="c1"># 当要rm的文件已被提交到暂存区时，就要使用 -f （force）指令</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 强制rm，这是git的一种安全措施</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 移除在 git 仓库和暂存区中的文件，而不删除工作区的文件</span>
+</span></span><span class="line"><span class="cl">git rm --cached file
+</span></span><span class="line"><span class="cl"><span class="c1"># 这个命令常作为忘记添加 .gitignore文件的补救措施</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 移动文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># git mv命令与linux的mv命令使用方法基本相同</span>
+</span></span><span class="line"><span class="cl">git mv file files/file
+</span></span><span class="line"><span class="cl"><span class="c1"># 将根目录的file文件移动到 files/文件夹下</span>
+</span></span><span class="line"><span class="cl">git mv filea fileb
+</span></span><span class="line"><span class="cl"><span class="c1"># 将当前目录的 filea 文件更名为 fileb文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用 mv 命令 可以保持git对文件的跟踪，</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 而不需要在移动或改名后再次运行 mv, git add, git rm</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="查看提交历史">查看提交历史</h3>
+<p>当我们想查看项目或文件的提交历史时：</p>
+<div class="highlight" id="id-13"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看提交历史</span>
+</span></span><span class="line"><span class="cl">git log
+</span></span><span class="line"><span class="cl"><span class="c1"># 默认情况下，git log会按时间顺序排列所有提交</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 它带有很多选项，当然你也可以使用 grep 等工具</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示每次提交引入的差异</span>
+</span></span><span class="line"><span class="cl">git log -p 		<span class="c1"># 或 --patch</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示最近2条提交</span>
+</span></span><span class="line"><span class="cl">git log -n
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示每次提交的简略统计信息</span>
+</span></span><span class="line"><span class="cl">git log --stat
+</span></span><span class="line"><span class="cl"><span class="c1">#用不同格式显示</span>
+</span></span><span class="line"><span class="cl">git log --pretty<span class="o">=[]</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># []内可以是 oneline:每个提交放到一行显示</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 还有类似的 short , full ,fuller</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可以使用 format 来定制记录的显示格式</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git log --pretty<span class="o">=</span>oneline --graph
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用此命令会用一些字符“图形化”地显示出每次提交和分支之间的关系</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="撤销操作">撤销操作</h3>
+<p>在某个阶段，比如正常运行的程序在修改后无法运行，这时我们可能需要撤销对相应文件的修改。撤销操作有可能会导致之前的工作丢失，在执行撤销前一定要注意。</p>
+<div class="highlight" id="id-14"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 重新提交</span>
+</span></span><span class="line"><span class="cl">git commit --amend
+</span></span><span class="line"><span class="cl"><span class="c1"># 适用于提交后发现某些文件忘记添加或提交信息写错的情况</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果暂存区没有文件改变，将只覆盖提交信息</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -amend 选项可以避免因为失误导致仓库版本混乱</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git reset HEAD &lt;file&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 此命令会将git仓库中的file文件复制到暂存区，不会改变工作区</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 以此来撤销对暂存区文件的修改</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 若文件不存在，则在暂存区中删除</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git checkout -- &lt;file&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 此命令会同时还原暂存区和工作区的file文件</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="远程仓库">远程仓库</h3>
+<p>为了能在git管理的项目上写作，我们通常会使用远程仓库，比如 <strong>Git Hub</strong> ，下面介绍如何连接远程仓库。</p>
+<div class="highlight" id="id-15"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看当前仓库对应的远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote 		<span class="c1"># -v选项会显示git保存的简写</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果当前仓库还未配置远程仓库，则需要</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 添加远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote add &lt;shortname&gt; &lt;url&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># shortname 设置为你自己对仓库的简写</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># url 为远程仓库的地址</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 从远程仓库中同步最新数据</span>
+</span></span><span class="line"><span class="cl">git fetch &lt;remote&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 会从远程仓库下载最新版本的文件和数据</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 推送到远程仓库</span>
+</span></span><span class="line"><span class="cl">git push origin master
+</span></span><span class="line"><span class="cl"><span class="c1"># 会将本地仓库同步到远程仓库的master分支</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote show origin
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># rm远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote rename name1 name2
+</span></span><span class="line"><span class="cl">git remote remove name1
+</span></span><span class="line"><span class="cl"><span class="c1"># 命令会将 name1 仓库更名为name2</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 命令会移除 name1 远程仓库</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 需要你对远程仓库具有读写权限</span></span></span></code></pre></td></tr></table>
+</div>
+</div></div><div class="post-reward">
+    <div class="comment">Buy me a coffee~</div>
+    <input type="checkbox" class="reward-input" name="reward" id="fi-reward" hidden />
+    <label class="reward-button" for="fi-reward">赞赏</label>
+    <div class="reward-ways" data-mode="fixed"><div><img loading="lazy" src="/images/alipay.jpg" srcset="/images/alipay.jpg, /images/alipay.jpg 1.5x, /images/alipay.jpg 2x" sizes="auto" data-title="flatig 支付宝" data-alt="flatig 支付宝" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span data-animation>支付宝</span>
+          </div><div><img loading="lazy" src="/images/wechatpay.jpg" srcset="/images/wechatpay.jpg, /images/wechatpay.jpg 1.5x, /images/wechatpay.jpg 2x" sizes="auto" data-title="flatig 微信" data-alt="flatig 微信" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span data-animation>微信</span>
+          </div></div>
+  </div><div class="post-footer" id="post-footer">
+  <div class="post-info">
+    <div class="post-info-line">
+      <div class="post-info-mod">
+        <span title="更新于 2022-08-24 23:48:27">更新于 2022-08-24&nbsp;</span>
+      </div><div class="post-info-license">
+          <span><a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span>
+        </div></div>
+    <div class="post-info-line">
+      <div class="post-info-md"><span><a href="https://github.com/Flatigers/flatigers.github.io/edit/docs/content/posts/%e4%b8%8d%e5%8f%aa%e6%98%af%e7%89%88%e6%9c%ac%e6%8e%a7%e5%88%b6%ef%bc%9a%e4%bd%bf%e7%94%a8Git%e6%90%ad%e5%bb%ba%e4%bd%a0%e7%9a%84%e5%b7%a5%e4%bd%9c%e6%b5%81.md" title="编辑此页"target="_blank" rel="external nofollow noopener noreferrer" class="link-to-edit">编辑此页</a></span></div>
+      <div class="post-info-share">
+        <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" data-title="不只是版本控制：使用Git搭建你的工作流" data-hashtags="教程,Git,版本控制"><i class="fa-brands fa-twitter fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" data-hashtag="教程"><i class="fa-brands fa-facebook-square fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/"><i class="fa-brands fa-linkedin fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" data-title="不只是版本控制：使用Git搭建你的工作流"><i class="fa-brands fa-weibo fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" data-title="不只是版本控制：使用Git搭建你的工作流"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg" aria-hidden="true"></i></a>
+  </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="post-info-more">
+    <section class="post-tags"><i class="fa-solid fa-tags fa-fw me-1" aria-hidden="true"></i><a href='/tags/%E6%95%99%E7%A8%8B/' class="post-tag">教程</a><a href='/tags/git/' class="post-tag">Git</a><a href='/tags/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/' class="post-tag">版本控制</a></section>
+    <section>
+      <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+    </section>
+  </div>
+
+  <div class="post-nav"><a href="/posts/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E7%BD%91%E7%AB%99%E4%BD%BF%E7%94%A8hexo%E4%B8%8Egit/" class="post-nav-item" rel="prev" title="手把手教你搭建自己的静态博客网站—使用Hexo与Git"><i class="fa-solid fa-angle-left fa-fw" aria-hidden="true"></i>手把手教你搭建自己的静态博客网站—使用Hexo与Git</a>
+      <a href="/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" class="post-nav-item" rel="next" title="Deepin20.7升级问题，Linux扩容home分区">Deepin20.7升级问题，Linux扩容home分区<i class="fa-solid fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+</article></main><footer class="footer">
+    <div class="footer-container"><div class="footer-line powered">由 <a href="https://gohugo.io/" target="_blank" rel="external nofollow noopener noreferrer" title="Hugo 0.119.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/hugo-fixit/FixIt" target="_blank" rel="external" title="FixIt v0.2.18-lts.1"><img class="fixit-icon" src="/fixit.min.svg" alt="FixIt logo" />&nbsp;FixIt</a>
+        </div><div class="footer-line copyright" itemscope itemtype="http://schema.org/CreativeWork"><i class="fa-regular fa-copyright fa-fw" aria-hidden="true"></i>
+            <span itemprop="copyrightYear">2023</span><span class="author" itemprop="copyrightHolder">
+              <a href="https://github.com/Flatigers"target="_blank" rel="external nofollow noopener noreferrer">flatig</a></span><span class="license footer-divider"><a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div><div class="footer-line statistics order-first"><span class="site-time" title='网站运行中……'><i class="fa-solid fa-heartbeat fa-fw animate-icon" aria-hidden="true"></i><span class="ms-1 d-none">博客已运行</span><span class="run-times ms-1">网站运行中……</span></span></div></div>
+  </footer></div><div class="widgets"><div class="fixed-buttons animate__faster d-none"><div class="fixed-button back-to-top" role="button" aria-label="回到顶部"><i class="fa-solid fa-arrow-up fa-fw" aria-hidden="true"></i><span class="variant-numeric">0%</span>
+        </div></div><a href="https://github.com/Flatigers" title="我的GitHub，看看有没有你感兴趣的项目"target="_blank" rel="external nofollow" class="github-corner right d-none-mobile"><svg viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><div id="mask"></div><div class="reading-progress-bar" style="left: 0;top: 0;--bg-progress: #000;--bg-progress-dark: #fff;"></div><noscript>
+    <div class="noscript-warning">FixIt 主题在启用 JavaScript 的情况下效果最佳。</div>
+  </noscript>
+</div><link rel="stylesheet" href="/lib/lightgallery/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><link rel="stylesheet" href="/lib/pace/themes/blue/pace-theme-minimal.css"><script src="/lib/autocomplete/autocomplete.min.js" defer></script><script src="/lib/algoliasearch/algoliasearch-lite.umd.min.js" defer></script><script src="/lib/instant-page/instantpage.min.js" async defer type="module"></script><script src="/lib/twemoji/twemoji.min.js" defer></script><script src="/lib/lightgallery/lightgallery.min.js" defer></script><script src="/lib/lightgallery/plugins/thumbnail/lg-thumbnail.min.js" defer></script><script src="/lib/lightgallery/plugins/zoom/lg-zoom.min.js" defer></script><script src="/lib/sharer/sharer.min.js" async defer></script><script src="/lib/typeit/index.umd.js" defer></script><script src="/lib/katex/katex.min.js" defer></script><script src="/lib/katex/auto-render.min.js" defer></script><script src="/lib/katex/copy-tex.min.js" defer></script><script src="/lib/katex/mhchem.min.js" defer></script><script src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script src="/lib/pangu/pangu.min.js" defer></script><script src="/lib/cell-watermark/watermark.min.js" defer></script><script src="/lib/pace/pace.min.js" async defer></script><script>window.config={"autoBookmark":true,"code":{"copyTitle":"复制到剪贴板","editLockTitle":"锁定可编辑代码块","editUnLockTitle":"解锁可编辑代码块","editable":true,"maxShownLines":50},"comment":{"enable":false},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验。"},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"data":{"typeit-header-subtitle-desktop":"博客|技术分享","typeit-header-subtitle-mobile":"博客|技术分享"},"enablePWA":true,"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"pangu":{"enable":true,"selector":"article"},"search":{"algoliaAppID":"","algoliaIndex":"","algoliaSearchKey":"","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"},"siteTime":"2023-10-14T11:30:00+08:00","twemoji":true,"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"typeit-header-subtitle-desktop":["typeit-header-subtitle-desktop"],"typeit-header-subtitle-mobile":["typeit-header-subtitle-mobile"]},"duration":-1,"loop":false,"speed":100},"watermark":{"appendto":".wrapper\u003emain","colspacing":30,"content":"\u003cimg style=\"height: 0.85rem;\" src=\"/logo.png\" alt=\"logo\" /\u003e flatig","enable":true,"fontfamily":"MMT_LRH,沐目体","fontsize":1.1,"height":20,"opacity":0.0125,"rotate":15,"rowspacing":60,"width":150}};</script><script src="/js/theme.min.js" defer></script></body>
+</html>

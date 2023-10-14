@@ -1,0 +1,288 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>Linux - 分类 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/categories/linux/</link>
+    <description>Linux - 分类 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>chineseliujiayi691@gmail.com (flatig)</managingEditor>
+      <webMaster>chineseliujiayi691@gmail.com (flatig)</webMaster><lastBuildDate>Sat, 03 Sep 2022 00:35:46 &#43;0000</lastBuildDate><atom:link href="https://flatig.vip/categories/linux/" rel="self" type="application/rss+xml" /><item>
+  <title>Deepin20.7升级问题，Linux扩容home分区</title>
+  <link>https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/</link>
+  <pubDate>Sat, 03 Sep 2022 00:35:46 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/</guid>
+  <description><![CDATA[<p>字数：1711</p>
+<p>阅读时长：5分钟</p>
+<h2 id="linux挂载新home分区方法deepin-207升级问题">Linux挂载新home分区方法；Deepin 20.7升级问题</h2>
+<h3 id="推荐体验deepin-linux">推荐体验Deepin Linux</h3>
+<p>Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运行大部分Windows和Android应用，可以说是Deepin让大部分人开始转移到国内开发者开发的Linux系统（虽然国内主导开发的Linux没几个）。</p>
+<p>最近在使用Deepin的过程钟出现了一个有趣的问题：将系统版本从Deepin 20.6升级到Deepin20.7之后，无限循环在登录页面无法进入桌面。后面发现这件事与之前做的另一件事有关系，从头开始说起。</p>
+<h3 id="linux挂载新home分区">Linux挂载新home分区</h3>
+<p>在初装Deepin时，我在我的笔记本上压缩出了60G的空间来装它（挂载 / 和 /home）。我只是想用它来学习Linux，同时作为Android开发的环境（Linux上要比Windows快很多，至少在我的电脑上是这样的），在安装完必要的环境并且工作一段时间后，还剩余将尽20G的空间。</p>
+<p>但在后来，我发现Linux上做开发是真的爽（主要是懒，Linux上玩游戏需要一定成本），搭配使用zsh（一款shell，Linux默认为bash）可以省去一些琐碎的步骤，于是渐渐地我将IDEA，PyCharm项目全部转移到Linux，后来学习Rust又安装了Clion。</p>
+<p>某天我下载某个文件，发现始终无法下载成功，打开文件管理器，这才看到60G已经被占满了。于是我就想为这块分区再分配一些空间，打开GParted后发现，我的硬盘上竟然还有一块60G的未分配空间，这把我乐坏了，直接把/home挂在这块分区上不就行了嘛。</p>
+<p>首先用这块空间新建一个分区，并格式化为ext4，之后：</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 创建新分区的临时挂载目录</span>
+</span></span><span class="line"><span class="cl">sudo mkdir /media/home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 把这块分区挂载在这个目录</span>
+</span></span><span class="line"><span class="cl">sudo mount /dev/nvme0n1p6 /media/home 	
+</span></span><span class="line"><span class="cl"><span class="c1"># 我的分区是/dev/nvme0n1p6</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可以使用 lsblk 命令查看各分区</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 同步/home 到 /media/home</span>
+</span></span><span class="line"><span class="cl">sudo rsync -aXS /home/. /media/home/.
+</span></span><span class="line"><span class="cl"><span class="c1"># 同步时间与home大小有关</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 将原来的home更名</span>
+</span></span><span class="line"><span class="cl">sudo mv /home /home_past
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 创建新的home</span>
+</span></span><span class="line"><span class="cl">sudo mkdir /home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 取消分区挂载到/media/home</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 并重新挂载到/home</span>
+</span></span><span class="line"><span class="cl">sudo umount /dev/nvme0n1p6
+</span></span><span class="line"><span class="cl">sudo mount /dev/nvme0n1p6 /home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看并记录分区的UUID</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 写入fstab文件，实现开机自动挂载</span>
+</span></span><span class="line"><span class="cl">blkid 					<span class="c1"># 记录对应/dev/nvme0n1p6的UUID</span>
+</span></span><span class="line"><span class="cl">sudo vim /etc/fstab 	<span class="c1"># 使用vim编辑fstab文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 在文件中添加如下内容：</span>
+</span></span><span class="line"><span class="cl"><span class="nv">UUID</span><span class="o">=</span>你的UUID		/home	/ext4	rw,nodev,nosuid		0,2
+</span></span><span class="line"><span class="cl"><span class="c1"># :wq保存，之后重启系统</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 若重启后发现/home分区挂载正常，则可以删除旧分区</span>
+</span></span><span class="line"><span class="cl">sudo rm -rf /home
+</span></span><span class="line"><span class="cl"><span class="c1"># 千万不要写 sudo rm -rf / 		手动滑稽</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这之后，我就用我的新home分区（60G都真香）工作了很长一段时间，直到那天升级系统&hellip;&hellip;</p>
+<h3 id="deepin-207升级后在登陆界面无法进入系统">Deepin 20.7升级后在登陆界面无法进入系统</h3>
+<p>我是使用apt升级的系统：</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo apt update
+</span></span><span class="line"><span class="cl">sudo apt upgrade</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一切同往常一样的操作，在重启后：</p>
+<p>TNND，输入密码，按下Enter，黑屏，再次回到登陆界面，输入密码，黑屏&hellip;&hellip;</p>
+<p>系统从这里开始就<strong>进不去了</strong>。</p>
+<p>先是怀疑<strong>升级出错</strong>，于是Ctrl + F2进入tty2，登陆后，再次apt，回到tty1，无效。</p>
+<p>后又 <code>dpkg --configure -a</code>， 再次进入，无效。</p>
+<p>怀疑<strong>DDE</strong>出问题了，于是重装dde:</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo apt purge dde dde-desktop dde-dock startdde
+</span></span><span class="line"><span class="cl">sudo apt install dde dde-desktop dde-dock startdde</span></span></code></pre></td></tr></table>
+</div>
+</div><p>依旧无效。</p>
+<p>再次怀疑是<strong>显卡驱动</strong>原因，重新安装<strong>Linux内核</strong>：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 搜索内核</span>
+</span></span><span class="line"><span class="cl">apt-cache search linux-image
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装内核，同时安装image和headers</span>
+</span></span><span class="line"><span class="cl">sudo apt install linux-image-5.18-amd64-desktop
+</span></span><span class="line"><span class="cl">sudo apt install linux-headers-5.18-amd64-desktop
+</span></span><span class="line"><span class="cl"><span class="c1"># 5.18.？？ 具体版本号忘记了。。。</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>再次进入依旧无效。</p>
+<p>之后怀疑home<strong>分区挂载</strong>的问题，查看分区情况，并重新挂载一遍：</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看分区情况</span>
+</span></span><span class="line"><span class="cl">lsblk
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 重新挂载</span>
+</span></span><span class="line"><span class="cl">sudo umount /dev/nvme0n1p6
+</span></span><span class="line"><span class="cl">sudo mount /dev/nvme0nqp6 /home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">lsblk</span></span></code></pre></td></tr></table>
+</div>
+</div><p>分区挂载正常。</p>
+<p>然后怀疑是<strong>桌面管理器</strong>的问题，于是安装kde试试：</p>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 安装kde基本包</span>
+</span></span><span class="line"><span class="cl">sudo apt install kde-plasma-desktop
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 在桌面管理器选择界面有两个选项：</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># lightdm sddm</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 前者是deepin默认，后者是kde的</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 桌面管理器可以认为与你的登陆界面有关</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用下列命令重写切换桌面管理器</span>
+</span></span><span class="line"><span class="cl">sudo dpkg-reconfigure lightdm</span></span></code></pre></td></tr></table>
+</div>
+</div><p>重启后，进入了kde的登陆界面，在登陆选项竟然看到了<strong>两个deepin桌面</strong>：</p>
+<p>deepin 和 <strong>deepin(wayland)</strong></p>
+<p>deepin使用Wayland还在试验阶段，所以默认桌面就是用X11的deepin，选择deepin登陆，失败。</p>
+<p>选择plasma登陆，失败。</p>
+<p>选择，deepin(wayland)，<strong>竟然成功了！</strong></p>
+<p>然而进入，这什么东西，一个窗口给我整5倍屏幕大小，卡顿，无法显示chrome&hellip;&hellip;.</p>
+<p>那么为什么deepin(wayland)可以进入，而其他都不行呢？这让我更加肯定是显卡驱动的问题，之后又重装了kernel 5.10，5.15，5.18，结果还是没用。</p>
+<p>呼~没办法，<strong>重装 <strong>吧！好在我的</strong>home</strong>挂载在了另一块分区，所以重装后我的大部分文件不会丢失。</p>
+<p>于是拿出U盘，再次安装。</p>
+<p>将系统盘格式化，然后重新挂载为根目录，再把home盘挂载为home。</p>
+<p>在漫长的安装后，我终于看到了那个登录界面。好了，开始进入系统。</p>
+<p><strong>又一次失败了</strong>。。。。</p>
+<p>这可不对了。再试一次，这次把home挂载在系统盘上。</p>
+<p>进入系统，这次终于 <strong>成功了！</strong></p>
+<p>这说明了不是因为系统或驱动等问题，<strong>问题出在home上</strong>。</p>
+<p>但在查看了默认配置文件之后，发现并没有跟正常文件有什么区别，问题的原因找不到。。。</p>
+<p>好吧，没办法，手动复原。</p>
+<p>将之前的home中重要的文件手动复制到新的home，然后把那个分区格了，再用重新挂载home的方法挂载一遍，重启，进入系统了，<strong>问题解决！</strong></p>
+<h3 id="总结">总结</h3>
+<p>这次更新系统出现问题，根源是在home分区，暂时未明了具体原因。</p>
+<p>目前的解决方案是：在tty1之外的控制台备份home到新的分区，之后重新挂载home，并复原文件。</p>
+]]></description>
+</item>
+<item>
+  <title>安装使用更可靠的Linux发行版—Debian</title>
+  <link>https://flatig.vip/posts/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%E6%9B%B4%E5%8F%AF%E9%9D%A0%E7%9A%84linux%E5%8F%91%E8%A1%8C%E7%89%88debian/</link>
+  <pubDate>Tue, 28 Jun 2022 09:53:06 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%E6%9B%B4%E5%8F%AF%E9%9D%A0%E7%9A%84linux%E5%8F%91%E8%A1%8C%E7%89%88debian/</guid>
+  <description><![CDATA[<p>全文字数：1555
+阅读时长：4min
+文章类型：教程</p>
+<h3 id="介绍">介绍</h3>
+<blockquote>
+<p>Debian（/ˈdɛbiən/）是完全由自由软件组成的类UNIX操作系统，其包含的多数软件使用GNU通用公共许可协议授权，并由Debian计划的参与者组成团队对其进行打包、开发与维护。Debian以其坚守Unix和自由软件的精神，以及其给予用户的众多选择而闻名。现时Debian提供了超过25,000个软件，超过50,000个软件包，并正式支持10个计算机系统结构。  ——来自Wikipedia</p>
+</blockquote>
+<p>个人在开发时常使用<strong>Ubuntu</strong>，它也是基于Debian 的Linux发行版，但在近日使用 Debian 后，终于尝到了它的甜头。在我看来，Debian（with KDE）的<strong>流畅度</strong>明显高于Ubuntu，从某些方面来说，它**”更像Linux“<strong>，这么说是由于Ubuntu的衬托，在使用数月之后，使用Gnome的Ubuntu流畅度要比开始慢上很多。总之，Ubuntu对我而言显得有些臃肿了，而Debian则</strong>稳定，简单，规矩**。</p>
+<p>本篇文章将从头介绍，从一台Windows电脑开始，如何一步一步安装<strong>Debian 11.3.0</strong>（2022年最新版本）。</p>
+<p><strong>注意：较新的电脑安装Debian一般会遇到问题，参照结尾 “问题及注意”</strong></p>
+<h3 id="准备工作">准备工作</h3>
+<p>在开始前，先确保您准备好了：</p>
+<p>一台电脑（以Windows 11为例），一个移动存储设备（U盘，移动硬盘等）。</p>
+<h4 id="下载安装镜像">下载安装镜像</h4>
+<p>安装镜像即系统本身，我一般较多使用<strong>清华Tuna</strong>和<strong>华为云</strong>提供的镜像服务，这里以Tuna为例。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba666e1d64b070662fde81.png" data-thumbnail="https://pic.imgdb.cn/item/62ba666e1d64b070662fde81.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba666e1d64b070662fde81.png</h2>"></a></p>
+<p>我们需要下载安装的是<strong>Live</strong>版本，它包含了基本的所有软件，可以简化我们的安装和使用。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba67061d64b07066308913.png" data-thumbnail="https://pic.imgdb.cn/item/62ba67061d64b07066308913.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba67061d64b07066308913.png</h2>"></a></p>
+<p>在这里我选择安装<strong>KDE</strong>图形管理器的版本。可以根据自己的喜好选择Gnome, KDE, xfce 等图形管理器的版本。</p>
+<p>点击下载，等它下载的同时可以完成下面的两个步骤。</p>
+<h4 id="拆分系统分区">拆分系统分区</h4>
+<p>新安装的系统需要找个地方放置它，在Windows 10以后的系统，均可以使用系统自带的工具**“创建并格式化硬盘分区”**。</p>
+<p>在开始菜单搜索“硬盘分区”，找到该工具，进入。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba6a711d64b07066348a45.png" data-thumbnail="https://pic.imgdb.cn/item/62ba6a711d64b07066348a45.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba6a711d64b07066348a45.png</h2>"></a></p>
+<p>创建的新分区建议应该大于30G，我这里创建一个60G的分区以便使用。</p>
+<ol>
+<li>右键点击自己要拆分的分区（我选择F盘），点击<strong>压缩卷</strong>。</li>
+<li>输入自己要压缩的盘区大小，即新系统的磁盘大小，这里我选择61440MB （即60G）。</li>
+<li>压缩完成后，工具中会出现黑色的未分配卷，到这里已经可以了，这个未分配的空间将用于安装系统。</li>
+</ol>
+<h4 id="启动盘创建工具">启动盘创建工具</h4>
+<p><strong>Rufus</strong>是一款开源软件，是我目前最喜欢使用的启动盘创建工具，下载它即可。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba6a3f1d64b0706634543c.png" data-thumbnail="https://pic.imgdb.cn/item/62ba6a3f1d64b0706634543c.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba6a3f1d64b0706634543c.png</h2>"></a></p>
+<h4 id="检查电脑设置">检查电脑设置</h4>
+<p>在前面的步骤完成后，需要检查自己电脑的启动设置，一般需要：</p>
+<p>查找自己的电脑如何进入<strong>引导配置界面</strong>。如我的联想小新需在开机界面按<strong>F12</strong>键。</p>
+<p>有些电脑可能会因为安全启动而无法从U盘启动系统。如果出现这种情况，请根据自己电脑的品牌或主板，查找自己的电脑如何进入<strong>UEFI固件设置界面</strong>，如我的电脑需在开机界面按<strong>F10</strong>键。在UEFI界面，关闭<strong>安全启动</strong>。</p>
+<h3 id="开始安装">开始安装</h3>
+<h4 id="将iso文件写入u盘">将ISO文件写入U盘</h4>
+<p>打开Rufus或你自己的启动盘制作工具，这里以Rufus为例。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png" data-thumbnail="https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png</h2>"></a></p>
+<p>选择你的U盘和刚下载的iso文件，不需要更改其他设置，直接开始写入。若询问要以哪种方式写入（iso或dd，dd为Linux上主要用于转换和输出文件的命令），推荐选择iso模式。然后静静等待写入完成。</p>
+<p>完成之后，就可以开始下一步安装了。</p>
+<h4 id="从u盘启动电脑并安装">从U盘启动电脑并安装</h4>
+<p>将U盘插拔一次，以保证电脑正确识别U盘。然后关闭电脑，开机时按F12（不同电脑可能不同）进入引导配置界面。选择U盘引导，启动。
+进入Grub界面，直接选择第一个选项进入，即可进入Debian安装程序。
+之后根据安装提示进行安装即可。</p>
+<h4 id="安装完成">安装完成</h4>
+<p>在安装流程结束之后，根据提示，进行重启。等待电脑电源指示灯熄灭后，拔掉U盘，然后静待开机。在此之后每次启动电脑，开机前均会进入Grub界面，可以在Grub界面选择你想进入的系统。Grub为Debian默认引导所必需的，若要直接进入Windows，可在UEFI配置引导，将Windows Boot Manager作为首选引导项。</p>
+<h3 id="问题及注意">问题及注意</h3>
+<p>Debian的发行版更新周期一般为2年，即每两年正式发布一次系统。例如，19 年 7 月的 Debian 10 “buster” 到 21 年 8 月的 Debian 11 “Bullseye”。
+更新周期较长主要会带来硬件驱动兼容问题。我在安装时，遇到GPU，USB串口和网卡等不能正确识别的情况，甚至无法正常启动系统。
+<strong>解决方案</strong>：</p>
+<ul>
+<li>可以尝试安装使用Debian-testing分支，一般不会有驱动问题</li>
+<li>若只有网卡声卡等驱动出现问题，不影响系统的正常操作，可以在GitHub或硬件提供商处找到相应的硬件驱动，然后编译或安装、</li>
+<li>放弃安装Debian，转向其他Linux（Arch Linux, Fedora, Open SUSE等），基于需求甚至可以使用WSL</li>
+</ul>
+<p>上述安装流程也可适用于其他系统的安装。​</p>
+]]></description>
+</item>
+</channel>
+</rss>

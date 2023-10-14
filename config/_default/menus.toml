@@ -1,0 +1,81 @@
+[[main]]
+identifier = "posts"
+pre = ""
+post = ""
+name = "文章"
+url = "/posts/"
+title = ""
+weight = 1
+[main.params]
+class = ""
+draft = false
+icon = "fa-solid fa-archive"
+type = ""
+
+
+[[main]]
+identifier = "categories"
+pre = ""
+post = ""
+name = "分类"
+url = "/categories/"
+title = ""
+weight = 2
+[main.params]
+icon = "fa-solid fa-th"
+
+[[main]]
+identifier = "tags"
+pre = ""
+post = ""
+name = "标签"
+url = "/tags/"
+title = ""
+weight = 3
+[main.params]
+icon = "fa-solid fa-tags"
+
+[[main]]
+identifier = "docs"
+pre = ""
+post = ""
+name = "文档"
+url = "/tags/"
+title = ""
+weight = 4
+[main.params]
+icon = "fa-solid fa-book"
+
+[[main]]
+identifier = "friends"
+pre = ""
+post = ""
+name = "友链"
+url = "/friends/"
+title = ""
+weight = 5
+[main.params]
+icon = "fa-solid fa-users"
+
+[[main]]
+identifier = "about"
+pre = ""
+post = ""
+name = "关于"
+url = "/about/"
+title = ""
+weight = 6
+[main.params]
+icon = "fa-solid fa-user-tie"
+
+[[main]]
+identifier = "github"
+pre = "<i class='fa-brands fa-github fa-fw' aria-hidden='true'></i>"
+post = ""
+name = ""
+url = "https://github.com/Flatigers"
+title = "GitHub"
+weight = ""
+[main.params]
+class = "text-center"
+type = "mobile"

@@ -1,0 +1,15 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>博客 | blog - 标签 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/tags/%E5%8D%9A%E5%AE%A2-blog/</link>
+    <description>博客 | blog - 标签 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 14 Oct 2023 10:42:01 &#43;0800</lastBuildDate><atom:link href="https://flatig.vip/tags/%E5%8D%9A%E5%AE%A2-blog/" rel="self" type="application/rss+xml" /><item>
+  <title>New_hugo</title>
+  <link>https://flatig.vip/posts/new_hugo/</link>
+  <pubDate>Sat, 14 Oct 2023 10:42:01 &#43;0800</pubDate>
+  <author>作者</author>
+  <guid>https://flatig.vip/posts/new_hugo/</guid>
+  <description><![CDATA[]]></description>
+</item>
+</channel>
+</rss>

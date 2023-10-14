@@ -1,0 +1,413 @@
+# Site Configurations
+
+version = "0.2.X"
+description = "flatig's blog: 我的个人博客站"
+keywords = ["flatig", "Developer", "开发", "技术", "Hugo Blog"]
+# site default theme ("light", "dark", "auto")
+defaultTheme = "auto"
+gitRepo = "https://github.com/Flatigers/flatigers.github.io"
+# FixIt NEW | 0.2.0 date format
+dateFormat = "2006-01-02"
+# website images for Open Graph and Twitter Cards
+images = ["/images/logo.png"]
+enablePWA = true
+externalIcon = true
+disableThemeInject = false
+
+
+[app]
+title = "Flatig 博客站"
+noFavicon = false
+svgFavicon = ""
+iconColor = "#5bbad5"
+tileColor = "#da532c"
+[app.themeColor]
+light = "#ffffff"
+dark = "#252627"
+
+
+[search]
+enable = true
+# type of search engine ("lunr", "algolia")
+type = "algolia"
+contentLength = 4000
+placeholder = "Search something"
+maxResultLength = 10
+snippetLength = 50
+highlightTag = "em"
+absoluteURL = false
+
+
+[header]
+# FixIt CHANGED | 0.2.13 desktop header mode ("sticky", "normal", "auto")
+desktopMode = "sticky"
+# FixIt CHANGED | 0.2.13 mobile header mode ("sticky", "normal", "auto")
+mobileMode = "auto"
+[header.title]
+logo = "/images/logo.svg"
+name = "Flatig"
+pre = ""
+post = ""
+typeit = false
+[header.subtitle]
+name = "博客|技术分享"
+typeit = true
+
+
+[breadcrumb]
+enable = true
+sticky = true
+showHome = false
+
+
+[footer]
+enable = true
+# For advanced use, see parameter `params.customFilePath.footer`
+custom = ""
+hugo = true
+copyright = true
+author = true
+since = 2023
+gov = ""
+icp = ""
+license = '<a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
+[footer.siteTime]
+enable = true
+animate = true
+icon = "fa-solid fa-heartbeat"
+pre = "博客已运行"
+value = "2023-10-14T11:30:00+08:00"
+[footer.order]
+powered = 0
+copyright = 0
+statistics = "first"
+visitor = 0
+beian = 0
+
+
+
+[section]
+paginate = 20
+dateFormat = "01-02"
+rss = 20
+[section.recentlyUpdated]
+enable = true
+rss = true
+days = 30
+maxCount = 10
+
+
+[list]
+paginate = 20
+dateFormat = "01-02"
+rss = 20
+
+
+[tagcloud]
+enable = true
+min = 12
+max = 34
+peakCount = 10
+orderby = "name"
+
+
+[home]
+rss = 20
+[home.profile]
+enable = true
+gravatarEmail = ""
+avatarURL = "/images/logo.png"
+avatarMenu = "about"
+title = "Flatig Blog"
+subtitle = "我会尝试走一步，未知或既定的一步"
+typeit = true
+social = true
+disclaimer = ""
+[home.posts]
+enable = true
+paginate = 10
+
+
+[social]
+GitHub = "Flatigers"
+Weibo = ""
+Email = "flatig@flatig.vip"
+RSS = true
+Stackoverflow = ""
+Zhihu = "flatig-"
+Douban = ""
+Gitea = ""
+Bilibili = ""
+BuyMeaCoffee = ""
+Linktree = ""
+QQ = ""
+QQGroup = ""
+CSDN = ""
+
+
+[page]
+authorAvatar = true
+hiddenFromHomePage = false
+hiddenFromSearch = false
+twemoji = true
+# whether to enable lightgallery
+lightgallery = "force"
+ruby = true
+fraction = true
+fontawesome = true
+license = '<a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
+linkToMarkdown = true
+rssFullText = true
+# FixIt NEW | 0.2.13 Page style ("narrow", "normal", "wide", ...)
+pageStyle = "normal"
+autoBookmark = true
+wordCount = true
+readingTime = true
+endFlag = "-- ~ --"
+instantPage = true
+
+  # FixIt NEW | 0.2.0 Table of the contents config
+  [page.toc]
+    # whether to enable the table of the contents
+    enable = true
+    #  whether to keep the static table of the contents in front of the post
+    keepStatic = false
+    # whether to make the table of the contents in the sidebar automatically collapsed
+    auto = true
+    # FixIt NEW | 0.2.13 position of TOC ("left", "right")
+    position = "right"
+  # FixIt NEW | 0.2.13 Display a message at the beginning of an article to warn the reader that its content might be expired
+  [page.expirationReminder]
+    enable = true
+    # Display the reminder if the last modified time is more than 90 days ago
+    reminder = 90
+    # Display warning if the last modified time is more than 180 days ago
+    warning = 180
+    # If the article expires, close the comment or not
+    closeComment = true
+  # FixIt 0.2.16 | CHANGED KaTeX mathematical formulas
+  [page.math]
+    enable = true
+    # default inline delimiter is $ ... $ and \( ... \)
+    inlineLeftDelimiter = ""
+    inlineRightDelimiter = ""
+    # default block delimiter is $$ ... $$, \[ ... \], \begin{equation} ... \end{equation} and some other functions
+    blockLeftDelimiter = ""
+    blockRightDelimiter = ""
+    # KaTeX extension copy_tex
+    copyTex = true
+    # KaTeX extension mhchem
+    mhchem = true
+  # FixIt NEW | 0.2.0 Code config
+  [page.code]
+    # whether to show the copy button of the code block
+    copy = true
+    # FixIt NEW | 0.2.13 whether to show the edit button of the code block
+    edit = true
+    # the maximum number of lines of displayed code by default
+    maxShownLines = 50
+  # FixIt NEW | 0.2.14 Post edit
+  [page.edit]
+    enable = true
+    # FixIt 0.2.15 | CHANGED Link for fork & edit
+    # url = "/edit/branch-name/subdirectory-name" # base on `params.gitRepo`
+    # url = "https://github.com/user-name/repo-name/edit/branch-name/subdirectory-name" # full url
+    url = "/edit/docs/content"
+  # FixIt NEW | 0.2.0 Mapbox GL JS config
+  [page.mapbox]
+    # access token of Mapbox GL JS
+    accessToken = ""
+    # style for the light theme
+    lightStyle = "mapbox://styles/mapbox/light-v9"
+    # style for the dark theme
+    darkStyle = "mapbox://styles/mapbox/dark-v9"
+    # whether to add NavigationControl
+    navigation = true
+    # whether to add GeolocateControl
+    geolocate = true
+    # whether to add ScaleControl
+    scale = true
+    # whether to add FullscreenControl
+    fullscreen = true
+  # FixIt 0.2.17 | NEW Donate (Sponsor) settings
+  [page.reward]
+    enable = true
+    animation = true
+    # position relative to post footer, optional value: ["before", "after"]
+    position = "before"
+    comment = "Buy me a coffee~"
+    # FixIt 0.2.18 | NEW display mode of QR code images, optional values: ["static", "fixed"], default: `static`
+    mode = "fixed"
+    [page.reward.ways]
+      wechatpay = "/images/wechatpay.jpg"
+      alipay = "/images/alipay.jpg"
+      # paypal = "/images/paypal.png"
+      # bitcoin = "/images/bitcoin.png"
+  # FixIt CHANGED | 0.2.0 social share links in post page
+  [page.share]
+    enable = true
+    Twitter = true
+    Facebook = true
+    Linkedin = true
+    Weibo = true
+    Baidu = true
+  # FixIt NEW | 0.2.7 Third-party library config
+  [page.library]
+    [page.library.css]
+      # someCSS = "some.css"
+      # located in "assets/"
+      # Or
+      # someCSS = "https://cdn.example.com/some.css"
+    [page.library.js]
+      # someJavascript = "some.js"
+      # Or
+      # someJavascript = "https://cdn.example.com/some.js"
+  # FixIt CHANGED | 0.2.10 Page SEO config
+  [page.seo]
+    # image URL
+    images = []
+    # Publisher info
+    [page.seo.publisher]
+      name = "flatig"
+      logoUrl = "/images/logo.png"
+
+# FixIt NEW | 0.2.5 TypeIt config
+[typeit]
+  # typing speed between each step (measured in milliseconds)
+  speed = 100
+  # blinking speed of the cursor (measured in milliseconds)
+  cursorSpeed = 1000
+  # character used for the cursor (HTML format is supported)
+  cursorChar = "|"
+  # cursor duration after typing finishing (measured in milliseconds, "-1" means unlimited)
+  duration = -1
+
+# FixIt 0.2.15 | NEW Mermaid config
+[mermaid]
+  # For values, see https://mermaid.js.org/config/theming.html#available-themes
+  themes = ['default', 'dark']
+
+# FixIt NEW | 0.2.12 PanguJS config
+[pangu]
+  # For Chinese writing
+  enable = true
+  selector = "article" # FixIt 0.2.17 | NEW
+
+# FixIt NEW | 0.2.12 Watermark config
+# Detail config see https://github.com/Lruihao/watermark#readme
+[watermark]
+  enable = true
+  # watermark's text (HTML format is supported)
+  content = '<img style="height: 0.85rem;" src="/logo.png" alt="logo" /> flatig'
+  # watermark's transparency
+  opacity = 0.0125
+  # parent of watermark's container
+  appendTo = '.wrapper>main'
+  # watermark's width. unit: px
+  width = 150
+  # watermark's height. unit: px
+  height = 20
+  # row spacing of watermarks. unit: px
+  rowSpacing = 60
+  # col spacing of watermarks. unit: px
+  colSpacing = 30
+  # watermark's tangent angle. unit: deg
+  rotate = 15
+  # watermark's fontSize. unit: rem
+  fontSize = 1.1
+  # FixIt NEW | 0.2.13 watermark's fontFamily
+  fontFamily = 'MMT_LRH,沐目体'
+
+# FixIt NEW | 0.2.12 Busuanzi count
+[ibruce]
+  enable = false
+  # Enable in post meta
+  enablePost = false
+
+# Site verification code config for Google/Bing/Yandex/Pinterest/Baidu
+[verification]
+  google = ""
+  bing = ""
+  yandex = ""
+  pinterest = ""
+  baidu = ""
+
+# FixIt NEW | 0.2.10 Analytics config
+[analytics]
+  enable = false
+  # Google Analytics
+  [analytics.google]
+    id = ""
+    # whether to anonymize IP
+    anonymizeIP = true
+  # Fathom Analytics
+  [analytics.fathom]
+    id = ""
+    # server url for your tracker if you're self hosting
+    server = ""
+
+# FixIt NEW | 0.2.7 Cookie consent config
+[cookieconsent]
+  enable = true
+  # text strings used for Cookie consent banner
+  [cookieconsent.content]
+    message = ""
+    dismiss = ""
+    link = ""
+
+
+[compatibility]
+  # whether to use Polyfill.io to be compatible with older browsers
+  polyfill = false
+  # whether to use object-fit-images to be compatible with older browsers
+  objectFit = false
+
+
+[githubCorner]
+  enable = true
+  permalink = "https://github.com/Flatigers"
+  title = "我的GitHub，看看有没有你感兴趣的项目"
+  position = "right" # ["left", "right"]
+
+# FixIt NEW | 0.2.14 Gravatar config
+[gravatar]
+  enable = true
+  # Gravatar host, default: "www.gravatar.com"
+  host = "gravatar.loli.net" # "cn.gravatar.com", "gravatar.loli.net"
+  style = "mp" # "", mp, identicon, monsterid, wavatar, retro, blank, robohash
+
+# FixIt 0.2.16 | NEW Back to top
+[backToTop]
+  enable = true
+  # Scroll percent label in b2t button
+  scrollpercent = true
+
+# FixIt 0.2.16 | NEW Reading progress bar
+[readingProgress]
+  enable = true
+  # Available values: ["left", "right"]
+  start = "left"
+  # Available values: ["top", "bottom"]
+  position = "top"
+  reversed = false
+  light = "#000"
+  dark = "#fff"
+  height = "2px"
+
+
+[pace]
+  enable = true
+  # All available colors:
+  # ["black", "blue", "green", "orange", "pink", "purple", "red", "silver", "white", "yellow"]
+  color = "blue"
+  # All available themes:
+  # ["barber-shop", "big-counter", "bounce", "center-atom", "center-circle", "center-radar", "center-simple",
+  # "corner-indicator", "fill-left", "flash", "flat-top", "loading-bar", "mac-osx", "material", "minimal"]
+  theme = "minimal"
+
+# FixIt 0.2.17 | NEW Define custom file paths
+# Create your custom files in site directory `layouts/partials/custom` and uncomment needed files below
+[customFilePath]
+  # aside = "custom/aside.html"
+  profile = "custom/profile.html"
+  # footer = "custom/footer.html"

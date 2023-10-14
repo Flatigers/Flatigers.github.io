@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+    <meta name="robots" content="noodp" />
+    <title>Deepin20.7升级问题，Linux扩容home分区 - flatig-我的个人博客站</title><meta name="author" content="flatig">
+<meta name="author-link" content="https://github.com/Flatigers">
+<meta name="description" content="字数：1711 阅读时长：5分钟 Linux挂载新home分区方法；Deepin 20.7升级问题 推荐体验Deepin Linux Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deep" /><meta name="keywords" content='开发, Linux, Bug, Deepin' /><meta itemprop="name" content="Deepin20.7升级问题，Linux扩容home分区">
+<meta itemprop="description" content="字数：1711 阅读时长：5分钟 Linux挂载新home分区方法；Deepin 20.7升级问题 推荐体验Deepin Linux Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deep"><meta itemprop="datePublished" content="2022-09-03T00:35:46+00:00" />
+<meta itemprop="dateModified" content="2022-09-03T00:35:46+00:00" />
+<meta itemprop="wordCount" content="2400"><meta itemprop="image" content="https://flatig.vip/images/logo.png"/>
+<meta itemprop="keywords" content="开发,Linux,Bug,Deepin," /><meta property="og:title" content="Deepin20.7升级问题，Linux扩容home分区" />
+<meta property="og:description" content="字数：1711 阅读时长：5分钟 Linux挂载新home分区方法；Deepin 20.7升级问题 推荐体验Deepin Linux Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deep" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" /><meta property="og:image" content="https://flatig.vip/images/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-09-03T00:35:46+00:00" />
+<meta property="article:modified_time" content="2022-09-03T00:35:46+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://flatig.vip/images/logo.png"/>
+
+<meta name="twitter:title" content="Deepin20.7升级问题，Linux扩容home分区"/>
+<meta name="twitter:description" content="字数：1711 阅读时长：5分钟 Linux挂载新home分区方法；Deepin 20.7升级问题 推荐体验Deepin Linux Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deep"/>
+<meta name="application-name" content="Flatig 博客站">
+<meta name="apple-mobile-web-app-title" content="Flatig 博客站"><meta name="theme-color" data-light="#ffffff" data-dark="#252627" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" /><link rel="prev" href="https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" /><link rel="next" href="https://flatig.vip/posts/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%AE%9E%E4%BE%8B-java%E8%A1%A8%E8%BF%B0/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Deepin20.7升级问题，Linux扩容home分区",
+    "inLanguage": "zh-CN",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https:\/\/flatig.vip\/posts\/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA\/"
+    },"genre": "posts","keywords": "开发, Linux, Bug, Deepin","wordcount":  2400 ,
+    "url": "https:\/\/flatig.vip\/posts\/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA\/","datePublished": "2022-09-03T00:35:46+00:00","dateModified": "2022-09-03T00:35:46+00:00","publisher": {
+      "@type": "Organization",
+      "name": "flatig","logo": "https:\/\/flatig.vip\/images\/logo.png"},"author": {
+        "@type": "Person",
+        "name": "flatig"
+      },"description": ""
+  }
+  </script></head>
+  <body data-header-desktop="sticky" data-header-mobile="auto"><script>(window.localStorage?.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('data-theme', 'dark');</script><div class="wrapper" data-page-style="normal"><header class="desktop animate__faster" id="header-desktop">
+  <div class="header-wrapper" data-github-corner="right">
+    <div class="header-title">
+      <a href="/" title="flatig-我的个人博客站"><img loading="lazy" src="/images/logo.svg" srcset="/images/logo.svg, /images/logo.svg 1.5x, /images/logo.svg 2x" sizes="auto" data-title="flatig-我的个人博客站" data-alt="flatig-我的个人博客站" class="logo" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span class="header-title-text">Flatig</span></a><span id="typeit-header-subtitle-desktop" class="typeit header-subtitle"></span></div>
+    <nav>
+      <ul class="menu"><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/posts/"
+                
+                
+              ><i class="fa-solid fa-archive fa-fw fa-sm" aria-hidden="true"></i> 文章</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/categories/"
+                
+                
+              ><i class="fa-solid fa-th fa-fw fa-sm" aria-hidden="true"></i> 分类</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/tags/"
+                
+                
+              ><i class="fa-solid fa-tags fa-fw fa-sm" aria-hidden="true"></i> 标签</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/tags/"
+                
+                
+              ><i class="fa-solid fa-book fa-fw fa-sm" aria-hidden="true"></i> 文档</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/friends/"
+                
+                
+              ><i class="fa-solid fa-users fa-fw fa-sm" aria-hidden="true"></i> 友链</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/about/"
+                
+                
+              ><i class="fa-solid fa-user-tie fa-fw fa-sm" aria-hidden="true"></i> 关于</a></li><li class="menu-item delimiter"></li><li class="menu-item search" id="search-desktop">
+            <input type="text" placeholder="Search something" id="search-input-desktop">
+            <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+              <i class="fa-solid fa-search fa-fw" aria-hidden="true"></i>
+            </a>
+            <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+              <i class="fa-solid fa-times-circle fa-fw" aria-hidden="true"></i>
+            </a>
+            <span class="search-button search-loading" id="search-loading-desktop">
+              <i class="fa-solid fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+            </span>
+          </li><li class="menu-item theme-switch" title="切换主题">
+          <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+        </li></ul>
+    </nav>
+  </div>
+</header><header class="mobile animate__faster" id="header-mobile">
+  <div class="header-container">
+    <div class="header-wrapper">
+      <div class="header-title">
+        <a href="/" title="flatig-我的个人博客站"><img loading="lazy" src="/images/logo.svg" srcset="/images/logo.svg, /images/logo.svg 1.5x, /images/logo.svg 2x" sizes="auto" data-title="/images/logo.svg" data-alt="/images/logo.svg" class="logo" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span class="header-title-text">Flatig</span></a><span id="typeit-header-subtitle-mobile" class="typeit header-subtitle"></span></div>
+      <div class="menu-toggle" id="menu-toggle-mobile">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <nav>
+      <ul class="menu" id="menu-mobile"><li class="search-wrapper">
+            <div class="search mobile" id="search-mobile">
+              <input type="text" placeholder="Search something" id="search-input-mobile">
+              <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                <i class="fa-solid fa-search fa-fw" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                <i class="fa-solid fa-times-circle fa-fw" aria-hidden="true"></i>
+              </a>
+              <span class="search-button search-loading" id="search-loading-mobile">
+                <i class="fa-solid fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+              </span>
+            </div>
+            <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+              取消
+            </a>
+          </li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/posts/"
+                  
+                  
+                ><i class="fa-solid fa-archive fa-fw fa-sm" aria-hidden="true"></i> 文章</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/categories/"
+                  
+                  
+                ><i class="fa-solid fa-th fa-fw fa-sm" aria-hidden="true"></i> 分类</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/tags/"
+                  
+                  
+                ><i class="fa-solid fa-tags fa-fw fa-sm" aria-hidden="true"></i> 标签</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/tags/"
+                  
+                  
+                ><i class="fa-solid fa-book fa-fw fa-sm" aria-hidden="true"></i> 文档</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/friends/"
+                  
+                  
+                ><i class="fa-solid fa-users fa-fw fa-sm" aria-hidden="true"></i> 友链</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/about/"
+                  
+                  
+                ><i class="fa-solid fa-user-tie fa-fw fa-sm" aria-hidden="true"></i> 关于</a></li><li
+              class="menu-item text-center"
+            ><a
+                  class="menu-link"
+                  href="https://github.com/Flatigers"
+                  title="GitHub"
+                  rel="noopener noreferrer" target="_blank"
+                ><i class='fa-brands fa-github fa-fw' aria-hidden='true'></i> </a></li><li class="menu-item menu-system">
+          <span class="menu-system-item theme-switch" title="切换主题"><i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i></span></li>
+      </ul>
+    </nav>
+  </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+  </div>
+  <div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+  </div><nav aria-label="breadcrumb" class="breadcrumb-container sticky">
+    <ol class="breadcrumb"><li class="breadcrumb-item"><a href="/posts/" title="Posts">Posts</a></li><li class="breadcrumb-item active" aria-current="page">Deepin20.7升级问题，Linux扩容home分区</li>
+    </ol>
+  </nav><main class="container"><aside class="toc" id="toc-auto"><h2 class="toc-title">目录&nbsp;<i class="toc-icon fa-solid fa-angle-down fa-fw" aria-hidden="true"></i></h2>
+      <div class="toc-content" id="toc-content-auto"></div></aside>
+
+  <aside class="aside-custom">
+    </aside>
+
+  <article class="page single">
+    <div class="header"><h1 class="single-title animate__animated animate__flipInX"><span>Deepin20.7升级问题，Linux扩容home分区</span>
+      </h1></div><div class="post-meta">
+      <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Flatigers" title="作者"target="_blank" rel="external nofollow noopener noreferrer author" class="author"><img loading="lazy" src="https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp" srcset="https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp, https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp 1.5x, https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp 2x" sizes="auto" data-title="flatig" data-alt="flatig" class="avatar" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/>&nbsp;flatig</a></span>
+          <span class="post-category">收录于 <a href="/categories/linux/"><i class="fa-regular fa-folder fa-fw" aria-hidden="true"></i> Linux</a></span></div>
+      <div class="post-meta-line"><span title="发布于 2022-09-03 00:35:46"><i class="fa-regular fa-calendar-alt fa-fw me-1" aria-hidden="true"></i><time datetime="2022-09-03">2022-09-03</time></span>&nbsp;<span title="更新于 2022-09-03 00:35:46"><i class="fa-regular fa-edit fa-fw me-1" aria-hidden="true"></i><time datetime="2022-09-03">2022-09-03</time></span>&nbsp;<span title="2400 字"><i class="fa-solid fa-pencil-alt fa-fw me-1" aria-hidden="true"></i>约 2500 字</span>&nbsp;<span><i class="fa-regular fa-clock fa-fw me-1" aria-hidden="true"></i>预计阅读 5 分钟</span>&nbsp;</div>
+    </div><div class="details toc" id="toc-static" data-kept="false">
+        <div class="details-summary toc-title">
+          <span>目录</span>
+          <span><i class="details-icon fa-solid fa-angle-right" aria-hidden="true"></i></span>
+        </div>
+        <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#linux挂载新home分区方法deepin-207升级问题">Linux挂载新home分区方法；Deepin 20.7升级问题</a>
+      <ul>
+        <li><a href="#推荐体验deepin-linux">推荐体验Deepin Linux</a></li>
+        <li><a href="#linux挂载新home分区">Linux挂载新home分区</a></li>
+        <li><a href="#deepin-207升级后在登陆界面无法进入系统">Deepin 20.7升级后在登陆界面无法进入系统</a></li>
+        <li><a href="#总结">总结</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+      </div><div class="content" id="content" data-end-flag="-- ~ --"><div class="details admonition warning open">
+      <div class="details-summary admonition-title">
+        <i class="icon fa-solid fa-exclamation-triangle fa-fw" aria-hidden="true"></i>警告<i class="details-icon fa-solid fa-angle-right fa-fw" aria-hidden="true"></i>
+      </div>
+      <div class="details-content">
+        <div class="admonition-content">本文最后更新于 2022-09-03，文中内容可能已过时。</div>
+      </div>
+    </div><p>字数：1711</p>
+<p>阅读时长：5分钟</p>
+<h2 id="linux挂载新home分区方法deepin-207升级问题">Linux挂载新home分区方法；Deepin 20.7升级问题</h2>
+<h3 id="推荐体验deepin-linux">推荐体验Deepin Linux</h3>
+<p>Deepin是我很喜欢的Linux发行版，它贴近Windows的图形界面和丰富的软件生态让新用户能快速上手Linux，有漂亮的DDE(Deepin Desktop Environment)，集成deepin-wine和ART(Android RunTime)，可以轻松运行大部分Windows和Android应用，可以说是Deepin让大部分人开始转移到国内开发者开发的Linux系统（虽然国内主导开发的Linux没几个）。</p>
+<p>最近在使用Deepin的过程钟出现了一个有趣的问题：将系统版本从Deepin 20.6升级到Deepin20.7之后，无限循环在登录页面无法进入桌面。后面发现这件事与之前做的另一件事有关系，从头开始说起。</p>
+<h3 id="linux挂载新home分区">Linux挂载新home分区</h3>
+<p>在初装Deepin时，我在我的笔记本上压缩出了60G的空间来装它（挂载 / 和 /home）。我只是想用它来学习Linux，同时作为Android开发的环境（Linux上要比Windows快很多，至少在我的电脑上是这样的），在安装完必要的环境并且工作一段时间后，还剩余将尽20G的空间。</p>
+<p>但在后来，我发现Linux上做开发是真的爽（主要是懒，Linux上玩游戏需要一定成本），搭配使用zsh（一款shell，Linux默认为bash）可以省去一些琐碎的步骤，于是渐渐地我将IDEA，PyCharm项目全部转移到Linux，后来学习Rust又安装了Clion。</p>
+<p>某天我下载某个文件，发现始终无法下载成功，打开文件管理器，这才看到60G已经被占满了。于是我就想为这块分区再分配一些空间，打开GParted后发现，我的硬盘上竟然还有一块60G的未分配空间，这把我乐坏了，直接把/home挂在这块分区上不就行了嘛。</p>
+<p>首先用这块空间新建一个分区，并格式化为ext4，之后：</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 创建新分区的临时挂载目录</span>
+</span></span><span class="line"><span class="cl">sudo mkdir /media/home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 把这块分区挂载在这个目录</span>
+</span></span><span class="line"><span class="cl">sudo mount /dev/nvme0n1p6 /media/home 	
+</span></span><span class="line"><span class="cl"><span class="c1"># 我的分区是/dev/nvme0n1p6</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可以使用 lsblk 命令查看各分区</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 同步/home 到 /media/home</span>
+</span></span><span class="line"><span class="cl">sudo rsync -aXS /home/. /media/home/.
+</span></span><span class="line"><span class="cl"><span class="c1"># 同步时间与home大小有关</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 将原来的home更名</span>
+</span></span><span class="line"><span class="cl">sudo mv /home /home_past
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 创建新的home</span>
+</span></span><span class="line"><span class="cl">sudo mkdir /home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 取消分区挂载到/media/home</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 并重新挂载到/home</span>
+</span></span><span class="line"><span class="cl">sudo umount /dev/nvme0n1p6
+</span></span><span class="line"><span class="cl">sudo mount /dev/nvme0n1p6 /home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看并记录分区的UUID</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 写入fstab文件，实现开机自动挂载</span>
+</span></span><span class="line"><span class="cl">blkid 					<span class="c1"># 记录对应/dev/nvme0n1p6的UUID</span>
+</span></span><span class="line"><span class="cl">sudo vim /etc/fstab 	<span class="c1"># 使用vim编辑fstab文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 在文件中添加如下内容：</span>
+</span></span><span class="line"><span class="cl"><span class="nv">UUID</span><span class="o">=</span>你的UUID		/home	/ext4	rw,nodev,nosuid		0,2
+</span></span><span class="line"><span class="cl"><span class="c1"># :wq保存，之后重启系统</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 若重启后发现/home分区挂载正常，则可以删除旧分区</span>
+</span></span><span class="line"><span class="cl">sudo rm -rf /home
+</span></span><span class="line"><span class="cl"><span class="c1"># 千万不要写 sudo rm -rf / 		手动滑稽</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在这之后，我就用我的新home分区（60G都真香）工作了很长一段时间，直到那天升级系统&hellip;&hellip;</p>
+<h3 id="deepin-207升级后在登陆界面无法进入系统">Deepin 20.7升级后在登陆界面无法进入系统</h3>
+<p>我是使用apt升级的系统：</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo apt update
+</span></span><span class="line"><span class="cl">sudo apt upgrade</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一切同往常一样的操作，在重启后：</p>
+<p>TNND，输入密码，按下Enter，黑屏，再次回到登陆界面，输入密码，黑屏&hellip;&hellip;</p>
+<p>系统从这里开始就<strong>进不去了</strong>。</p>
+<p>先是怀疑<strong>升级出错</strong>，于是Ctrl + F2进入tty2，登陆后，再次apt，回到tty1，无效。</p>
+<p>后又 <code>dpkg --configure -a</code>， 再次进入，无效。</p>
+<p>怀疑<strong>DDE</strong>出问题了，于是重装dde:</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo apt purge dde dde-desktop dde-dock startdde
+</span></span><span class="line"><span class="cl">sudo apt install dde dde-desktop dde-dock startdde</span></span></code></pre></td></tr></table>
+</div>
+</div><p>依旧无效。</p>
+<p>再次怀疑是<strong>显卡驱动</strong>原因，重新安装<strong>Linux内核</strong>：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 搜索内核</span>
+</span></span><span class="line"><span class="cl">apt-cache search linux-image
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装内核，同时安装image和headers</span>
+</span></span><span class="line"><span class="cl">sudo apt install linux-image-5.18-amd64-desktop
+</span></span><span class="line"><span class="cl">sudo apt install linux-headers-5.18-amd64-desktop
+</span></span><span class="line"><span class="cl"><span class="c1"># 5.18.？？ 具体版本号忘记了。。。</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>再次进入依旧无效。</p>
+<p>之后怀疑home<strong>分区挂载</strong>的问题，查看分区情况，并重新挂载一遍：</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看分区情况</span>
+</span></span><span class="line"><span class="cl">lsblk
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 重新挂载</span>
+</span></span><span class="line"><span class="cl">sudo umount /dev/nvme0n1p6
+</span></span><span class="line"><span class="cl">sudo mount /dev/nvme0nqp6 /home
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">lsblk</span></span></code></pre></td></tr></table>
+</div>
+</div><p>分区挂载正常。</p>
+<p>然后怀疑是<strong>桌面管理器</strong>的问题，于是安装kde试试：</p>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 安装kde基本包</span>
+</span></span><span class="line"><span class="cl">sudo apt install kde-plasma-desktop
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 在桌面管理器选择界面有两个选项：</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># lightdm sddm</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 前者是deepin默认，后者是kde的</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 桌面管理器可以认为与你的登陆界面有关</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用下列命令重写切换桌面管理器</span>
+</span></span><span class="line"><span class="cl">sudo dpkg-reconfigure lightdm</span></span></code></pre></td></tr></table>
+</div>
+</div><p>重启后，进入了kde的登陆界面，在登陆选项竟然看到了<strong>两个deepin桌面</strong>：</p>
+<p>deepin 和 <strong>deepin(wayland)</strong></p>
+<p>deepin使用Wayland还在试验阶段，所以默认桌面就是用X11的deepin，选择deepin登陆，失败。</p>
+<p>选择plasma登陆，失败。</p>
+<p>选择，deepin(wayland)，<strong>竟然成功了！</strong></p>
+<p>然而进入，这什么东西，一个窗口给我整5倍屏幕大小，卡顿，无法显示chrome&hellip;&hellip;.</p>
+<p>那么为什么deepin(wayland)可以进入，而其他都不行呢？这让我更加肯定是显卡驱动的问题，之后又重装了kernel 5.10，5.15，5.18，结果还是没用。</p>
+<p>呼~没办法，<strong>重装 <strong>吧！好在我的</strong>home</strong>挂载在了另一块分区，所以重装后我的大部分文件不会丢失。</p>
+<p>于是拿出U盘，再次安装。</p>
+<p>将系统盘格式化，然后重新挂载为根目录，再把home盘挂载为home。</p>
+<p>在漫长的安装后，我终于看到了那个登录界面。好了，开始进入系统。</p>
+<p><strong>又一次失败了</strong>。。。。</p>
+<p>这可不对了。再试一次，这次把home挂载在系统盘上。</p>
+<p>进入系统，这次终于 <strong>成功了！</strong></p>
+<p>这说明了不是因为系统或驱动等问题，<strong>问题出在home上</strong>。</p>
+<p>但在查看了默认配置文件之后，发现并没有跟正常文件有什么区别，问题的原因找不到。。。</p>
+<p>好吧，没办法，手动复原。</p>
+<p>将之前的home中重要的文件手动复制到新的home，然后把那个分区格了，再用重新挂载home的方法挂载一遍，重启，进入系统了，<strong>问题解决！</strong></p>
+<h3 id="总结">总结</h3>
+<p>这次更新系统出现问题，根源是在home分区，暂时未明了具体原因。</p>
+<p>目前的解决方案是：在tty1之外的控制台备份home到新的分区，之后重新挂载home，并复原文件。</p>
+</div><div class="post-reward">
+    <div class="comment">Buy me a coffee~</div>
+    <input type="checkbox" class="reward-input" name="reward" id="fi-reward" hidden />
+    <label class="reward-button" for="fi-reward">赞赏</label>
+    <div class="reward-ways" data-mode="fixed"><div><img loading="lazy" src="/images/alipay.jpg" srcset="/images/alipay.jpg, /images/alipay.jpg 1.5x, /images/alipay.jpg 2x" sizes="auto" data-title="flatig 支付宝" data-alt="flatig 支付宝" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span data-animation>支付宝</span>
+          </div><div><img loading="lazy" src="/images/wechatpay.jpg" srcset="/images/wechatpay.jpg, /images/wechatpay.jpg 1.5x, /images/wechatpay.jpg 2x" sizes="auto" data-title="flatig 微信" data-alt="flatig 微信" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span data-animation>微信</span>
+          </div></div>
+  </div><div class="post-footer" id="post-footer">
+  <div class="post-info">
+    <div class="post-info-line">
+      <div class="post-info-mod">
+        <span title="更新于 2022-09-03 00:35:46">更新于 2022-09-03&nbsp;</span>
+      </div><div class="post-info-license">
+          <span><a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span>
+        </div></div>
+    <div class="post-info-line">
+      <div class="post-info-md"><span><a href="https://github.com/Flatigers/flatigers.github.io/edit/docs/content/posts/Deepin20-7%e5%8d%87%e7%ba%a7%e9%97%ae%e9%a2%98%ef%bc%8cLinux%e6%89%a9%e5%ae%b9home%e5%88%86%e5%8c%ba.md" title="编辑此页"target="_blank" rel="external nofollow noopener noreferrer" class="link-to-edit">编辑此页</a></span></div>
+      <div class="post-info-share">
+        <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" data-title="Deepin20.7升级问题，Linux扩容home分区" data-hashtags="开发,Linux,Bug,Deepin"><i class="fa-brands fa-twitter fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" data-hashtag="开发"><i class="fa-brands fa-facebook-square fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/"><i class="fa-brands fa-linkedin fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" data-title="Deepin20.7升级问题，Linux扩容home分区"><i class="fa-brands fa-weibo fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://flatig.vip/posts/deepin20-7%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98linux%E6%89%A9%E5%AE%B9home%E5%88%86%E5%8C%BA/" data-title="Deepin20.7升级问题，Linux扩容home分区"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg" aria-hidden="true"></i></a>
+  </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="post-info-more">
+    <section class="post-tags"><i class="fa-solid fa-tags fa-fw me-1" aria-hidden="true"></i><a href='/tags/%E5%BC%80%E5%8F%91/' class="post-tag">开发</a><a href='/tags/linux/' class="post-tag">Linux</a><a href='/tags/bug/' class="post-tag">Bug</a><a href='/tags/deepin/' class="post-tag">Deepin</a></section>
+    <section>
+      <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+    </section>
+  </div>
+
+  <div class="post-nav"><a href="/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/" class="post-nav-item" rel="prev" title="不只是版本控制：使用Git搭建你的工作流"><i class="fa-solid fa-angle-left fa-fw" aria-hidden="true"></i>不只是版本控制：使用Git搭建你的工作流</a>
+      <a href="/posts/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E6%80%9D%E6%83%B3%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%AE%9E%E4%BE%8B-java%E8%A1%A8%E8%BF%B0/" class="post-nav-item" rel="next" title="面向对象思想：对象和实例-Java表述">面向对象思想：对象和实例-Java表述<i class="fa-solid fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+</article></main><footer class="footer">
+    <div class="footer-container"><div class="footer-line powered">由 <a href="https://gohugo.io/" target="_blank" rel="external nofollow noopener noreferrer" title="Hugo 0.119.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/hugo-fixit/FixIt" target="_blank" rel="external" title="FixIt v0.2.18-lts.1"><img class="fixit-icon" src="/fixit.min.svg" alt="FixIt logo" />&nbsp;FixIt</a>
+        </div><div class="footer-line copyright" itemscope itemtype="http://schema.org/CreativeWork"><i class="fa-regular fa-copyright fa-fw" aria-hidden="true"></i>
+            <span itemprop="copyrightYear">2023</span><span class="author" itemprop="copyrightHolder">
+              <a href="https://github.com/Flatigers"target="_blank" rel="external nofollow noopener noreferrer">flatig</a></span><span class="license footer-divider"><a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div><div class="footer-line statistics order-first"><span class="site-time" title='网站运行中……'><i class="fa-solid fa-heartbeat fa-fw animate-icon" aria-hidden="true"></i><span class="ms-1 d-none">博客已运行</span><span class="run-times ms-1">网站运行中……</span></span></div></div>
+  </footer></div><div class="widgets"><div class="fixed-buttons animate__faster d-none"><div class="fixed-button back-to-top" role="button" aria-label="回到顶部"><i class="fa-solid fa-arrow-up fa-fw" aria-hidden="true"></i><span class="variant-numeric">0%</span>
+        </div></div><a href="https://github.com/Flatigers" title="我的GitHub，看看有没有你感兴趣的项目"target="_blank" rel="external nofollow" class="github-corner right d-none-mobile"><svg viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><div id="mask"></div><div class="reading-progress-bar" style="left: 0;top: 0;--bg-progress: #000;--bg-progress-dark: #fff;"></div><noscript>
+    <div class="noscript-warning">FixIt 主题在启用 JavaScript 的情况下效果最佳。</div>
+  </noscript>
+</div><link rel="stylesheet" href="/lib/lightgallery/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><link rel="stylesheet" href="/lib/pace/themes/blue/pace-theme-minimal.css"><script src="/lib/autocomplete/autocomplete.min.js" defer></script><script src="/lib/algoliasearch/algoliasearch-lite.umd.min.js" defer></script><script src="/lib/instant-page/instantpage.min.js" async defer type="module"></script><script src="/lib/twemoji/twemoji.min.js" defer></script><script src="/lib/lightgallery/lightgallery.min.js" defer></script><script src="/lib/lightgallery/plugins/thumbnail/lg-thumbnail.min.js" defer></script><script src="/lib/lightgallery/plugins/zoom/lg-zoom.min.js" defer></script><script src="/lib/sharer/sharer.min.js" async defer></script><script src="/lib/typeit/index.umd.js" defer></script><script src="/lib/katex/katex.min.js" defer></script><script src="/lib/katex/auto-render.min.js" defer></script><script src="/lib/katex/copy-tex.min.js" defer></script><script src="/lib/katex/mhchem.min.js" defer></script><script src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script src="/lib/pangu/pangu.min.js" defer></script><script src="/lib/cell-watermark/watermark.min.js" defer></script><script src="/lib/pace/pace.min.js" async defer></script><script>window.config={"autoBookmark":true,"code":{"copyTitle":"复制到剪贴板","editLockTitle":"锁定可编辑代码块","editUnLockTitle":"解锁可编辑代码块","editable":true,"maxShownLines":50},"comment":{"enable":false},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验。"},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"data":{"typeit-header-subtitle-desktop":"博客|技术分享","typeit-header-subtitle-mobile":"博客|技术分享"},"enablePWA":true,"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"pangu":{"enable":true,"selector":"article"},"search":{"algoliaAppID":"","algoliaIndex":"","algoliaSearchKey":"","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"},"siteTime":"2023-10-14T11:30:00+08:00","twemoji":true,"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"typeit-header-subtitle-desktop":["typeit-header-subtitle-desktop"],"typeit-header-subtitle-mobile":["typeit-header-subtitle-mobile"]},"duration":-1,"loop":false,"speed":100},"watermark":{"appendto":".wrapper\u003emain","colspacing":30,"content":"\u003cimg style=\"height: 0.85rem;\" src=\"/logo.png\" alt=\"logo\" /\u003e flatig","enable":true,"fontfamily":"MMT_LRH,沐目体","fontsize":1.1,"height":20,"opacity":0.0125,"rotate":15,"rowspacing":60,"width":150}};</script><script src="/js/theme.min.js" defer></script></body>
+</html>
