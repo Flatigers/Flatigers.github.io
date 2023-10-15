@@ -1,0 +1,360 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>函数式 - 标签 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/tags/%E5%87%BD%E6%95%B0%E5%BC%8F/</link>
+    <description>函数式 - 标签 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>chineseliujiayi691@gmail.com (flatig)</managingEditor>
+      <webMaster>chineseliujiayi691@gmail.com (flatig)</webMaster><lastBuildDate>Sun, 02 Apr 2023 21:05:39 &#43;0000</lastBuildDate><atom:link href="https://flatig.vip/tags/%E5%87%BD%E6%95%B0%E5%BC%8F/" rel="self" type="application/rss+xml" /><item>
+  <title>详解闭包:Rust中的函数式编程</title>
+  <link>https://flatig.vip/posts/%E8%AF%A6%E8%A7%A3%E9%97%AD%E5%8C%85-rust%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</link>
+  <pubDate>Sun, 02 Apr 2023 21:05:39 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E8%AF%A6%E8%A7%A3%E9%97%AD%E5%8C%85-rust%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</guid>
+  <description><![CDATA[<p>全文长度：2300词
+阅读时长：约15分钟</p>
+<p>本节参考：</p>
+<ul>
+<li><a href="https://course.rs/advance/functional-programing/closure.html"target="_blank" rel="external nofollow noopener noreferrer">Rust语言圣经<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li><a href="https://rustwiki.org/zh-CN/reference/expressions/closure-expr.html"target="_blank" rel="external nofollow noopener noreferrer">RF-闭包表达式<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li><a href="https://rustwiki.org/zh-CN/reference/types/closure.html"target="_blank" rel="external nofollow noopener noreferrer">RF-闭包类型<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/341815515"target="_blank" rel="external nofollow noopener noreferrer">Rust中的闭包与关键字Move<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+</ul>
+<p>Rust中函数式编程的大梁由四大天王顶起：</p>
+<ul>
+<li>模式匹配</li>
+<li>枚举</li>
+<li>迭代器</li>
+<li>闭包</li>
+</ul>
+<p>使用 <strong>闭包（Closure）</strong> 可以做到将一系列语句和表达式赋值给变量，因此也可以将语句和表达式作为参数传递，将语句和表达式作为函数返回值返回，它具有如此一系列神奇的特性。闭包的使用很简单，但其中一些细节需要仔细推敲。
+下面，我们从闭包如何捕获环境，闭包如何使用捕获值，以及闭包实现的角度，来介绍这个编程利器。</p>
+<h2 id="开始捕获环境">开始——捕获环境</h2>
+<hr>
+<p>Rust中的函数是无法捕获其所在环境的。对于以下代码：</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{num}</span><span class="s">&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">fn</span> <span class="nf">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{num}</span><span class="s">&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>即使该函数定义在 <code>main()</code> 内部，它仍然无法访问到自己被定义的环境中定义的变量。若要访问这些变量，只能通过传递函数参数的方式。需要注意，<code>static</code> 和 <code>const</code> 这样的量具有静态生命周期，是可以访问的。
+而使用闭包，便可以起到捕获环境的作用。
+那么如何定义一个闭包呢？Rust中通过闭包表达式定义一个闭包类型，在其他语言中也称为 <strong>lambda表达式</strong>。</p>
+<p>闭包表达式的<strong>句法规则</strong>是：可选的 <code>move</code> ，后跟由 <code>||</code> 围住的参数模式列表（可以省略类型标注），后跟可选的返回值标注 <code>-&gt; type</code> ，后跟一个块表达式（无返回值标注时，若块内只有一个表达式则可以直接写在 <code>||</code> 后）。例如：</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="k">fn</span> <span class="nf">func</span><span class="p">(</span><span class="n">a</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">a</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="kt">i32</span><span class="o">|</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 相同的调用方式 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">assert_eq!</span><span class="p">(</span><span class="n">res</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="闭包捕获环境的方式">闭包捕获环境的方式</h2>
+<hr>
+<p>闭包是可以捕获环境的，捕获的方式有这几种（不捕获环境的闭包见后文）：</p>
+<ul>
+<li>不可变引用 <code>&amp;T</code></li>
+<li>可变引用 <code>&amp;mut T</code></li>
+<li>移动语义（获取所有权） <code>T</code>
+当在 <code>||</code> 前使用 <code>move</code> 时，将强制闭包以移动语义（move）捕获值，获取值的所有权。对于实现了 <code>Copy Trait</code> 的类型，则使用 <code>Copy</code> <strong>复制语义</strong>。当没有使用 <code>move</code> 时，编译器会按照如下顺序进行检查，选择捕获方式，直到遇到第一个能通过编译的选项：</li>
+</ul>
+<ol>
+<li>不可变引用</li>
+<li>唯一不可变引用</li>
+<li>可变引用</li>
+<li>移动语义
+此处，<strong>唯一不可变引用</strong> 是基于借用规则而出现的一种特殊的捕获方式。对于下述代码：</li>
+</ol>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">};</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 下行代码不正确  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// let y = &amp;b;  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">x</span><span class="p">();</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{y}</span><span class="s">&#34;</span><span class="p">);</span><span class="w">   </span><span class="c1">// 由于NLL，这里需要使用 y
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">;</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>代码中 <code>b</code> 是对 <code>a</code> 的可变借用，因此可以通过解引用 <code>b</code> 来修改 <code>a</code> 的值。但在这里我们将修改的操作放在一个闭包中，其中使用了 <code>b</code>，因此闭包需要捕获它。由于 <code>b</code> 本身不是 <code>mut</code> 的，因此无法以可变引用的形式捕获。但若以不可变引用的形式捕获，那么就会获得对可变引用的引用 <code>&amp; &amp;mut</code>，它将不是唯一的，这违反了借用规则。
+这时，闭包便使用<strong>唯一不可变引用</strong>的方式来捕获变量，即它会对 <code>b</code> 进行不可变引用，同时会确保对 <code>b</code> 的引用只有一个。</p>
+<h2 id="3种闭包trait">3种闭包Trait</h2>
+<hr>
+<p>这里需要做一区别，闭包<strong>如何捕获环境</strong>，和闭包<strong>如何使用捕获到的值</strong>，两者是不同的。</p>
+<p>Rust编译器会根据闭包 <strong>如何使用</strong> 捕获到的值，来决定为闭包实现哪些<strong>闭包Trait</strong>。
+或者说，编译器通过这3种Trait来描述和分类不同的闭包：</p>
+<ul>
+<li><code>FnOnce</code> ：闭包可能会消耗掉捕获值的所有权，表示闭包至少能使用一次，因此所有的闭包均实现了该Trait。</li>
+<li><code>FnMut</code> ：闭包不会消耗掉捕获值的所有权，同时会对捕获值进行修改。</li>
+<li><code>Fn</code> ：闭包不会消耗掉捕获值的所有权，同时不会对捕获值进行修改。
+所有闭包都 <strong>至少</strong> 实现了 <code>FnOnce</code>。</li>
+</ul>
+<p>所有类型的闭包中，有些闭包可能会消耗掉捕获值的所有权，这种闭包在调用一次后无法再次调用（要处理的值已经不见了），因此对于所有的闭包来说，闭包最少是可以使用一次的，使用 <code>FnOnce</code> 描述。如果闭包并不消耗掉捕获值的所有权，便可以多次被调用，它对捕获值的操作，只可能是修改或者不修改，前者使用 <code>FnMut</code> 描述，后者使用 <code>Fn</code> 描述。</p>
+<p>因此可以说， <strong>3种闭包Trait，是在闭包如何使用捕获值的角度上，对闭包的分类。</strong></p>
+<p>现在观察这3种Trait的定义签名（简化）：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">Fn</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span>: <span class="nb">FnMut</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;rust-call&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">args</span>: <span class="nc">Args</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span>::<span class="n">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">FnMut</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span>: <span class="nb">FnOnce</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;rust-call&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_mut</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">args</span>: <span class="nc">Args</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span>::<span class="n">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">FnOnce</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">type</span> <span class="nc">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;rust-call&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">args</span>: <span class="nc">Args</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span>::<span class="n">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，实现 <code>FnMut</code> 的条件是，已经实现了 <code>FnOnce</code>，而实现 <code>Fn</code> 的条件是已经实现了 <code>FnMut</code>，因此，闭包对这3种Trait的实现有这三种情况：</p>
+<ol>
+<li>只实现了 <code>FnOnce</code></li>
+<li>实现了 <code>FnOnce</code> 和 <code>FnMut</code></li>
+<li>实现了 <code>FnOnce</code> ，<code>FnMut</code> 和 <code>Fn</code>
+分别对应上述三种Trait的情况。</li>
+</ol>
+<h2 id="函数式编程作为参数和返回值">函数式编程：作为参数和返回值</h2>
+<hr>
+<p>由于Rust中的闭包实现了上文介绍的几种闭包特征，因此可以使用特征约束的方法让闭包作为函数参数或返回值来使用，例如：</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// 接收一个 FnOnce() 类型的闭包并调用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">function</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">where</span><span class="w"> </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">f</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 返回一个 FnOnce() -&gt; &amp;&#39;static str 类型的闭包
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">some_func</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span> <span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;666&#34;</span><span class="w"> </span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 返回一个特征对象，不常用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">dyn_func</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nb">Box</span><span class="o">&lt;</span><span class="k">dyn</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nb">Box</span>::<span class="n">new</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;999&#34;</span><span class="w"> </span><span class="p">})</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于函数而言，只要符合特征约束，也可以作为其他函数的参数：</p>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// 将要接收函数和闭包作为参数的函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">call_me</span><span class="o">&lt;</span><span class="n">F</span>: <span class="nb">Fn</span><span class="p">()</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">f</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 一个函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;I&#39;m a function!&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 一个闭包
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">closure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;I&#39;m a closure!&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">call_me</span><span class="p">(</span><span class="n">closure</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">call_me</span><span class="p">(</span><span class="n">function</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="闭包的实际类型">闭包的实际类型</h2>
+<hr>
+<p>当使用闭包表达式定义一个闭包时，编译器会隐式生成一个匿名结构体，结构体中的字段会存储闭包捕获的变量。同时，会为该结构体实现闭包特征，并由此实现闭包的函数功能。
+例如，对于以下闭包：</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">closure</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">where</span><span class="w"> </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span>  
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;closure: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">());</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;Hello&#34;</span><span class="w"> </span><span class="p">};</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">closure</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译器会大致生成如下的代码：</p>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">ClosureSome</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">a</span>: <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">ClosureSome</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">type</span> <span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nb">&#39;static</span><span class="w"> </span><span class="kt">str</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">fn</span> <span class="nf">call_once</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span> <span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="s">&#34;Hello&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>因此每个闭包都具有自己独特的类型，且无法被写出。
+由此可以看出，当传递一个闭包时，<strong>传递的实际上是一个结构体</strong>，而调用一个闭包时，则是调用相应Trait定义的方法。</p>
+<p>上文中介绍了编译器根据闭包如何使用捕获到的值而实现不同的闭包特征，而对于 <strong>闭包没有捕获值</strong> 的情况，该闭包可以被 <strong>自动强转</strong> 为函数指针：</p>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">add</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">type</span> <span class="nc">Binop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">fn</span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">bo</span>: <span class="nc">Binop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">add</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="总结">总结</h2>
+<hr>
+<p>Rust中的闭包可以实现一些函数式编程的功能，它与函数类似，但也不同，主要便在于<strong>闭包可以捕获环境</strong>。</p>
+<p>闭包 <strong>捕获环境</strong> 的方式分为三种，即 <code>&amp;T</code> <code>&amp;mut T</code> 和 <code>T</code>，当闭包不捕获环境时，可以被自动强转为函数指针。
+闭包 <strong>使用捕获值</strong> 的方式也分为三种，即消耗所有权，不消耗所有权并进行修改，不消耗所有权且不修改。与此对应的，有三种闭包特征，即 <code>FnOnce</code>， <code>FnMut</code> 和 <code>Fn</code>，实现了后一个特征则肯定实现了前一个特征，如一个闭包实现了 <code>Fn</code>，它肯定实现了 <code>FnMut</code> 和 <code>FnOnce</code>。</p>
+<p>通过使用特征约束，利用3种Trait，可以将闭包作为参数传递，或作为返回值返回。
+最后，闭包实现这样一系列功能，它的真实类型便是一个编译器自动生成的匿名结构体，结构体的字段存储着闭包捕获的环境，编译器为它实现相应的Trait，并将闭包包含的语句和表达式作为具体的实现。</p>
+]]></description>
+</item>
+</channel>
+</rss>

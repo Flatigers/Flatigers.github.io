@@ -1,0 +1,548 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>Git - 分类 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/categories/git/</link>
+    <description>Git - 分类 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>chineseliujiayi691@gmail.com (flatig)</managingEditor>
+      <webMaster>chineseliujiayi691@gmail.com (flatig)</webMaster><lastBuildDate>Wed, 24 Aug 2022 23:48:27 &#43;0000</lastBuildDate><atom:link href="https://flatig.vip/categories/git/" rel="self" type="application/rss+xml" /><item>
+  <title>不只是版本控制：使用Git搭建你的工作流</title>
+  <link>https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/</link>
+  <pubDate>Wed, 24 Aug 2022 23:48:27 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/</guid>
+  <description><![CDATA[<p>全文字数：5241</p>
+<p>阅读时长：15分钟</p>
+<h2 id="开始">开始</h2>
+<p>在2021 <strong>Stack Overflow</strong> 最受欢迎的工具调查排名中，有超过90%的开发者选择<strong>git</strong>，它如今已成为开发人员的基本技能和工作时首选的版本控制系统。本文将介绍git的基本概念和常用操作，教你使用git快速完成自己的工作流。</p>
+<p>本文只介绍<strong>基本</strong>操作和概念，若想对git有更详细的了解，请到git官网（https://git-scm.com）获取更多细节。推荐到官网阅读并下载 <strong>Pro Git</strong> 中文版阅读（https://book.git-scm.com/book/zh/v2）。有时网络不太好，你可以在公众号消息界面发送 <em><strong>ProGit</strong></em> 即可获得文章编写时的最新<strong>pdf</strong>文件。</p>
+<p><strong>git</strong>(/ɡɪt/)是一个分布式版本控制软件软件，最初由<strong>Linus Torvalds</strong>创作，于2005年以GPL许可协议发布。最初目的是为了更好地管理Linux内核开发而设计。</p>
+<blockquote>
+<p>历史（Wikipedia）</p>
+<p>自2002年开始，Linus Torvalds决定使用BitKeeper作为Linux内核主要的版本控制系统用以维护代码。因为BitKeeper为专有软件，这个决定在社群中长期遭受质疑。在Linux社群中，特别是理查德·斯托曼与自由软件基金会的成员，主张应该使用开放源代码的软件来作为Linux内核的版本控制系统。Linus曾考虑过采用现成软件作为版本控制系统（例如Monotone），但这些软件都存在一些问题，特别是性能不佳。现成的方案，如CVS的架构，受到Linus的批评。</p>
+<p>2005年，Andrew Tridgell写了一个简单程序，可以连接BitKeeper的仓库，BitKeeper著作权拥有者拉里·麦沃伊认为Andrew对BitKeeper内部使用的协议进行逆向工程，决定收回无偿使用BitKeeper的许可。Linux内核开发团队与BitMover公司进行磋商，但无法解决他们之间的歧见。Linus决定自行开发版本控制系统替代BitKeeper，以<strong>十天</strong>的时间编写出git第一个版本。</p>
+</blockquote>
+<h2 id="安装配置">安装配置</h2>
+<ul>
+<li>Linux</li>
+</ul>
+<p>在Linux上可以方便地通过自己系统的软件包管理器安装 git，如：</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Debian:</span>
+</span></span><span class="line"><span class="cl">sudo apt install git
+</span></span><span class="line"><span class="cl"><span class="c1"># Fedora:</span>
+</span></span><span class="line"><span class="cl">sudo yum install git
+</span></span><span class="line"><span class="cl"><span class="c1"># Arch Linux:</span>
+</span></span><span class="line"><span class="cl">sudo pacman -S git
+</span></span><span class="line"><span class="cl"><span class="c1"># ......</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Windows</li>
+</ul>
+<p>Windows下的安装一般选择直接到官网下载适合自己系统的版本（https://book.git-scm.com/download/win）。</p>
+<p>若有winget（Windows下的包管理器），也可以使用：</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">winget</span> <span class="n">install</span> <span class="p">-</span><span class="n">-id</span> <span class="n">Git</span><span class="p">.</span><span class="py">Git</span> <span class="n">-e</span> <span class="p">-</span><span class="n">-source</span> <span class="n">winget</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>macOS</li>
+</ul>
+<p>一般使用HomeBrew或MacPorts：</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># HomeBrew:</span>
+</span></span><span class="line"><span class="cl">brew install git
+</span></span><span class="line"><span class="cl"><span class="c1"># MacPorts:</span>
+</span></span><span class="line"><span class="cl">sudo port install git</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="一些概念">一些概念</h2>
+<h3 id="版本控制">版本控制</h3>
+<p>我们使用git，主要是将它作为一个版本控制工具，那么什么是版本控制？</p>
+<p>在手机上安装完软件后，我们经常需要对它们进行升级，或者说<strong>版本更新</strong>。旧版和新版软件最明显的区别是什么？就是它们的版本号不同。而一般来说，每个版本对应的软件包，它们在界面、功能、体验等方面总有一些差别，除非开发者故意拿一套不变的代码糊弄。同样的，在实际开发过程中，总是要对程序做修改，导致文件前后发生变化。我们把这些软件包，源代码，或者说<strong>文件</strong>的不同“内容”，叫做不同的<strong>版本</strong>，可以写个版本号来表示。而<strong>版本控制</strong>，就是用来记录一个或多个文件内容（版本）变化的系统。</p>
+<p>开发程序的过程中，我们用版本控制工具来管理程序的源代码文件。但几乎所有版本控制工具都可以拿来管理 <strong>所有文件</strong> 的版本。我们可以用它来管理 .kt, .cpp, .rs, .docx, .xlsx, .txt, .png 甚至 .mp4文件。</p>
+<p>我们<strong>为什么需要版本控制</strong>呢？假设你是一位装修设计师，正在设计一个房间，本来房间的基本架构都做好了，某天你突然想改装一下卫生间，之后又想改装一下飘窗，后面发现这样会弄坏承重墙和楼下邻居的天花板，由于你改得一团糟，很难再改回去了。这时如果你使用了版本控制，你可以<strong>很轻松</strong>地恢复到原来的样子，通常这样比<strong>备份多个文件</strong>更方便。</p>
+<h3 id="分布式版本控制系统">分布式版本控制系统</h3>
+<p>分布式是相对于集中式而言的，它们是描述多人协作的版本控制方式的。假设要开发一个大型软件，这个软件要求连接互联网，可以与人对话，会根据用户手机壳颜色更换主题（/手动滑稽），显然一个人不太可能精通所有方面，所以需要很多人同时开发，写好自己的代码然后合并在一个软件里面。</p>
+<p>集中式指的是，这个软件的代码存放在一个中心服务器上，即它的仓库是在一个地方统一管理的，每个程序员在开发时都要连接这个服务器，取出最新的文件然后开发再上传。你可以看到这个软件每个人开发的最新情况是什么样的，也可以在别人把服务器卡死不能工作的时候回家休息一段时间。</p>
+<p>分布式，则指的是这个软件的完整代码，分布在每一个开发人员手上，即每个人都需要有这个软件的完整仓库。分布式一般会设置一个仓库作为中心仓库，存放目前开发的主线（应该是用来作为代码交换的中心），在每次工作结束之后，每个人只需要提交自己的改动即可，同时再同步一下别人的改动。你可以按照自己的想法完全修改这个仓库，可以在公司停电的情况下在自家工作，也可以在克隆仓库时花一个多小时（一般只在第一次，且大多数都在几分钟）。</p>
+<h3 id="存储文件快照">存储文件快照</h3>
+<p>不同于CVS等版本控制工具，git对待数据的方式是直接记录文件的快照（某个版本的文件本身），而不是记录文件的变化（这是<strong>基于差异</strong>的版本控制系统 <strong>delta-based</strong>）。</p>
+<p>具体来说，基于差异的控制方式是，只记录每次的改动：假设你有一个香蕉，某天你在香蕉上贴了标签，这作为一个版本，之后你又在香蕉上打蜡，再作为一个版本。那么你现有的三个版本是这样记录的，一个香蕉， 香蕉上贴了标签， 香蕉上打了蜡。</p>
+<p>而git则是记录每次的文件本身：还是这根香蕉，使用git记录的话，这三个版本则是这样的，一个香蕉，一个贴了标签的香蕉，一个贴了标签并打了蜡的香蕉。</p>
+<h3 id="git的一些特点">git的一些特点</h3>
+<ul>
+<li>
+<p>几乎都在本地执行。git中绝大多数操作只需要访问本地资源，一般不需要互联网或其他计算机的信息，这让它在工作时具有令人极其舒服的快速。</p>
+</li>
+<li>
+<p>文件完整性校验。git中所有的数据在存储前都会计算SHA-1值，然后通过哈希值来引用，而不是文件名。这样，你就无法在git不知情的情况下修改文件及内容。同样，git也会发现你在传输过程中发生的信息丢失或文件损坏。</p>
+</li>
+<li>
+<p>一般只添加数据。我们执行的git操作几乎只向数据库中添加数据，而很难<strong>从数据库中</strong>删除数据，它几乎不会执行任何可能导致文件不能回复的操作，这让它更加安全。</p>
+</li>
+</ul>
+<h3 id="git-bash">Git Bash</h3>
+<p>在Linux/macOS上，运行git只需要在终端执行 <code>git [commands命令] [arguments参数]</code> 之类的命令即可。在Windows下，会提供 <em><strong>git bash</strong></em> 工具，使用 git bash 可以保持命令的一致性。本文的所有git命令均可以在不同平台运行。</p>
+<h2 id="全局配置">全局配置</h2>
+<p>版本控制系统需要知道每次都是谁对文件做了修改，因此你需要为git配置你的一些信息，每台计算机（严格说是某个计算机的某个系统中的某个用户）只需要<strong>全局配置</strong>一次，今后的版本控制都将<strong>默认</strong>使用全局配置，你也可以在特定仓库中使用不同的配置。</p>
+<p>进行全局配置的工具为 <code>git config</code>，git将配置存储在一些文件中：</p>
+<ul>
+<li>
+<p>Linux/macOS：</p>
+<ol>
+<li>
+<p>系统配置文件： <em><strong>/etc/gitconfig</strong></em></p>
+<p>使用 <code>git config --system</code> 进行读写。</p>
+</li>
+<li>
+<p>全局配置文件： <em><strong>~/.gitconfig  或  ~/.config/git/config</strong></em></p>
+</li>
+</ol>
+<p>使用 <code>git config --global</code> 进行读写。</p>
+<ol start="3">
+<li>
+<p>仓库配置文件：<em><strong>仓库/.git/config</strong></em></p>
+<p>使用 <code>git config --local</code> 进行读写，前提是你已经在此仓库中。</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Windows（使用命令同上）</p>
+<ol>
+<li>系统配置文件：<em><strong>C:\ProgramFiles\Git\etc\gitconfig</strong></em> （在你的Git安装目录下寻找）</li>
+<li>全局配置文件：<em><strong>C:\Users\用户名.gitconfig</strong></em></li>
+<li>仓库配置文件：<em><strong>仓库\.git\gitconfig</strong></em></li>
+</ol>
+</li>
+</ul>
+<p>大多数情况下，我们只需要关注<strong>全局配置文件</strong>，在极少数的情况下会配置仓库配置文件。以下为配置的命令：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看现有配置</span>
+</span></span><span class="line"><span class="cl">git config --list
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 配置用户信息，默认全局配置</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可使用 --local 代替 --global 来进行仓库配置</span>
+</span></span><span class="line"><span class="cl">git config --global user.name <span class="s2">&#34;你的用户名&#34;</span>
+</span></span><span class="line"><span class="cl">git config --global user.email 你的邮箱@mail.com</span></span></code></pre></td></tr></table>
+</div>
+</div><p>只需要输入两行命令就可以完成配置，之后就可以使用git来工作了。</p>
+<h2 id="工作区">工作区</h2>
+<p>在git中，文件存在三种状态：</p>
+<ul>
+<li>已修改  modified</li>
+<li>已暂存  staged</li>
+<li>已提交  committed</li>
+</ul>
+<p>与之对应，git项目就会有三个阶段：</p>
+<ul>
+<li>工作区  working directory</li>
+<li>暂存区  staging area (Index)</li>
+<li>git仓库  .git repository</li>
+</ul>
+<p>需要知道的是，你的仓库就是在 项目 .git 文件夹下的一些内容，当你克隆仓库时，你不需要复制克隆别的文件，克隆的只是 .git文件夹。</p>
+<p><strong>工作区</strong>就是你本来的项目文件，它在.git文件夹外。严格来说，在你使用git管理你的项目文件后，之前的项目文件就应该看做是从.git仓库的某个特定版本的数据库中提取出来的文件，放在磁盘上以供修改使用。</p>
+<p><strong>暂存区</strong>是一个文件，按git的术语也可以叫做索引（Index），它一般放在.git文件夹下，保存了下次将要提交的文件列表信息。比如，你对工作区中的a文件做了修改，那么在你保存后，暂存区中就会记录a文件已经修改，准备下次提交，你可以手动选择是否提交。</p>
+<p><strong>git仓库</strong>是你提交的内容，你的本地仓库，它在.git文件夹下，存放项目元数据和对象数据库。</p>
+<h2 id="使用git">使用Git</h2>
+<p>这里将从头开始创建一个git仓库，并在实际操作中学习如何使用git工作。</p>
+<h3 id="创建仓库">创建仓库</h3>
+<p>在本地创建仓库有两种方式：</p>
+<ul>
+<li>将一个本地目录转换为git仓库：</li>
+</ul>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 新建文件夹作为仓库</span>
+</span></span><span class="line"><span class="cl">mkdir my_git
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> my_git
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git init 		<span class="c1"># git init 命令将初始化一个本地仓库</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>从其他计算机或服务器克隆一个git仓库：</li>
+</ul>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 从url地址克隆一个git仓库</span>
+</span></span><span class="line"><span class="cl">git clone <span class="o">[</span>url<span class="o">]</span> <span class="o">(</span>rename<span class="o">)</span>  <span class="c1">#可以选择添加rename参数更改目录名</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在创建一个git仓库后，对应目录下会出现一个 .git 目录，这里面含有你初始化git仓库所有必要的文件，它是git仓库的骨干。</p>
+<h3 id="检查文件状态">检查文件状态</h3>
+<p>你工作目录下的文件只有两种状态：<strong>已跟踪</strong> 和 <strong>未跟踪</strong>，它们的区别是是否纳入版本控制。对于已跟踪的文件，git知道要记录它们的版本变化。通过以下命令查看当前文件是否跟踪：</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git status
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果有未跟踪的文件你将在Untracked files中看到</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 你还可以看到在暂存区未提交的文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用以下命令查看更简略的信息</span>
+</span></span><span class="line"><span class="cl">git status -s
+</span></span><span class="line"><span class="cl">git status --short
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用 git ststis -s 时：</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## ??表示未跟踪的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##  A表示新添加到暂存区的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##  M表示修改后的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##   注意，状态码包含两个字符，左侧表示暂存区，右侧表示工作区</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## MM表示文件已修改并暂存，暂存后又做了修改，后做的修改未暂存</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## A 表示已修改且已暂存</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="跟踪暂存文件">跟踪、暂存文件</h3>
+<p>在创建仓库之后，我们需要将项目文件添加到版本控制。</p>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 使用git add 跟踪未跟踪的文件，可以使用通配符</span>
+</span></span><span class="line"><span class="cl">git add files 		<span class="c1"># 跟踪files文件</span>
+</span></span><span class="line"><span class="cl">git add .			<span class="c1"># 跟踪所有文件</span>
+</span></span><span class="line"><span class="cl">git add src			<span class="c1"># 跟踪src目录下的所有文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 在文件修改后，再次使用add命令会将文件添加到暂存区</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 修改文件后及时运行git add命令是一个良好的习惯</span>
+</span></span><span class="line"><span class="cl">git add .</span></span></code></pre></td></tr></table>
+</div>
+</div><p>需要注意的是，只有对文件进行跟踪，才可以使用git进行版本控制。每次修改完成后，应该再次使用add将文件添加到暂存区。</p>
+<h3 id="忽略掉某些文件">忽略掉某些文件</h3>
+<p>通常来说，为了方便我们会直接运行 git add 命令来将项目所有文件纳入跟踪并添加到暂存区。但有时候，会有一些本地配置文件或生成的中间文件（如gcc编译的目标文件），我们并不需要将其纳入版本控制，但一个一个进行add又有些麻烦。</p>
+<p>这种情况下，我们可以在项目根目录（事实上可以在项目内的任何一个目录创建，以起到分别对目录管理）创建一个 <em><strong>.gitignore</strong></em> 文件，在里面列出要忽略的文件格式。</p>
+<p>.gitignore文件的格式规范可查看官方文档，这里是一些常用的示例：</p>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 忽略所有的 .a 文件</span>
+</span></span><span class="line"><span class="cl">*.a
+</span></span><span class="line"><span class="cl"><span class="c1"># 跟踪所有的 lib.a 文件，这会覆盖之前忽略 .a 文件对 lib.a 文件的影响</span>
+</span></span><span class="line"><span class="cl">!lib.a
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略当前目录下的 TODO 文件</span>
+</span></span><span class="line"><span class="cl">/TODO
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略所有目录下名为 build 的文件夹</span>
+</span></span><span class="line"><span class="cl">build/
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略 app 文件夹下的 build 文件夹</span>
+</span></span><span class="line"><span class="cl">app/build/</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="查看修改">查看修改</h3>
+<p>可以使用 git statue 命令查看文件的修改状态，有时在向仓库提交前我们要查看一些详细的信息，比如某一行修改的具体内容，这时候就可以使用 git diff：</p>
+<div class="highlight" id="id-10"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看尚未暂存的文件的变化：</span>
+</span></span><span class="line"><span class="cl">git diff 
+</span></span><span class="line"><span class="cl"><span class="c1"># 修改的部分是与上次已暂存的文件相比较</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看已暂存的文件的变化：</span>
+</span></span><span class="line"><span class="cl">git diff --staged
+</span></span><span class="line"><span class="cl">git diff --cached 		<span class="c1"># 与上面一条同义</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#修改的部分是与上次已提交到git仓库的文件相比较</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="提交到本地仓库">提交到本地仓库</h3>
+<p>当把所有修改完成的文件提交到暂存区后，就可以提交到本地仓库了。在此之前，请务必确认所有已修改或新建的文件都有 add 过，可以使用git status查看，否则提交的时候变化不会被包含在里面。使用如下命令进行提交：</p>
+<div class="highlight" id="id-11"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 提交到本地仓库</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 提交之前确定运行 git add</span>
+</span></span><span class="line"><span class="cl">git commit
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令会打开文本编辑器，你需要在里面填写提交说明</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 良好的提交声明会让版本管理更加有效</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git commit -m <span class="s2">&#34;Commit Message&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令可以很方便地书写提交信息，更加方便，适合短说明文本</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git commit -a
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令，git会自动对所有已跟踪的文件执行 git add，使命令更简洁</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>要注意，提交到仓库的是暂存区的文件快照，如果工作区的修改未提交到暂存区，将会造成遗漏。</p>
+<h3 id="移动移除文件">移动、移除文件</h3>
+<p>有时，我们需要git停止对某一文件的跟踪，或者删除某些错误提交到版本库中的文件，或是移动某些文件的位置，这时就需要用到：</p>
+<div class="highlight" id="id-12"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 移除文件</span>
+</span></span><span class="line"><span class="cl">git rm file
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令会删除工作区的本地文件，并撤销git对其的版本跟踪</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git rm -f file
+</span></span><span class="line"><span class="cl"><span class="c1"># 当要rm的文件已被提交到暂存区时，就要使用 -f （force）指令</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 强制rm，这是git的一种安全措施</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 移除在 git 仓库和暂存区中的文件，而不删除工作区的文件</span>
+</span></span><span class="line"><span class="cl">git rm --cached file
+</span></span><span class="line"><span class="cl"><span class="c1"># 这个命令常作为忘记添加 .gitignore文件的补救措施</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 移动文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># git mv命令与linux的mv命令使用方法基本相同</span>
+</span></span><span class="line"><span class="cl">git mv file files/file
+</span></span><span class="line"><span class="cl"><span class="c1"># 将根目录的file文件移动到 files/文件夹下</span>
+</span></span><span class="line"><span class="cl">git mv filea fileb
+</span></span><span class="line"><span class="cl"><span class="c1"># 将当前目录的 filea 文件更名为 fileb文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用 mv 命令 可以保持git对文件的跟踪，</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 而不需要在移动或改名后再次运行 mv, git add, git rm</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="查看提交历史">查看提交历史</h3>
+<p>当我们想查看项目或文件的提交历史时：</p>
+<div class="highlight" id="id-13"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看提交历史</span>
+</span></span><span class="line"><span class="cl">git log
+</span></span><span class="line"><span class="cl"><span class="c1"># 默认情况下，git log会按时间顺序排列所有提交</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 它带有很多选项，当然你也可以使用 grep 等工具</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示每次提交引入的差异</span>
+</span></span><span class="line"><span class="cl">git log -p 		<span class="c1"># 或 --patch</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示最近2条提交</span>
+</span></span><span class="line"><span class="cl">git log -n
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示每次提交的简略统计信息</span>
+</span></span><span class="line"><span class="cl">git log --stat
+</span></span><span class="line"><span class="cl"><span class="c1">#用不同格式显示</span>
+</span></span><span class="line"><span class="cl">git log --pretty<span class="o">=[]</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># []内可以是 oneline:每个提交放到一行显示</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 还有类似的 short , full ,fuller</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可以使用 format 来定制记录的显示格式</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git log --pretty<span class="o">=</span>oneline --graph
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用此命令会用一些字符“图形化”地显示出每次提交和分支之间的关系</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="撤销操作">撤销操作</h3>
+<p>在某个阶段，比如正常运行的程序在修改后无法运行，这时我们可能需要撤销对相应文件的修改。撤销操作有可能会导致之前的工作丢失，在执行撤销前一定要注意。</p>
+<div class="highlight" id="id-14"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 重新提交</span>
+</span></span><span class="line"><span class="cl">git commit --amend
+</span></span><span class="line"><span class="cl"><span class="c1"># 适用于提交后发现某些文件忘记添加或提交信息写错的情况</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果暂存区没有文件改变，将只覆盖提交信息</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -amend 选项可以避免因为失误导致仓库版本混乱</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git reset HEAD &lt;file&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 此命令会将git仓库中的file文件复制到暂存区，不会改变工作区</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 以此来撤销对暂存区文件的修改</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 若文件不存在，则在暂存区中删除</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git checkout -- &lt;file&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 此命令会同时还原暂存区和工作区的file文件</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="远程仓库">远程仓库</h3>
+<p>为了能在git管理的项目上写作，我们通常会使用远程仓库，比如 <strong>Git Hub</strong> ，下面介绍如何连接远程仓库。</p>
+<div class="highlight" id="id-15"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看当前仓库对应的远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote 		<span class="c1"># -v选项会显示git保存的简写</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果当前仓库还未配置远程仓库，则需要</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 添加远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote add &lt;shortname&gt; &lt;url&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># shortname 设置为你自己对仓库的简写</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># url 为远程仓库的地址</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 从远程仓库中同步最新数据</span>
+</span></span><span class="line"><span class="cl">git fetch &lt;remote&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 会从远程仓库下载最新版本的文件和数据</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 推送到远程仓库</span>
+</span></span><span class="line"><span class="cl">git push origin master
+</span></span><span class="line"><span class="cl"><span class="c1"># 会将本地仓库同步到远程仓库的master分支</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote show origin
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># rm远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote rename name1 name2
+</span></span><span class="line"><span class="cl">git remote remove name1
+</span></span><span class="line"><span class="cl"><span class="c1"># 命令会将 name1 仓库更名为name2</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 命令会移除 name1 远程仓库</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 需要你对远程仓库具有读写权限</span></span></span></code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item>
+</channel>
+</rss>

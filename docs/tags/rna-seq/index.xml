@@ -1,0 +1,1422 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>RNA-Seq - 标签 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/tags/rna-seq/</link>
+    <description>RNA-Seq - 标签 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>chineseliujiayi691@gmail.com (flatig)</managingEditor>
+      <webMaster>chineseliujiayi691@gmail.com (flatig)</webMaster><lastBuildDate>Mon, 18 Apr 2022 10:20:02 &#43;0000</lastBuildDate><atom:link href="https://flatig.vip/tags/rna-seq/" rel="self" type="application/rss+xml" /><item>
+  <title>运行一个RNA-Seq流程</title>
+  <link>https://flatig.vip/posts/%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AArna-seq%E6%B5%81%E7%A8%8B/</link>
+  <pubDate>Mon, 18 Apr 2022 10:20:02 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E8%BF%90%E8%A1%8C%E4%B8%80%E4%B8%AArna-seq%E6%B5%81%E7%A8%8B/</guid>
+  <description><![CDATA[<h2 id="运行一个rna-seq流程">运行一个RNA-Seq流程</h2>
+<hr>
+<blockquote>
+<p>此流程根据《使用HISAT StringTie和Ballgown进行的转录本表达水平分析》重复文中的RNA-Seq实验</p>
+</blockquote>
+<h3 id="流程设计">流程设计</h3>
+<p>本流程分为如下步骤：</p>
+<ol>
+<li>生物信息服务器的搭建</li>
+<li>生信环境的配置</li>
+<li>在生信环境上操作RNA-seq实验</li>
+<li>统计数据及结果分析</li>
+</ol>
+<h3 id="生信服务器的搭建">生信服务器的搭建</h3>
+<p>生物信息学分析所使用的数据量极大，往往需要数百G以上的存储空间及大量内存，这样的需求在一般PC上较难实现。而且生信分析往往需要众人分工协作，由此搭建一个公用服务器十分重要。</p>
+<p>本次重复的实验使用的数据较小，在个人PC上完全可以操作，需要的硬盘存储空间约<strong>20G</strong>以内，由于条件的限制，作者本次实验在个人Linux系统上进行操作。</p>
+<p>生物信息学实验使用服务器是必不可少的，在今后的操作中，读者需熟练掌握Linux操作系统及shell命令编程的使用，熟练使用云Linux服务器进行操作。国内云计算提供商有<strong>腾讯云，阿里云，华为云</strong>等，新用户均有数月的云服务器体验，读者可根据自己的实际情况自行选择。</p>
+<h3 id="生信环境的配置">生信环境的配置</h3>
+<h4 id="系统环境">系统环境</h4>
+<p>根据此流程需要进行的操作，本次实验需要在Linux系统上配置的环境如下：</p>
+<ul>
+<li>R语言环境</li>
+<li>R包：alyssafrazee/RSkittleBrewer, <strong>ballgown</strong>, genefilter, dplyr, devtools</li>
+<li>分析软件：Hisat2, StringTie, <strong>Samtools</strong>， gffcompare</li>
+</ul>
+<p>安装hisat2和StringTie:</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">sudo apt update
+</span></span><span class="line"><span class="cl">sudo apt install hisat2
+</span></span><span class="line"><span class="cl">sudo apt install stringtie</span></span></code></pre></td></tr></table>
+</div>
+</div><p>安装Conda并使用其安装Samtools, gffcompare:</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">wget -c https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+</span></span><span class="line"><span class="cl"># 适合于linux 64位
+</span></span><span class="line"><span class="cl">chmod 777 Miniconda3-latest-Linux-x86_64.sh
+</span></span><span class="line"><span class="cl">#给执行权限
+</span></span><span class="line"><span class="cl">bash Miniconda3-latest-Linux-x86_64.sh
+</span></span><span class="line"><span class="cl">#运行安装程序，所有选项均选&#39;yes&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+</span></span><span class="line"><span class="cl">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+</span></span><span class="line"><span class="cl">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+</span></span><span class="line"><span class="cl">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+</span></span><span class="line"><span class="cl">#配置conda频道，这里选择清华Tuna镜像
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">conda install samtools
+</span></span><span class="line"><span class="cl">conda install gffcompare
+</span></span><span class="line"><span class="cl">#使用conda安装Samtools和gffcompare
+</span></span><span class="line"><span class="cl">#这里使用conda安装是因为作者使用apt安装samtools时出现问题
+</span></span><span class="line"><span class="cl">#conda是专用于生物信息学分析的环境配置器
+</span></span><span class="line"><span class="cl">#Hisat, StringTie以及其他R包均可使用conda安装</span></span></code></pre></td></tr></table>
+</div>
+</div><p>安装 R 和 R包Ballgown：</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">conda create -n Rspcae
+</span></span><span class="line"><span class="cl">#创建名为Rspace的conda环境，可以替换成自己需要的名称
+</span></span><span class="line"><span class="cl">source activate Rspace
+</span></span><span class="line"><span class="cl">#激活此环境
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">conda install r-base=4.1.3
+</span></span><span class="line"><span class="cl">#安装4.1.3的R，可以在conda官网包管理页面查询r包的最新版本
+</span></span><span class="line"><span class="cl">conda install r-ballgown
+</span></span><span class="line"><span class="cl">#conda 安装r包需要在包名前 添加 r-
+</span></span><span class="line"><span class="cl">#此处作者使用conda安装r包，也是因为在R中安装遇到问题
+</span></span><span class="line"><span class="cl">#若无问题，可以直接在R中安装任何R包，具体为：
+</span></span><span class="line"><span class="cl">#install.packages(ballgown) 或
+</span></span><span class="line"><span class="cl">#BiocManager::install(&#34;ballgown&#34;)
+</span></span><span class="line"><span class="cl">#使用BiocManager需先安装，参加下一步
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">conda deactivate
+</span></span><span class="line"><span class="cl">#安装完成后退出当前conda环境</span></span></code></pre></td></tr></table>
+</div>
+</div><p>安装其他R包：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">R        
+</span></span><span class="line"><span class="cl">#进入R环境
+</span></span><span class="line"><span class="cl">install.packages(“devtools”)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">install.packages(&#34;BiocManager&#34;)
+</span></span><span class="line"><span class="cl">library(&#34;BiocManager&#34;)
+</span></span><span class="line"><span class="cl">#安装并导入BiocManager
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">BiocManager::install(c(&#34;alyssafrazee/RSkittleBrewer&#34;,&#34;ballgown&#34;,&#34;genefilter&#34;,&#34;dplyr&#34;))
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">#source(&#34;http://www.bioconductor.org/biocLite.R&#34;)
+</span></span><span class="line"><span class="cl">#BiocManager::biocLite(c(&#34;alyssafrazee/RSkittleBrewer&#34;,&#34;ballgown&#34;,&#34;genefilter&#34;,&#34;dplyr&#34;))
+</span></span><span class="line"><span class="cl">#安装R包,此项为旧版本用法
+</span></span><span class="line"><span class="cl">#此处也可使用：
+</span></span><span class="line"><span class="cl">#install.packages()</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="资源">资源</h4>
+<p>此处所需资源为文章中提供的测序数据及参考序列等资料：</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">cd /home/username/RNA
+</span></span><span class="line"><span class="cl">nohup wget ftp://ftp.ccb.jhu.edu/pub/RNAseq_protocol/chrX_data.tar.gz &amp;
+</span></span><span class="line"><span class="cl">tar zxvf chrX_data.tar.gz
+</span></span><span class="line"><span class="cl">#先cd到工作环境下文件夹
+</span></span><span class="line"><span class="cl">#下载并解压</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="在生信环境上操作rna-seq实验">在生信环境上操作RNA-seq实验</h3>
+<h4 id="hisat2将reads与genome匹配">hisat2:将reads与genome匹配</h4>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">for i in *1.fastq.gz; 
+</span></span><span class="line"><span class="cl">do
+</span></span><span class="line"><span class="cl">i=${i%1.fastq.gz*}; 
+</span></span><span class="line"><span class="cl">nohup hisat2 -p 8 --dta -x /home/username/RNA/chrX_data/indexes/chrX_tran -1 ${i}1.fastq.gz -2 ${i}2.fastq.gz -S /home/username/RNA/chrX_data/result/${i}align.sam /home/username/RNA/chrX_data/result/${i}align.log &amp; 
+</span></span><span class="line"><span class="cl">done
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">#此步骤将在/ home/username/RNA/chrX_data/result/ 下生成sample reads的sam文件</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="samtools将sam文件转换为bam文件">samtools:将sam文件转换为bam文件</h4>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">for i in *.sam;
+</span></span><span class="line"><span class="cl">do 
+</span></span><span class="line"><span class="cl">i=${i%_align.sam*};
+</span></span><span class="line"><span class="cl">nohup samtools sort -@ 8 -o ${i}.bam ${i}_align.sam &amp; 
+</span></span><span class="line"><span class="cl">done
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">#此步骤将在同目录下生成bam文件</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="stringtie组装转录本并定量表达基因">stringtie:组装转录本并定量表达基因</h4>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">for i in *.bam; 
+</span></span><span class="line"><span class="cl">do 
+</span></span><span class="line"><span class="cl">i=${i%.bam*};
+</span></span><span class="line"><span class="cl">nohup stringtie -p 8 -G /home/username/RNA/chrX_data/genes/chrX.gtf -o ${i}.gtf ${i}.bam &amp; 
+</span></span><span class="line"><span class="cl">done
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">#此步骤将在同目录下生成gtf文件</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="stringtie合并所有转录本">stringtie:合并所有转录本</h4>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">stringtie --merge -p 8 -G  /home/username/RNA/chrX_data/genes/chrX.gtf -o stringtie_merged.gtf  /home/username/RNA/chrX_data/mergelist.txt
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">#此步骤将在同目录下生成 stringtie_merged.gtf 文件</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="gffcompare检测相对于注释文件转录本的组装情况">gffcompare:检测相对于注释文件，转录本的组装情况</h4>
+<div class="highlight" id="id-10"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">gffcompare -r /home/username/RNA/chrX_data/genes/chrX.gtf  -G -o merged stringtie_merged.gtf
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">#此步骤将生成如下文件：
+</span></span><span class="line"><span class="cl">#gffcmp.annotated.gtf
+</span></span><span class="line"><span class="cl">#它在每个转录本上添加一个 “类代码”（描述参见流程文档）和注释文件中的转录本名称
+</span></span><span class="line"><span class="cl">#gffcmp.stats
+</span></span><span class="line"><span class="cl">#输出文件中计算不同基因特征的灵敏度和精确度（P值）统计</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="stringtie重新组装转录本并估算基因表达丰度并为ballgown创建读入文件">stringtie:重新组装转录本并估算基因表达丰度，并为ballgown创建读入文件</h4>
+<div class="highlight" id="id-11"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">for i in *_chrX.bam; 
+</span></span><span class="line"><span class="cl">do 
+</span></span><span class="line"><span class="cl">i=${i%_chrX.bam*};
+</span></span><span class="line"><span class="cl">nohup stringtie -e -B -p 8 -G stringtie_merged.gtf -o ballgown/${i}/${i}_chrX.gtf  ${i}_chrX.bam &amp; 
+</span></span><span class="line"><span class="cl">done
+</span></span><span class="line"><span class="cl">#此步骤将在 /home/username/RNA/chrX_data/ballgown/ 下生成
+</span></span><span class="line"><span class="cl">#以sample名为文件夹名的的ballgown读取文件</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="统计数据及结果分析">统计数据及结果分析</h3>
+<p>此步骤将在R环境中进行统计步骤及结果分析</p>
+<h4 id="数据处理">数据处理</h4>
+<ul>
+<li>进入R并加载R包</li>
+</ul>
+<div class="highlight" id="id-12"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">library(ballgown)
+</span></span><span class="line"><span class="cl">library(RSkittleBrewer)
+</span></span><span class="line"><span class="cl">library(genefilter)
+</span></span><span class="line"><span class="cl">library(dplyr)
+</span></span><span class="line"><span class="cl">library(devtools)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>加载表型数据</li>
+</ul>
+<div class="highlight" id="id-13"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">setwd(&#34;/home/username/RNA/chrX_data/&#34;)
+</span></span><span class="line"><span class="cl">#设置R工作环境目录
+</span></span><span class="line"><span class="cl">pheno_data = read.csv(&#34;geuvadis_phenodata.csv&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>读入StringTie的计算结果</li>
+</ul>
+<div class="highlight" id="id-14"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">bg_chrX = ballgown(dataDir = &#34;/home/username/RNA/chrX_data/result/ballgown&#34;, samplePattern = &#34;ERR&#34;, pData=pheno_data)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>滤去低丰度基因（样本间差异少于一个转录本）</li>
+</ul>
+<div class="highlight" id="id-15"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">bg_chrX_filt = subset(bg_chrX,&#34;rowVars(texpr(bg_chrX)) &gt;1&#34;,genomesubset=TRUE)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>得到组间有差异的转录本和基因</li>
+</ul>
+<div class="highlight" id="id-16"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">results_transcripts = stattest(bg_chrX_filt, feature=&#34;transcript&#34; covariate=&#34;sex&#34;,adjustvars = c(&#34;population&#34;),  getFC=TRUE, meas=&#34;FPKM&#34;)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">results_genes = stattest(bg_chrX_filt, feature=&#34;gene&#34;, covariate=&#34;sex&#34;, adjustvars = c(&#34;population&#34;), getFC=TRUE, meas=&#34;FPKM&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>对转录本结果添加基因名</li>
+</ul>
+<div class="highlight" id="id-17"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">results_transcripts = data.frame(geneNames=ballgown::geneNames(bg_chrX_filt), geneIDs=ballgown::geneIDs(bg_chrX_filt), results_transcripts)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>转录本与基因结果按P值排序</li>
+</ul>
+<div class="highlight" id="id-18"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">results_transcripts=arrange(results_transcripts,pval)
+</span></span><span class="line"><span class="cl">results_genes=arrange(results_genes,pval)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>将排序结果写入文件</li>
+</ul>
+<div class="highlight" id="id-19"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">write.csv(results_transcripts, &#34;chrX_transcript_results.csv&#34;,row。names=FALSE)
+</span></span><span class="line"><span class="cl">write.csv(results_genes, &#34;chrX_gene_results.csv&#34;,row.names=FALSE)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">#此步骤生成 chrX_transcript_results.csv, chrX_gene_results.csv
+</span></span><span class="line"><span class="cl">#两个文字表格文件</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>识别q值小于0.05的转录物和基因（性别间表达有差异）</li>
+</ul>
+<div class="highlight" id="id-20"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">subset(results_transcripts,results_transcripts$qval&lt;0.05)
+</span></span><span class="line"><span class="cl">subset(results_genes,results_genes$qval&lt;0.05)</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="结果可视化">结果可视化</h4>
+<ul>
+<li>FPKM为参考值，性别为区分条件作图</li>
+</ul>
+<div class="highlight" id="id-21"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">palette(rainbow(5))
+</span></span><span class="line"><span class="cl">#为调色板指定颜色
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">fpkm = texpr(bg_chrX,meas=&#34;FPKM&#34;)
+</span></span><span class="line"><span class="cl">fpkm = log2(fpkm+1)
+</span></span><span class="line"><span class="cl">#提取FPKM值并做log转换
+</span></span><span class="line"><span class="cl">boxplot(fpkm,col=as.numeric(pheno_data$sex),las=2,ylab=&#39;log2(FPKM+1)&#39;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>单个样本在转录组上的分布</li>
+</ul>
+<div class="highlight" id="id-22"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ballgown::transcriptNames(bg_chrX)[12]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">ballgown::geneNames(bg_chrX)[12]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># 绘制箱线图
+</span></span><span class="line"><span class="cl">plot(fpkm[12,] ~ pheno_data$sex, border=c(1,2),
+</span></span><span class="line"><span class="cl">    main=paste(ballgown::geneNames(bg_chrX)[12],&#39; : &#39;,
+</span></span><span class="line"><span class="cl">    ballgown::transcriptNames(bg_chrX)[12]),pch=19, xlab=&#34;Sex&#34;,
+</span></span><span class="line"><span class="cl">    ylab=&#39;log2(FPKM+1)&#39;)
+</span></span><span class="line"><span class="cl">points(fpkm[12,] ~ jitter(as.numeric(pheno_data$sex)),
+</span></span><span class="line"><span class="cl">    col=as.numeric(pheno_data$sex))</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>查看某一基因位置上所有转录组</li>
+</ul>
+<div class="highlight" id="id-23"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">plotTranscripts(ballgown::geneIDs(bg_chrX)[2263], bg_chrX, main=c(&#39;Gene XIST in sample ERR188234&#39;), sample=c(&#39;ERR188234&#39;))
+</span></span><span class="line"><span class="cl">#根据ERR188234.gtf的文件，查出XIST基因所在位置编码2263，进行绘图</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>以性别为区分查看特定基因表达情况</li>
+</ul>
+<div class="highlight" id="id-24"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">plotMeans(&#39;MSTRG.56&#39;, bg_chrX_filt,groupvar=&#34;sex&#34;,legend=FALSE)</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<p>由于作者精力有限，编写时难免会出现错误和过失，对您的阅读和操作造成的不便请您谅解。如果方便，还请把错误处邮件至本人邮箱，或于公众号处留言，十分感谢！</p>
+]]></description>
+</item>
+<item>
+  <title>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)</title>
+  <link>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/</link>
+  <pubDate>Sat, 12 Mar 2022 17:01:35 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/</guid>
+  <description><![CDATA[<h3 id="流程">流程</h3>
+<h5 id="将rna-seq-reads与基因组进行比对--时间20分钟">将RNA-seq reads与基因组进行比对 ● 时间&lt;20分钟</h5>
+<ol>
+<li>将每个样本的reads映射到参考基因组上</li>
+</ol>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188044_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188044_chrX_2.fastq.gz -S ERR188044_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188104_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188104_chrX_2.fastq.gz -S ERR188104_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188234_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188234_chrX_2.fastq.gz -S ERR188234_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188245_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188245_chrX_2.fastq.gz -S ERR188245_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188257_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188257_chrX_2.fastq.gz -S ERR188257_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188273_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188273_chrX_2.fastq.gz -S ERR188273_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188337_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188337_chrX_2.fastq.gz -S ERR188337_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188383_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188383_chrX_2.fastq.gz -S ERR188383_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188401_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188401_chrX_2.fastq.gz -S ERR188401_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188428_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188428_chrX_2.fastq.gz -S ERR188428_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188454_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188454_chrX_2.fastq.gz -S ERR188454_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR204916_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR204916_chrX_2.fastq.gz -S ERR204916_chrX.sam</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>将SAM文件分类并转换为BAM文件。</li>
+</ol>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188044_chrX.bam ERR188044_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188104_chrX.bam ERR188104_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188234_chrX.bam ERR188234_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188245_chrX.bam ERR188245_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188257_chrX.bam ERR188257_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188273_chrX.bam ERR188273_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188337_chrX.bam ERR188337_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188383_chrX.bam ERR188383_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188401_chrX.bam ERR188401_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188428_chrX.bam ERR188428_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188454_chrX.bam ERR188454_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR204916_chrX.bam ERR204916_chrX.sam</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>上述命令适用于SAMtools
+1.3版或更新的版本。对于旧版本的SAMtools，用户应该参考Box3。</p>
+</blockquote>
+<p>- Box3 | 使用SAMtools 1.2.1版及以上版本对SAM文件进行分类和转换</p>
+<blockquote>
+<p>最近版本的SAMtools可以在一个步骤中把SAM文件转换成BAM文件。对于使用旧版本的人来说，需要两个步骤。如图所示。</p>
+</blockquote>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Convert SAM files to binary BAM files:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188044_chrX.sam &gt;ERR188044_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188104_chrX.sam &gt;ERR188104_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188234_chrX.sam &gt;ERR188234_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188245_chrX.sam &gt;ERR188245_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188257_chrX.sam &gt;ERR188257_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188273_chrX.sam &gt;ERR188273_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188337_chrX.sam &gt;ERR188337_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188383_chrX.sam &gt;ERR188383_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188401_chrX.sam &gt;ERR188401_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188428_chrX.sam &gt;ERR188428_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188454_chrX.sam &gt;ERR188454_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR204916_chrX.sam &gt;ERR204916_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Sort the BAM files:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188044_chrX_unsorted.bam ERR188044_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188104_chrX_unsorted.bam ERR188104_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188234_chrX_unsorted.bam ERR188234_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188245_chrX_unsorted.bam ERR188245_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188257_chrX_unsorted.bam ERR188257_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188273_chrX_unsorted.bam ERR188273_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188337_chrX_unsorted.bam ERR188337_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188383_chrX_unsorted.bam ERR188383_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188401_chrX_unsorted.bam ERR188401_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188428_chrX_unsorted.bam ERR188428_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188454_chrX_unsorted.bam ERR188454_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR204916_chrX_unsorted.bam ERR204916_chrX
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">// Optionally, the user might want to delete temporary files:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ rm *.sam *unsorted.bam </span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="组装和量化表达的基因和转录物--时间15分钟">组装和量化表达的基因和转录物 ● 时间~15分钟</h5>
+<ol>
+<li>为每个样本组装转录本</li>
+</ol>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188044_chrX.gtf –l ERR188044 ERR188044_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188104_chrX.gtf –l ERR188104 ERR188104_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188234_chrX.gtf –l ERR188234 ERR188234_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188245_chrX.gtf –l ERR188245 ERR188245_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188257_chrX.gtf –l ERR188257 ERR188257_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188273_chrX.gtf –l ERR188273 ERR188273_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188337_chrX.gtf –l ERR188337 ERR188337_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188383_chrX.gtf –l ERR188383 ERR188383_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188401_chrX.gtf –l ERR188401 ERR188401_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188428_chrX.gtf –l ERR188428 ERR188428_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188454_chrX.gtf –l ERR188454 ERR188454_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR204916_chrX.gtf –l ERR204916 ERR204916_chrX.bam</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>合并所有样本的转录本</li>
+</ol>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stringtie --merge -p 8 -G chrX_data/genes/chrX.gtf -o stringtie_merged.gtf chrX_data/mergelist.txt</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>错误排除</li>
+</ul>
+<blockquote>
+<p>这里mergelist.txt是一个文本文件，其中有上一步创建的基因转移格式（GTF）文件的名称，每个文件的名称在一行中（参见ChrX_data的例子文件）。如果你不在所有GTF文件所在的同一目录下运行StringTie，那么你可能需要在mergelist.txt中的每个GTF文件名中包括其完整路径。使用任何文本编辑器来创建或编辑（纯文本）mergelist.txt文件。</p>
+</blockquote>
+<ol>
+<li>检查转录本与参考注释的对比情况（可选）</li>
+</ol>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ gffcompare –r chrX_data/genes/chrX.gtf –G –o merged stringtie_merged.gtf</span></span></code></pre></td></tr></table>
+</div>
+</div><p>选项-o指定了gffcompare将创建的输出文件的前缀。上面的命令将生成多个文件，在<em>gffcompare</em>文档中作了解释；更多细节见<strong>BOX1</strong>。</p>
+<ol>
+<li>估计转录物丰度，并为Ballgown创建表格计数</li>
+</ol>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188044/ERR188044_chrX.gtf ERR188044_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188104/ERR188104_chrX.gtf ERR188104_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188234/ERR188234_chrX.gtf ERR188234_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188245/ERR188245_chrX.gtf ERR188245_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188257/ERR188257_chrX.gtf ERR188257_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188273/ERR188273_chrX.gtf ERR188273_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188337/ERR188337_chrX.gtf ERR188337_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188383/ERR188383_chrX.gtf ERR188383_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188401/ERR188401_chrX.gtf ERR188401_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188428/ERR188428_chrX.gtf ERR188428_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188454/ERR188454_chrX.gtf ERR188454_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR204916/ERR204916_chrX.gtf ERR204916_chrX.bam</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="运行差异化表达分析协议--时间5分钟">运行差异化表达分析协议 ● 时间~5分钟</h5>
+<ol>
+<li>加载相关的R包。这些包包括你将用于执行大部分分析的Ballgown包，以及其他一些有助于这些分析的包，特别是<strong>RSkittleBrewer</strong>（用于设置颜色）、<strong>genefilter</strong>（用于快速计算平均值和变异值）、<strong>dplyr</strong>（用于排序和排列结果）和<strong>devtools</strong>（用于重现性和安装软件包）。</li>
+</ol>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ R
+</span></span><span class="line"><span class="cl">R version 3.2.2 (2015-08-14) -- &#34;Fire Safety&#34;
+</span></span><span class="line"><span class="cl">Copyright (C) 2015 The R Foundation for Statistical Computing
+</span></span><span class="line"><span class="cl">Platform: x86_64-apple-darwin13.4.0 (64-bit)
+</span></span><span class="line"><span class="cl">&gt;library(ballgown)
+</span></span><span class="line"><span class="cl">&gt;library(RSkittleBrewer)
+</span></span><span class="line"><span class="cl">&gt;library(genefilter)
+</span></span><span class="line"><span class="cl">&gt;library(dplyr)
+</span></span><span class="line"><span class="cl">&gt;library(devtools)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>加载样本的表型数据。一个名为geuvadis_phenodata.csv的示例文件包括在该协议的数据文件中（ChrX_data）。一般来说，你将不得不自己创建这个文件。它包含了关于你的RNA-seq样本的信息，格式如这个csv（逗号分隔的值）文件中所示。文件中的每一行包含每个样本的描述，每一列应该包含一个变量。为了将这个文件读入R，我们使用read.csv命令。在这个文件中，数值是由逗号分隔的，但如果文件是以制表符分隔的，你可以使用函数read.table。</li>
+</ol>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;pheno_data = read.csv(&#34;geuvadis_phenodata.csv&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>错误排除</li>
+</ul>
+<ol>
+<li>读入由StringTie计算的表达数据。Ballgown目前也支持从Cufflinks6和RSEM17读取数据。要做到这一点，我们使用带有以下三个参数的ballgown命令：存储数据的目录（dataDir，这里简单命名为&rsquo;Ballgown&rsquo;），出现在样本名称中的模式（samplePattern）和我们在前一步加载的表型信息（pData）。请注意，一旦创建了Ballgown对象，任何其他Bioconductor32软件包都可以应用于数据分析或数据可视化。这里我们提出了一个标准化的流程，可以用来进行标准的差异表达分析。</li>
+</ol>
+<div class="highlight" id="id-10"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;bg_chrX = ballgown(dataDir = &#34;ballgown&#34;, samplePattern = &#34;ERR&#34;, pData=pheno_data)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>错误排除</li>
+</ul>
+<ol>
+<li>使用筛选器去除低丰度基因。RNA-seq数据的一个常见问题是，某些基因经常有非常少的计数或零计数。一个常见的步骤是过滤掉其中的一些。另一种被用于基因表达分析的方法是应用一个方差过滤器。在这里，我们删除所有跨样本方差小于1的转录本。</li>
+</ol>
+<div class="highlight" id="id-11"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;bg_chrX_filt = subset(bg_chrX,&#34;rowVars(texpr(bg_chrX)) &gt;1&#34;,genomesubset=TRUE)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>识别在统计学上显示组间差异的转录本。我们可能想做的一件事是确保我们考虑到其他变量引起的表达变化。作为一个例子，我们将寻找在性别间有差异表达的转录本，同时校正由于群体变量造成的任何表达差异。我们可以使用Ballgown的stattest函数来做这件事。我们设置了<strong>getFC=TRUE</strong>参数，这样我们就可以查看两组之间经混杂因素调整后的折叠变化。
+请注意，Ballgown的统计测试是一个基于标准线性模型的比较。对于小样本量（每组n&lt;4），通常最好进行正则化。这可以用<em>Bioconductor</em>中的limma包来完成。其他正则化方法，如DESeq和edgeR可以应用于基因或外显子计数，但它们不适合直接应用于FPKM丰度估计。统计测试使用累积的上四分位数规范化(<em>cumulative
+upper quartile normalization</em>)。</li>
+</ol>
+<div class="highlight" id="id-12"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_transcripts = stattest(bg_chrX_filt,
+</span></span><span class="line"><span class="cl">feature=&#34;transcript&#34;,covariate=&#34;sex&#34;,adjustvars = c(&#34;population&#34;), 
+</span></span><span class="line"><span class="cl">getFC=TRUE, meas=&#34;FPKM&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>识别组间有统计学差异的基因。为此，我们可以运行与识别差异表达的转录本相同的函数，在这里我们在stattest命令中设置feature=&ldquo;gene&rdquo;</li>
+</ol>
+<div class="highlight" id="id-13"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_genes = stattest(bg_chrX_filt, feature=&#34;gene&#34;,
+</span></span><span class="line"><span class="cl">covariate=&#34;sex&#34;, adjustvars = c(&#34;population&#34;), getFC=TRUE,
+</span></span><span class="line"><span class="cl">meas=&#34;FPKM&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>在results_transcripts数据框中添加基因名称和基因ID</li>
+</ol>
+<div class="highlight" id="id-14"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_transcripts =
+</span></span><span class="line"><span class="cl">data.frame(geneNames=ballgown::geneNames(bg_chrX_filt),
+</span></span><span class="line"><span class="cl">geneIDs=ballgown::geneIDs(bg_chrX_filt), results_transcripts)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>将结果从最小的P值排序到最大</li>
+</ol>
+<div class="highlight" id="id-15"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_transcripts = arrange(results_transcripts,pval)
+</span></span><span class="line"><span class="cl">&gt;results_genes = arrange(results_genes,pval)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>两性之间差异表达的转录物（q值&lt;5%） 基因名|基因ID|转录本名|ID|Fold
+Change|P值|q值 :&ndash;:|:&ndash;:|:&ndash;:|:&ndash;:|:&ndash;:|:&ndash;:|:&ndash;: XIST
+MSTRG.506|NR_001564|1729|0.003255|7.0447e-10|1.6160e-06
+|MSTRG.506|MSTRG.506.1|1728|0.016396|1.2501e-08|1.4339e-05
+TSIX|MSTRG.505|NR_003255|1726|0.083758|2.4939e-06|1.9070e-03
+|MSTRG.506|MSTRG.506.2|1727|0.047965|3.7175e-06|2.1319e-03
+|MSTRG.585|MSTRG.585.1|1919|7.318925|9.3945e-06|3.7715e-03
+PNPLA4|MSTRG.56|NM_004650|203|0.466647|9.8645e-06|3.7715e-03
+|MSTRG.506|MSTRG.506.5|1731|0.046993|2.1350e-05|6.9968e-03
+|MSTRG.592|MSTRG.592.1|1923|9.186257|3.5077e-05|1.0058e-02
+|MSTRG.518|MSTRG.518.1|1744|11.972859|4.4476e-05|1.1336e-02</li>
+</ul>
+<blockquote>
+<p>Fold
+Change是指女性与男性的表达比例；因此，低于1的数值意味着转录物在男性中的表达水平较低。</p>
+</blockquote>
+<ol>
+<li>将结果写入一个可以共享和分发的csv文件</li>
+</ol>
+<div class="highlight" id="id-16"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;write.csv(results_transcripts, &#34;chrX_transcript_results.csv&#34;,
+</span></span><span class="line"><span class="cl">row.names=FALSE)
+</span></span><span class="line"><span class="cl">&gt;write.csv(results_genes, &#34;chrX_gene_results.csv&#34;,
+</span></span><span class="line"><span class="cl">row.names=FALSE) </span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>识别q值&lt;0.05的转录物和基因</li>
+</ol>
+<div class="highlight" id="id-17"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;subset(results_transcripts,results_transcripts$qval&lt;0.05)
+</span></span><span class="line"><span class="cl">&gt;subset(results_genes,results_genes$qval&lt;0.05)</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每个命令的Ballgown输出都会出现在屏幕上；我们在下面的<strong>Table3</strong>（转录物）和<strong>Table4</strong>（基因）中显示了结果。如表所示，X号染色体有9个转录本在两性之间有差异表达（使用q值阈值为0.05），其中3个对应于已知基因的异构体（XIST、TSIX和PNPLA4）。在基因水平上（表4），X染色体在相同的q值临界点上有10个差异表达的基因。(如果使用不同版本的程序，这些表格可能包含略有不同的结果）。</p>
+<ul>
+<li>
+<p>错误排除</p>
+</li>
+<li>
+<p>错误排除</p>
+</li>
+<li>
+<p>错误排除</p>
+</li>
+</ul>
+]]></description>
+</item>
+<item>
+  <title>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(三)</title>
+  <link>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%B8%89/</link>
+  <pubDate>Sat, 12 Mar 2022 11:47:17 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%B8%89/</guid>
+  <description><![CDATA[<h3 id="材料">材料</h3>
+<h5 id="配置">配置</h5>
+<ul>
+<li>数据（本方案中使用的RNA-seq reads、索引和基因注释的例子可在<a href="ftp://ftp.ccb.jhu.edu/pub/RNAseq_protocol"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>；详情见设备设置）</li>
+<li>HISAT2软件（<a href="http://ccb.jhu.edu/software/hisat2"target="_blank" rel="external nofollow noopener noreferrer">链接1<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>或<a href="http://github.com/infphilo/hisat2"target="_blank" rel="external nofollow noopener noreferrer">链接2<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>），2.0.1或更高版本</li>
+<li>StringTie软件(<a href="http://ccb.jhu.edu/software/stringtie"target="_blank" rel="external nofollow noopener noreferrer">链接1<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>或<a href="https://github.com/gpertea/stringtie"target="_blank" rel="external nofollow noopener noreferrer">链接2<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>,  1.2.2 或更高版本)</li>
+<li>SAMtools （<a href="http://samtools.sourceforge.net"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>, 版本0.1.19或更高)</li>
+<li>R（<a href="https://www.r-project.org"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>，版本3.2.2或更高）。</li>
+<li>硬件（64位计算机，运行Linux或Mac OS X（10.7 Lion或更高版本）；4GB内存（最好是8GB）；见<strong>设备设置</strong>)</li>
+</ul>
+<h5 id="设备配置">设备配置</h5>
+<h6 id="所需的数据">所需的数据</h6>
+<p>该协议用一个来自智人X染色体的例子实验来说明，你可以通过分析来熟悉全套软件。你需要的所有数据都可以在文件<strong>chrX_data.tar.gz</strong>中找到，该文件将在下面说明。要使用HISAT2和StringTie进行基因表达分析，你必须使用一个基因组已被测序的生物体。这两个工具也可以使用基因和转录物的注释文件，尽管这是可选的。HISAT2需要一个基因组的索引，这在数据下载文件中提供。在HISAT2网站上可以找到其他多个物种的预建索引。在没有可用索引的情况下，<strong>Box2</strong>提供了如何创建一个HISAT2索引的说明。</p>
+<blockquote>
+<p>重要提醒 协议中使用的命令都应该从Unix shell提示下的终端窗口运行，直到在R环境中进行差异表达式分析。我们鼓励用户创建一个单一的目录（例如，&ldquo;my_rnaseq_exp&rdquo;），在其中存储所有的例子数据和分析所创建的文件。所有的命令都是在假设用户是在这个目录下工作的情况下描述的。该协议还包括在R统计计算环境中运行的小部分代码。拟在Unix shell（如bash或csh）中执行的命令以&quot;$&ldquo;字符为前缀。要从R脚本或R交互式shell中运行的命令前缀为&rdquo;&gt;&ldquo;字符。</p>
+</blockquote>
+<ul>
+<li>Box2 | 创建HISAT2索引文件
+<blockquote>
+<p>人类基因组和许多模式生物的预建HISAT2索引可以从HISAT网站下载。如果所需的索引不在那里，用户可能需要建立一个自定义的索引。这里我们描述了如何为人类X号染色体建立索引；要为其他基因组建立索引，应该用对应于该基因组及其注释的文件分别替换基因组文件CHRX.FA和注释文件CHRX.gtf。
+首先，使用HISAT2软件包中的python脚本，从基因注释文件中提取剪接位点和外显子信息(Line:01,02)，然后再创建一个索引。</p>
+</blockquote>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ extract_splice_sites.py chrX_data/genes/chrX.gtf &gt;chrX.ss
+</span></span><span class="line"><span class="cl">$ extract_exons.py chrX_data/genes/chrX.gtf &gt;chrX.exon
+</span></span><span class="line"><span class="cl">$ hisat2-build --ss chrX.ss --exon chrX.exon chrX_data/genome/chrX.fa chrX_tran</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>如果没有注释，上述命令中的&ndash;ss和&ndash;exon选项可以省略。请注意，建立索引的步骤比对齐步骤需要更多的内存，而且可能无法在台式电脑上执行。例如，为X染色体建立索引需要9GB内存，为整个人类基因组建立索引需要160GB内存。如果省略注释信息，内存量要小得多。使用一个CPU核心对X染色体进行索引 需要&lt;10分钟。使用8个CPU核为整个人类基因组建立索引应该需要2小时。</p>
+</blockquote>
+</li>
+</ul>
+<h6 id="下载和整理所需数据">下载和整理所需数据</h6>
+<p>解压数据文件并检查内容</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tar xvzf chrX_data.tar.gz</span></span></code></pre></td></tr></table>
+</div>
+</div><p>假设我们将数据存储在my_rnaseq_exp/，软件包解压后包含一个chrX_data/文件夹，其结构如下：<em>samples/ indexes/ genome/ genes/</em>（包含四个目录）。</p>
+<p>样本目录包含12个样本的成对端RNA-seq reads(<em>paired-end RNA-seq reads</em>)，其中6个样本来自两个人群，GBR（来自英格兰的英国人）和YRI（来自尼日利亚伊巴丹的约鲁巴人）。每个人群都有三个样本，分别来自男性和女性受试者（每个样本的人口和性别见<strong>Table2</strong>）。</p>
+<ul>
+<li>Table2|协议中使用的样本
+<table>
+<thead>
+<tr>
+<th style="text-align:center">样本ID</th>
+<th style="text-align:center">性别</th>
+<th style="text-align:center">人群</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">ERR188245</td>
+<td style="text-align:center">Female</td>
+<td style="text-align:center">GBR</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188428</td>
+<td style="text-align:center">Female</td>
+<td style="text-align:center">GBR</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188337</td>
+<td style="text-align:center">Female</td>
+<td style="text-align:center">GBR</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188401</td>
+<td style="text-align:center">Male</td>
+<td style="text-align:center">GBR</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188257</td>
+<td style="text-align:center">Male</td>
+<td style="text-align:center">GBR</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188383</td>
+<td style="text-align:center">Male</td>
+<td style="text-align:center">GBR</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR204916</td>
+<td style="text-align:center">Female</td>
+<td style="text-align:center">YRI</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188234</td>
+<td style="text-align:center">Female</td>
+<td style="text-align:center">YRI</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188273</td>
+<td style="text-align:center">Female</td>
+<td style="text-align:center">YRI</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188454</td>
+<td style="text-align:center">Male</td>
+<td style="text-align:center">YRI</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188104</td>
+<td style="text-align:center">Male</td>
+<td style="text-align:center">YRI</td>
+</tr>
+<tr>
+<td style="text-align:center">ERR188044</td>
+<td style="text-align:center">Male</td>
+<td style="text-align:center">YRI</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<p>所有的序列都是压缩的&rsquo;fastq&rsquo;格式，它将每个read存储为四行。每个样本依次包含在两个文件中：一个是read 1，另一个是read 2。因此，例如，样本<em>ERR188245</em>包含在文件<em>ERR188245_ chrX_1.fastq.gz</em>和<em>ERR188245_chrX_2.fastq.gz</em>中，每个文件包含 <em>855,983</em>条reads。请注意，原始数据文件包含映射到整个基因组的<em>reads</em>，而不仅仅是X染色体，这些文件大约要大25倍。如果读者有兴趣，可以在<a href="ftp://ftp.ccb.jhu.edu/pub/RNAseq_protocol"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>下的README文件查看关于下载完整数据集的说明。请注意，HISAT2还提供了一个选项，称为-sra-acc，可以通过互联网直接使用<strong>NCBI序列</strong>阅读档案（SRA）数据。这消除了手动下载<em>SRA reads</em>并将其转换为fasta/fastq格式的需要，却不会显著影响到运行时间。例如，下面的HISAT2命令将下载并对齐本协议中使用的12个样本中的1个（<em>ERR188245</em>）。</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran --sra-acc ERR188245 –S ERR188245_chrX.sam</span></span></code></pre></td></tr></table>
+</div>
+</div><p>indexes目录包含X染色体的HISAT2索引，包括<em>chrX_tran.1.ht2, chrX_tran.2.ht2, chrX_tran.3.ht2, chrX_tran.4.ht2
+chrX_tran.5.ht2, chrX_tran.6.ht2, chrX_tran.7.ht2 和 chrX_tran.8.ht2</em>.</p>
+<p>基因组目录包含一个文件<em>chrX.fa</em>，它是人类X染色体的序列（<em>GRCh38 build 81</em>）。注意，如果你使用的是全基因组，这个目录将有一个包含所有染色体的文件。基因目录包含一个 <em>chrX.gtf</em>，它存储你了来自RefSeq数据库的GRCh38的人类基因注释。
+chrX_data目录还包含另外两个文件：<em>mergelist.txt</em>和<em>geuvadis_phenodata.csv</em>。这些文件是运行这个协议必须的文本文件，如下文所述。通常情况下，你会自己用文本编辑器创建这些文件，但我们在这里提供它们作为例子。</p>
+<h6 id="下载安装软件">下载安装软件</h6>
+<p>先创建一个目录来存储本协议中使用的所有的程序（如果还没有）</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ mkdir $HOME/bin</span></span></code></pre></td></tr></table>
+</div>
+</div><p>将上述目录添加到你的PATH环境变量中</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ export PATH=$HOME/bin:$PATH</span></span></code></pre></td></tr></table>
+</div>
+</div><p>要安装SAMtools，请从<a href="http://samtools.sourceforge.net"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>下载，解压<em>SAMtools tar</em>文件，然后cd到SAMtools源目录（该协议将适用于从0.1.19开始的所有SAMtools版本）。</p>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tar jxvf samtools-0.1.19.tar.bz2
+</span></span><span class="line"><span class="cl">$ cd samtools-0.1.19
+</span></span><span class="line"><span class="cl">$ make
+</span></span><span class="line"><span class="cl">$ cd .
+</span></span><span class="line"><span class="cl">// Copy the samtools binary to a directory in your PATH:
+</span></span><span class="line"><span class="cl">$ cp samtools-0.1.19/samtools $HOME/bin</span></span></code></pre></td></tr></table>
+</div>
+</div><p>要安装HISAT2，请从<a href="http://ccb.jhu.edu/software/hisat2"target="_blank" rel="external nofollow noopener noreferrer">链接1<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>或<a href="http://github.com/infphilo/hisat2"target="_blank" rel="external nofollow noopener noreferrer">链接2<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>，下载最新的二进制程序包，解压HISAT2的压缩包，并cd到解压后的目录。</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ unzip hisat2-2.0.1-beta-OSX_x86_64.zip</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接下来，将HISAT2的可执行文件复制到你的PATH中的一个目录。</p>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cp hisat2-2.0.1-beta/hisat2* hisat2-2.0.1-beta/*.py $HOME/bin</span></span></code></pre></td></tr></table>
+</div>
+</div><p>要安装StringTie，请从<a href="http://ccb.jhu.edu/software/stringtie"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>，下载最新的二进制包，解压StringTie tar文件，然后cd到解压后的目录。</p>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ tar xvzf stringtie-1.2.2.OSX_x86_64.tar.gz</span></span></code></pre></td></tr></table>
+</div>
+</div><p>(注意，这个指令使用了Mac OS X的可执行文件。如果你使用的是Linux，可以用这个可执行文件代替：stringtie-1.2.2.Linux_x86_64.tar.gz）。接下来，将StringTie包的可执行文件复制到你的PATH中的某个目录。</p>
+<div class="highlight" id="id-10"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ cp stringtie-1.2.2.OSX_x86_64/stringtie $HOME/bin</span></span></code></pre></td></tr></table>
+</div>
+</div><p>StringTie也可以从<a href="https://github.com/gpertea/stringtie"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>下载。要安装<em>gffcompare</em>，请从以下网站下载最新的二进制软件包<a href="http://github.com/gpertea/gffcompare"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>，并按照 <em>README.md</em>文件中的说明。要安装Ballgown，请先启动R语言会话界面。</p>
+<div class="highlight" id="id-11"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ R
+</span></span><span class="line"><span class="cl">R version 3.2.2 (2015-08-14) -- &#34;Fire Safety&#34;
+</span></span><span class="line"><span class="cl">Copyright (C) 2015 The R Foundation for
+</span></span><span class="line"><span class="cl">Statistical Computing
+</span></span><span class="line"><span class="cl">Platform: x86_64-apple-darwin13.4.0 (64-bit)</span></span></code></pre></td></tr></table>
+</div>
+</div><p>&lsquo;&gt;&lsquo;前的文本为R的介绍信息结束。安装 <strong>Ballgown</strong>软件包和其他R的依赖项，如下所示。</p>
+<div class="highlight" id="id-12"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;install.packages(&#34;devtools&#34;,repos=&#34;http://cran.us.r-project.org&#34;)
+</span></span><span class="line"><span class="cl">&gt;source(&#34;http://www.bioconductor.org/biocLite.R&#34;)
+</span></span><span class="line"><span class="cl">&gt;biocLite(c(&#34;alyssafrazee/RSkittleBrewer&#34;,&#34;ballgown&#34;,&#34;genefilter&#34;,&#34;dplyr&#34;,&#34;devtools&#34;))</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行本协议需要Bioconductor 3.0或更高版本，以及R 3.1版本。补充软件包括一个shell脚本和其他依赖文件，可以用来运行本协议的所有步骤。还包括一个README文件，解释了如何运行该脚本。这些文件也可以从<a href="ftp://ftp.ccb.jhu.edu/pub/RNAseq_protocol"target="_blank" rel="external nofollow noopener noreferrer">链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>获取。</p>
+]]></description>
+</item>
+<item>
+  <title>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(二)</title>
+  <link>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%BA%8C/</link>
+  <pubDate>Wed, 09 Mar 2022 10:10:49 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%BA%8C/</guid>
+  <description><![CDATA[<h3 id="实验设计">实验设计</h3>
+<h5 id="用hisat进行reads比对">用HISAT进行reads比对</h5>
+<p>RNA-seq分析开始时，将<em>reads</em>与参考基因组进行映射，以确定其基因组位置。这种映射信息使我们能够收集每个基因对应的<em>reads</em>子集，然后进行组装，并对这些<em>reads</em>所代表的转录本进行量化。已经开发了几种将<em>reads</em>与基因组对齐的快速算法，其中<strong>Bowtie</strong>和<strong>Burrows-Wheeler</strong>对齐法(<em>Burrows–Wheeler aligner, BWA</em>)是最广泛使用的算法之一。这两种方法都使用一种叫做Burrows-Wheeler变换（<strong>Burrows–Wheeler transform, BWT</strong>）的数据结构。它以高度压缩的形式存储参考基因组。通过使用一个特殊的，称为费拉吉娜-曼奇尼（FM）索引的方式，这些程序可以极其迅速地搜索基因组，其比对速度以每小时数百万个<em>reads</em>计算。
+RNA-seq映射器（<em>mapper</em>）需要解决一个额外的问题，它不存在于在纯DNA比对中：许多RNA-seq 产生的<em>reads</em>将横跨内含子。RNA-seq流程捕获并测序成熟的mRNA分子进行，其中内含子已被剪接去除。因此，一个短的<em>reads</em>可能与相隔<strong>10,000 bp</strong>或更多的两个位置对齐（人类内含子的平均长度为 &gt;6,000 bp ，一些内含子的长度为&gt;1 Mbp）。对于一个典型的使用100bp <em>reads</em>的人类RNA-seq数据集，&gt;35%的<em>reads</em>将跨越多个外显子。对齐这些跨外显子的<em>reads</em>比对齐一个外显子内的<em>reads</em>要困难得多。
+<strong>HISAT</strong>使用两种类型的索引（<em>index</em>）进行比对：一个全局的全基因组索引和数以万计的小型局部索引。这两种类型的索引都是使用与<em>Bowtie2</em>相同的<strong>BWT/FM</strong>索引构建的。而HISAT系统甚至使用了一些<em>Bowtie2</em>的代码。由于使用了这些高效的数据结构和算法，HISAT生成拼接排列的速度比Bowtie和BWA快了数倍，而使用的内存却只有Bowtie的两倍。HISAT是被设计为作为<strong>TopHat 和TopHat2</strong>（后者是由本协议的一些作者开发的）的继承者而设计的，具有兼容的输出，但它的运行速度是TopHat和TopHat2的<strong>50</strong>倍。快50倍。对于与人类基因组的比对，该索引需要 8千兆字节（GB）的内存，这使得它可以在传统的台式机上运行；一台电脑处理20个人类RNA-seq样本，每个样本有1亿个读数，应该需要<strong>不到一天时间</strong>。对于具有较小基因组的物种，内存和处理量的要求也会相应减少。在本协议中，我们使用了<strong>HISAT2</strong>，它包含了算法上的改进，产生了比原来的HISAT系统略高的准确性。
+RNA-seq数据的比对可以用来检测新的<strong>剪接点、转录起始点和转录终止点</strong>。与TopHat一样，如果这些事件（<em>event</em>）存在于数据集（<em>data</em>）中，HISAT将检测所有这些事件。用户还可以提供基因注释文件，指定已知基因的位置，包括其所有的外显子和内含子边界。使用高质量的注释文件可以改善<strong>HISAT</strong>在已知基因附近的比对，但这种输入是可选的。</p>
+<h5 id="用stringtie进行转录本组装和量化">用StringTie进行转录本组装和量化</h5>
+<p>RNA-seq实验的分析需要准确重建每一个基因所表达的异构体，以及对这些异构体的相对丰度进行估计。因为注释仍然不完整，即使是对研究最深入的物种，如人类，我们也不能为我们的程序提供所有基因和所有异构体的完整列表。尽管如此，准确的量化得益于准确了解哪些<em>reads</em>来自于哪些异构体，由于<em>reads</em>比转录本短得多，所以无法完美计算。<strong>StringTie</strong>将RNA-seq <em>reads</em>中的转录本组装起来，这些<em>reads</em>已经与基因组进行了比对。首先将<em>reads</em>分组为不同的基因位点，然后将每个基因位点组装成不同的基因组。然后将每个基因座组装成所需数量的异构体来解释这些数据。<strong>StringTie</strong>使用一种网络流算法，从表达量最高的转录本开始，它同时对其进行组装和定量。然后删除与该转录本相关的<em>reads</em>，并重复这一过程，组装更多的异构体，直到所有的<em>reads</em>都被使用，或者直到剩余<em>reads</em>的数量低于设定的转录噪音（<em>transcriptional noise</em>）水平（用户可自行调整）。</p>
+<p><strong>StringTie</strong>的网络流算法可以比以前的一些方法更准确地重建转录本，这是因为它同时计算丰度和外显子结构。该算法还具有计算运行效率，使它的运行速度比其前身<strong>Cufflinks</strong>快很多倍，而且使用的内存也少很多。大多数RNA-seq的运行可以由StringTie在只有<strong>8GB</strong>随机存取内存（RAM）的传统台式电脑上处理，甚至大型数据集也可以在<strong>一小时内</strong>运行。用户可以选择向StringTie提供一个包含参考基因模型的文件；这个注释文件包含 &ldquo;已知 &ldquo;基因的外显子结构说明，以及这些基因的名称。如果用户提供了这个注释文件，<strong>StringTie</strong>将使用它作为组装的指南，它也将用该文件中的名称来标记它组装的基因。注释对重建低丰度基因很有帮助，对于这些基因来说<em>reads</em>数量太少，无法准确组装。请注意，注释文件是可选的，StringTie会根据需要组装额外的、没有注释的基因来解释数据。在用StringTie组装转录本后，用户可以使用<strong>gffcompare</strong>工具（Box1；表1）来确定有多少组装的转录本与注释的基因完全或部分匹配，并计算出有多少基因是全新的。另外，用户可以跳过对新基因和转录本的组装，只用StringTie对注释文件中提供的所有转录本进行量化（图1）。</p>
+<ul>
+<li>
+<p>Box1 | 将一组转录物与已知基因列表进行比较</p>
+<blockquote>
+<p>比较基因和转录物的清单首先要求清单的格式相同。许多生物信息学程序利用 GFF（<em>gene finding format</em>, 基因搜索格式）来表示基因和转录物。GFF是一种简单的以制表符分隔的文本格式，描述基因、转录本、外显子和内含子在基因组上的属性。StringTie使用GTF，它是GFF的一个特殊版本，包含一些额外的数据类型。<a href="http://www.ensembl.org/info/website/upload/gff.html"target="_blank" rel="external nofollow noopener noreferrer">详见此链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>
+我们已经开发了gffcompare工具（可从<a href="http://ccb.jhu.edu/software/stringtie/gff.shtml"target="_blank" rel="external nofollow noopener noreferrer">JHU<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>或<a href="http://github.com/gpertea/gffcompare"target="_blank" rel="external nofollow noopener noreferrer">GitHub<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>下载）来比较一个或多个由StringTie产生的GTF文件和一个GFF或GTF的参考注释文件。假设StringTie的输出是transcripts.gtf，参考注释文件是chrX.gtf，可以用以下命令运行gffcompare软件。</p>
+</blockquote>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ gffcompare –G –r chrX.gtf transcripts.gtf </span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>在-r选项之后是要用作参考的注释文件，而-G选项告诉gffcompare比较输入的transcripts.gtf文件中的所有转录本，尽管那些可能是多余的。
+gffcompare程序是基于CuffCompare工具的，它是Cufflinks/Tuxedo套件的一部分，<a href="http://cole-trapnell-lab.github.io/cufflinks/cuffcompare"target="_blank" rel="external nofollow noopener noreferrer">CuffCompare手册<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>中记载的许多使用选项和输出结果也适用于gffcompare程序。所有由gffcompare生成的文件的前缀都是gffcmp，除非用户在 -o 选项中选择不同的前缀。当如上所示使用时，gffcompare会产生一个输出文件，称为gffcmp.annotated.gtf，它在每个转录本上添加一个 &ldquo;类代码&rdquo;（在表1中描述）和参考注释文件中的转录本名称。这使用户能够快速检查预测的转录本与注释文件的关系。这里显示的gffcompare命令还将在gffcmp.stats输出文件中计算不同基因特征（如外显子、内含子、转录本和基因）的灵敏度和精确度统计。敏感性被定义为正确重建的来自注释的基因的比例，而精确性（positive predictive value, 也被称为阳性预测值）捕捉到与注释重叠的输出的比例。因此，这两个衡量标准都是相对于输入注释而言的，可能不能完全反映出组装的基因和转录物的真正准确性。gffcmp.stats文件还包含其他几个衡量标准，如StringTie输出中包含的新外显子、内含子或基因的总数。</p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<ul>
+<li>Table1 | 类别代码——用于描述转录本集合与参考注释的比较情况
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Class Code</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">=</td>
+<td style="text-align:left">预测的转录本与参考转录本有完全相同的内含子</td>
+</tr>
+<tr>
+<td style="text-align:center">c</td>
+<td style="text-align:left">预测的转录本包含在参考转录本中</td>
+</tr>
+<tr>
+<td style="text-align:center">j</td>
+<td style="text-align:left">预测的转录本是一种潜在的新异构体，它与参考转录本至少有一个剪接结点</td>
+</tr>
+<tr>
+<td style="text-align:center">e</td>
+<td style="text-align:left">预测的单外显子转录本与一个参考外显子和一个参考内含子的至少10bp重叠，表明可能是前体mRNA（<em>possiblepre-mRNA</em>）片段</td>
+</tr>
+<tr>
+<td style="text-align:center">i</td>
+<td style="text-align:left">预测的转录本完全落在参考内含子中</td>
+</tr>
+<tr>
+<td style="text-align:center">o</td>
+<td style="text-align:left">预测转录本的外显子与参考转录本重合</td>
+</tr>
+<tr>
+<td style="text-align:center">p</td>
+<td style="text-align:left">预测的转录本位于参考转录本的2kb范围内（可能是聚合酶活跃的片段）</td>
+</tr>
+<tr>
+<td style="text-align:center">r</td>
+<td style="text-align:left">预测的转录本有&gt;50%的碱基与软屏蔽的<em>soft-masked</em>（重复的）参考序列重叠</td>
+</tr>
+<tr>
+<td style="text-align:center">u</td>
+<td style="text-align:left">与已知参考转录本相比，预测的转录本是基因间区（<em>intergenic</em>）的</td>
+</tr>
+<tr>
+<td style="text-align:center">x</td>
+<td style="text-align:left">预测转录本的外显子与参考文献重叠，但位于相反的链上</td>
+</tr>
+<tr>
+<td style="text-align:center">s</td>
+<td style="text-align:left">预测转录本的内含子与相反链上的参考内含子重叠</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<p>在包括此协议在内的大多数实验设计中，实验包括多个RNA-seq样本.存在于一个样本中的基因和异构体很少与存在于所有其他样本中的基因和异构体相同，但它们需要以一致的方式进行组装，以便可以进行比较。我们通过使用<strong>StringTie</strong>的合并功能将所有的装配合并在一起来解决这个问题，该功能合并了在全部样本中发现的所有基因。因此，在一个样本中由于缺乏覆盖率而缺少外显子的转录本可能会被<strong>恢复到它的全长</strong>；关于合并（<em>merging</em>）如何改善组装(<em>assemblies</em>)的说明，见<strong>图2</strong>。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/622c17185baa1a80ab603a30.png" data-thumbnail="https://pic.imgdb.cn/item/622c17185baa1a80ab603a30.png" data-sub-html="<h2>图2</h2>"></a></p>
+<blockquote>
+<p>图2 | 使用StringTie的合并功能合并转录本组合。在这个例子中，来自四个不同样本的四个部分集合被合并成两个转录本A和B。样本1和2都与参考注释一致，在此用于合并和扩展以创建转录本A。样本3和4彼此一致，但与注释不一致，这些被合并以创建转录本B。</p>
+</blockquote>
+<p>在合并步骤之后，再运行一次<strong>StringTie</strong>来重新估计合并后的转录本的丰度。重新估计的步骤使用与初始步骤中使用的相同的丰度估计算法。</p>
+<p>许多（不是全部）RNA-seq的用户都对发现有差异表达的基因感兴趣，而且许多人都专注于研究得很好(<em>well-studied</em>)的基因。因此，使用一种完全依赖注释的，不会去发现新的基因和新的异构体的方法（特别是对于像人类、小鼠和果蝇这样研究良好的物种），可能是很诱人的。然而，这些物种可用的标准注释文件可能遗漏了成千上万的异构体，以及许多基因。例如，最近的一项研究使用核糖体足迹分析（<em>ribosome footprint profiling</em>）验证了<strong>7273</strong>个以前未被注释的人类基因，其中大部分是研究人员在一组非常大的RNA-seq数据（28亿读数）上运行<strong>StringTie</strong>时发现的。StringTie自动检测新的基因和新的异构体，如果它们存在于你的实验数据中，不管它们是否出现在标准注释文件中，这里描述的协议可以发现影响这些基因的差异表达。</p>
+<h5 id="用ballgown-进行差异性表达分析">用Ballgown 进行差异性表达分析</h5>
+<p>分析、可视化和统计建模是收集和量化转录本后的下一个步骤。<strong>R编程语言</strong>和<strong>Bioconductor</strong>软件套件拥有一套全面的工具来处理从绘制(<em>plotting</em>)原始数据到归一化(<em>ormalization</em>)再到下游统计建模的任务。我们的流水线(<em>pipeline</em>)使用Ballgown软件包，它被设计为成为SAT和StringTie等上游命令行软件与<em>Bioconductor</em>社区的下游功能之间的桥梁。</p>
+<p>StringTie可以产生一组链接的表格（<em>a linked set of tables</em>），可以使用Ballgown包中的函数直接读入R。在R中产生的数据包括三个表中的信息。(i) 表型数据（<em>phenotype data</em>）-关于正在收集的样本的信息；(ii) 表达数据（<em>expression data</em>）-每个样本中每个外显子、连接点、转录本和基因表达量的标准化和非标准化措施；(iii) 基因组信息（<em>genomic information</em>）-给出外显子、内含子、转录本和基因的位置的坐标，以及包括基因名称等信息的注释。</p>
+<p>一旦信息被读入R会话（<em>session</em>），分析就会以交互方式进行。换句话说，R和Bioconductor中的任何包或函数都可以使用。大多数差异表达分析都是沿着这个路径进行的：(i) 数据可视化和检查，(ii) 差异表达的统计测试，(iii) 多重测试校正，(iv) 下游检查和结果总结。Ballgown为这些步骤中的每一步都提供了函数，当数据集出现特定问题（包括RNA-seq分析中通常出现的问题）时，可以与其他R命结合使用。</p>
+<p>协议的<strong>Ballgown</strong>部分从向R中加载数据开始。这需要加载StringTie产生的丰度数据和描述样本的表型信息。这个过程中的一个关键步骤是确保基因组样本的标识符（ID）与表型数据的ID相匹配。如果样本似乎并不匹配，Ballgown将抛出一个错误。装入数据后，下一步是检查转录本的丰度估计分布。在这一点上，丰度估计（以<strong>FPKM</strong>值表示，即每百万映射读数中每千碱基的转录物片段）已经相对于文库大小进行了归一化处理，因此，样品之间整体分布的任何极端差异都应引起人们关于样品、排列或丰度估计出现问的担心。</p>
+<p>差异表达分析采用线性模型。附在转录本上的<strong>FPKM</strong>值通常是高度倾斜（<em>skewed</em>）的。因此，为了稳定方差，Ballgown的内置函数会应用对数转换，然后拟合标准的可用于测试差异表达的线性模型。Ballgown允许进行时间序列和固定条件（<em>time-course and fixed-condition</em>）的差异表达分析。RNA-seq分析中出现的一个常见问题是没有考虑到混杂因素&ndash;诸如批次效应（<em>batch effects</em>）&ndash;这些因素与分析并无直接关系，但可能影响基因的表达水平。使用Ballgown <strong>stattest</strong>函数，你可以直接指定任何已知的混杂因素。Ballgown允许你在基因、转录本、外显子或连接点水平上进行分析。其结果是一个表格（<em>table</em>），它包含了差异性表达测试的特征信息；条件之间的折叠变化（若存在）；P值；差异性表达的q值。
+这些结果可用于下游基因组分析软件的进一步挖掘，对重要的结果进行可视化检查（<em>visual inspection</em>），或将结果导出到表格中，以便共享并使用<strong>Excel</strong>等程序进行人工检查。</p>
+]]></description>
+</item>
+<item>
+  <title>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(一)</title>
+  <link>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%B8%80/</link>
+  <pubDate>Tue, 08 Mar 2022 17:04:31 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%B8%80/</guid>
+  <description><![CDATA[<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">本文章基于 DeepL 进行初步翻译，后人工调整部分语法和句式以使其通顺易读。
+</span></span><span class="line"><span class="cl">具有相应基础知识的读者可以阅读此篇文章以横向扩充知识：</span></span></code></pre></td></tr></table>
+</div>
+</div><p><a href="https://www.jianshu.com/p/1f5d13cc47f8"target="_blank" rel="external nofollow noopener noreferrer">RNA-seq数据分析&mdash;方法学文章的实战练习<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+<p>作者： Mihaela Pertea1,2, Daehwan Kim1, Geo M Pertea1, Jeffrey T Leek3 &amp; Steven L Salzberg1–4</p>
+<blockquote>
+<p>美国马里兰州巴尔摩市约翰-霍普金斯医学院McKusick-Nathans遗传医学研究所计算生物学中心。美国马里兰州巴尔摩市约翰霍普金斯大学惠特工程学院计算机科学系。约翰霍普金斯大学彭博公共卫生学院生物统计学系。美国马里兰州巴尔的摩市约翰霍普金斯大学生物统计系。生物医学工程系，约翰霍普金斯大学，巴尔的摩，马里兰州，美国。通讯作者：S.L.S.（salzberg@jhu.edu）。</p>
+</blockquote>
+<blockquote>
+<p>2016年8月11日在线发布于Nature; doi:10.1038/nprot.2016.095</p>
+</blockquote>
+<blockquote>
+<p>高通量mRNA测序（RNA-seq）已经成为测量和比较各种物种和条件下的基因表达水平的标准方法。RNA-seq实验产生了非常大的、复杂的数据集，需要快速、准确和灵活的软件来将原始读数数据减少到可理解的结果。HISAT（转录本拼接排列的分层索引）、StringTie和Ballgown是免费的、开源的软件工具，用于全面分析RNA-seq实验。它们一起允许科学家将<em>reads</em>与基因组对齐，组装包括新剪接变体的转录本，计算这些转录本在每个样本中的丰度，并比较实验以确定差异表达的基因和转录本。该协议(Protocol)描述了处理大量原始测序<em>reads</em>并创建基因转录本、表达水平以及差异表达基因及转录本的清单的所有必要步骤。该协议的执行时间取决于计算资源，但通常需要不到45分钟的计算机时间。HISAT、StringTie和Ballgown可以从以下网站获得：
+<a href="http://ccb.jhu.edu/software.shtml"target="_blank" rel="external nofollow noopener noreferrer">网页链接<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+</blockquote>
+<h3 id="介绍">介绍</h3>
+<p>RNA-seq实验从一组细胞中捕获总的mRNA，然后对该RNA进行测序，以确定哪些基因在这些细胞中是活跃的，或表达的。使用高通量测序机（<em>high-throughput sequencing machines</em>），一个实验可以一次捕获数千个基因的表达水平，而且精确度很高。
+这些实验产生了大量的原始测序<em>reads</em>，即使是中等规模的实验，其数量也通常在数千万以上。每个基因产生的<em>reads</em>可以作为基因丰度的衡量标准，通过适当的设计，RNA-seq可以检测哪些基因在两个或多个条件下表达水平明显不同。RNA-seq数据可以很容易地检测出未包括在标准注释（<em>standard annotation</em>）中的基因和基因变体，包括非编码RNA基因。使用适当的软件，RNA-seq也可以用来发现单一基因的不同异构体受到不同的调节和表达的条件。</p>
+<p>RNA-seq实验必须用准确、高效的软件进行分析，这些软件是精心设计的，可以处理大多数实验产生的非常大的测序量。分析管道（<em>Analysis Pipeline</em>）在概念上可以分为四个<strong>主要任务</strong>：(i) 将<em>reads</em>与基因组进行比对；(ii) 将比对结果组装成全长的转录本。(iii) 对每个基因和转录本的表达水平进行定量分析；以及（iv）计算不同实验条件下所有基因的表达差异。我们中的一些人以前开发了两个软件工具，<strong>TopHat2</strong>和<strong>Cufflinks5</strong>，它们一起可以完成所有这四项任务，如在早期的协议中所述。最近，我们又开发了三个新的软件工具完成同样的任务，同时运行速度更快，使用的内存更少，提供更准确的整体结果。<strong>HISAT</strong>将RNA-seq读数与基因组进行比对，并发现转录本的剪接位点，同时运行速度远远超过<em>TopHat2</em>，所需的计算机内存也比其他方法少很多。<strong>StringTie</strong>将排列组合成完整和部分的转录本，必要时创建多种异构体（<em>isoform</em>），并估计所有基因和转录本的表达水平。<strong>Ballgown</strong>从<em>StringTie</em>中获取转录本和表达水平，并应用严格的统计方法来确定哪些转录本在两个或多个实验之间有差异表达。我们在此描述了一个使用这些工具进行RNA-seq数据分析的协议；<strong>图1</strong> 显示了该协议中使用的软件，并强调了每个工具所执行的主要步骤。所有的工具都在网上有完整的文档，并由开发者积极维护。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/622727e05baa1a80ab4d3a15.png" data-thumbnail="https://pic.imgdb.cn/item/622727e05baa1a80ab4d3a15.png" data-sub-html="<h2>图1</h2>"></a></p>
+<blockquote>
+<p>图1｜&quot;新Tuxedo &ldquo;协议的概述。在一个涉及多个RNA-seq数据集的实验中，首先使用HISAT将<em>reads</em>映射到基因组上（步骤1和2）。参考基因和转录物的注释文件可以作为输入，但这是可选的，如虚线所示。然后将比对结果传递给StringTie（第3步），由它对每个样品中的转录本进行组装和量化。(在另一个协议中，步骤2的排列被直接传递到步骤6，跳过所有的组装步骤。第6步将只估计已知的、有注释的转录本的丰度）。初步组装后，组装好的转录物被一个特殊的StringTie模块合并在一起（第4步），它为所有的样本创建了一个统一的转录本集。StringTie可以在这两个步骤中使用注释文件，如虚线所示。然后，gffcompare程序将基因和转录本与注释进行比较，并报告这一比较的统计数据（第5步）。在第6步，StringTie处理<strong>reads</strong>排列和合并的转录本或参考注释（通过标有 &ldquo;OR &ldquo;的标签）。利用这一输入，StringTie在必要时重新估计丰度，并创建新的转录本表以输入到Ballgown。然后，Ballgown比较所有条件下的转录本，并生成差异表达的基因和转录本的表格和图（步骤7-21）。图中的黑线和蓝色弧线分别代表程序的输入和输出。可选的输入用虚线表示。</p>
+</blockquote>
+<h3 id="协议概述">协议概述</h3>
+<p>RNA-seq实验可用于测量许多现象。为了简单起见，这里描述的协议旨在用于许多用户的设计密切对应的类似实验。我们考虑一个比较两种生物条件的实验，如病例与对照、野生型与突变型或疾病与正常的比较。对于每个条件，我们包括六个重复，注意到三个是有效统计结果的最小重复数。该软件将支持许多其他设计，包括时间过程实验（ <em>time-course experiments</em>）和两个以上条件的比较。
+本协议中使用的例子数据包括人类RNA-seq样本，尽管该协议适用于任何有测序基因组（<em>sequenced genome</em>）的物种，包括小鼠、大鼠、果蝇、拟南芥、酵母和许多其他物种。(一些程序参数可能需要调整以优化内含子较小的基因组的结果）。实验产生的数据文件非常大，这也是高通量RNA-seq实验经常出现的情况；因此，为了让新手更快、更简单地使用该协议，我们提取了一个映射到人类X染色体的<em>reads</em>子集，这是一个基因相对丰富的染色体，横跨151兆字节（Mb），约占基因组的5%。该协议描述了对这些<em>reads</em>的端到端(<em>end-to-end analysis</em>)分析，但它同样适用于完整的数据集，对于这些数据集，它需要明显更多的计算时间。</p>
+<p>这个协议从收集到的所有样本的原始RNA-seq <em>reads</em>开始，并产生一些有用的输出，包括每个样品的基因、转录物和表达水平的列表（<em>lists</em>），显示两种条件下差异表达的基因的表格(<em>table</em>)，以及伴随的统计学意义的测量(<em>accompanying statistical measures of significance</em>)。首先，用<strong>HISAT</strong>将每个样品的<em>reads</em>映射到参考基因组上（图1）。用户可以提供一个有注释的基因位置的文件作为选项，HISAT将使用该文件，但它也将检测注释中缺少的剪接位点(<em>splice sites</em>)。接下来，排列组合被传递给<strong>StringTie</strong>进行转录组装。<strong>StringTie</strong>分别对每个数据集的基因进行组装，在组装时估计每个基因和每个异构体的表达水平。在组装完每个样本后，全套的组装被传递给<strong>StringTie</strong>的合并功能，它将把在任何样本中发现的所有基因结构合并在一起。这一步是必要的，因为一些样本中的转录本可能只被<em>reads</em> 部分覆盖，因此在最初的<strong>StringTie</strong>运行中，它们只有部分版本被组装起来。合并步骤创建了一套在所有样本中都一致的转录本，这样转录本就可以在后续步骤中进行比较。合并后的转录本会被再一次反馈给<strong>StringTie</strong>，这样它就可以用合并后的结构重新估计转录本的丰度。重新估计使用与原始组装相同的算法，但对于转录本结构因合并步骤而改变，可能需要重新分配<em>reads</em>。<strong>StringTie</strong>还为每个转录本提供<strong>Ballgown</strong>需要的额外读数数据。最后，<strong>Ballgown从StringTie</strong>获取所有的转录本和丰度，按实验条件分组，并确定哪些基因和转录本在不同条件下有差异表达。<strong>Ballgown</strong>包括作为<em>R/Bioconductor</em>软件包一部分的绘图工具，可以帮助实现结果的可视化。</p>
+<p>这个协议不需要编程的专业知识，但它确实需要熟悉<strong>Unix命令行界面</strong>和运行基本<strong>R Scripts</strong>的能力。用户需要能够适应从命令行运行程序和在Unix环境中编辑文本文件的操作。</p>
+<h3 id="替代性分析包">替代性分析包</h3>
+<p><em>HISAT、StringTie和Ballgown</em>提供了一个完整的分析包（&ldquo;新Tuxedo &ldquo;包），它从原始读取数据开始，为每个RNA-seq样本产生基因列表和表达水平，以及为整个实验产生差异表达基因列表。其他RNA-seq分析包已经被开发出来，可以代替这些工具，或与这些工具结合使用，最明显的是<strong>TopHat2和Cufflinks</strong>系统（最初的&rsquo;Tuxedo&rsquo;包）。对齐步骤(<em>The alignment step</em>)需要一种允许<em>reads</em>跨越内含子且不需要注释文件的拼接对齐算法，对此有几种替代工具可供选择。来自这些其他工具的对准可以作为<em>StringTie</em>的输入。对于转录组的组装和量化步骤，也已经开发出了替代方法。一些方法可以重建转录本，不使用参考基因组，这是一个可以从这个协议中考虑的另一个问题。其他RNA-seq分析程序可以通过使用注释文件的、已知的基因来量化转录本；通过跳过转录本组装步骤，这些程序具有大量的速度优势。我们注意到，即使目前的研究已经相当成熟的生物体，如人类、小鼠和果蝇，蛋白质编码基因、剪接变体和非编码RNA基因的注释也远未完成，这些替代程序不能报告任何新的转录本或剪接变体。</p>
+<p>在所有样品组装完毕后，我们的方案使用<strong>StringTie</strong>来合并转录本，但也可以使用Cufflinks软件包中的<strong>cuffmerge</strong>程序来代替。
+最后，已经开发了多种用于计算差异表达的工具，这些工具可以作为Ballgown的替代品。这些替代程序的输入要求各不相同，它们可能需要进行数据格式的转换，然后才能与这里的程序一起使用。这种自由选择（<em>customization</em>）超出了本协议的范围，我们建议用户遵循下面描述的协议。我们还注意到，尽管这里介绍的方案可以检<strong>测差异表达的转录本和基因</strong>，但它并不是为了检测差异外显子的使用情况，而其他几个程序（<strong>DEXseq23、rMATS24和MISO25</strong>）是专门为解决这一问题而开发的。</p>
+<h3 id="软件与协议的局限性">软件与协议的局限性</h3>
+<p>HISAT、StringTie和Ballgown并不是对RNA-seq数据进行基因和转录物表达分析的唯一方法，它们也不会处理所有RNA-seq实验。例如，一些RNA-seq实验可能需要对原始RNA-seq数据进行预处理，以去除污染物、适配体、低质量序列和其他假象(<em>contaminants, adaptors, low-quality sequences and other artifacts</em>)。本协议不包括这种预处理，但诸如<a href="http://hannonlab.cshl.edu/fastx_toolkit"target="_blank" rel="external nofollow noopener noreferrer">FASTX工具包<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>和<a href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc"target="_blank" rel="external nofollow noopener noreferrer">FastQC<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a>等工具可以确保向初始拼接比对步骤提供高质量的数据。我们假定了RNA-seq数据是在<strong>Illumina</strong>测序仪上产生的，但如果是来自第三代序列的数据量大，错误率高的<em>reads</em>，比如来自<strong>Pacific Biosciences</strong>或牛津<strong>Nanopore</strong>的测序数据，可能需要不同的软件，尤其是在对齐步骤。</p>
+<p><strong>Ballgown</strong>可以用来从几个汇编程序中加载数据。
+包括<strong>StringTie、Cufflinks5和RSEM17</strong>；但其他转录组组装方法产生的输出结果与Ballgown不兼容。这些方法也主要是在转录本水平上使用，尽管<strong>Bioconductor</strong>对象允许应用任何Bioconductor包进行基因或外显子水平的分析。请注意，Ballgown的默认参数是在假设样本量不大的情况下创建的，范围从三个到几百个。然而，如果用户想以本协议所描述以外的方式应用该软件，可以对参数进行调整，以适应广泛的特定情况。</p>
+]]></description>
+</item>
+</channel>
+</rss>

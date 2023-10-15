@@ -1,0 +1,80 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>Categories - 分类 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/categories/</link>
+    <description>Categories - 分类 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>chineseliujiayi691@gmail.com (flatig)</managingEditor>
+      <webMaster>chineseliujiayi691@gmail.com (flatig)</webMaster><lastBuildDate>Sat, 14 Oct 2023 10:42:01 &#43;0800</lastBuildDate><atom:link href="https://flatig.vip/categories/" rel="self" type="application/rss+xml" /><item>
+  <title>blog</title>
+  <link>https://flatig.vip/categories/blog/</link>
+  <pubDate>Sat, 14 Oct 2023 10:42:01 &#43;0800</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/blog/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>Rust</title>
+  <link>https://flatig.vip/categories/rust/</link>
+  <pubDate>Sun, 02 Apr 2023 21:05:39 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/rust/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>开发</title>
+  <link>https://flatig.vip/categories/%E5%BC%80%E5%8F%91/</link>
+  <pubDate>Sun, 02 Apr 2023 21:05:39 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/%E5%BC%80%E5%8F%91/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>Linux</title>
+  <link>https://flatig.vip/categories/linux/</link>
+  <pubDate>Sat, 03 Sep 2022 00:35:46 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/linux/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>Git</title>
+  <link>https://flatig.vip/categories/git/</link>
+  <pubDate>Wed, 24 Aug 2022 23:48:27 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/git/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>建站</title>
+  <link>https://flatig.vip/categories/%E5%BB%BA%E7%AB%99/</link>
+  <pubDate>Sun, 10 Jul 2022 10:55:19 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/%E5%BB%BA%E7%AB%99/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>生物信息学习</title>
+  <link>https://flatig.vip/categories/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6%E4%B9%A0/</link>
+  <pubDate>Mon, 18 Apr 2022 10:20:02 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6%E4%B9%A0/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>生活</title>
+  <link>https://flatig.vip/categories/%E7%94%9F%E6%B4%BB/</link>
+  <pubDate>Mon, 18 Apr 2022 09:43:58 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/%E7%94%9F%E6%B4%BB/</guid>
+  <description><![CDATA[]]></description>
+</item>
+<item>
+  <title>诗歌</title>
+  <link>https://flatig.vip/categories/%E8%AF%97%E6%AD%8C/</link>
+  <pubDate>Mon, 14 Mar 2022 16:30:08 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/categories/%E8%AF%97%E6%AD%8C/</guid>
+  <description><![CDATA[]]></description>
+</item>
+</channel>
+</rss>

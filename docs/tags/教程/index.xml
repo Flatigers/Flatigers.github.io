@@ -1,0 +1,1224 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>教程 - 标签 - flatig-我的个人博客站</title>
+    <link>https://flatig.vip/tags/%E6%95%99%E7%A8%8B/</link>
+    <description>教程 - 标签 - flatig-我的个人博客站</description>
+    <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><managingEditor>chineseliujiayi691@gmail.com (flatig)</managingEditor>
+      <webMaster>chineseliujiayi691@gmail.com (flatig)</webMaster><lastBuildDate>Sun, 02 Apr 2023 21:05:39 &#43;0000</lastBuildDate><atom:link href="https://flatig.vip/tags/%E6%95%99%E7%A8%8B/" rel="self" type="application/rss+xml" /><item>
+  <title>详解闭包:Rust中的函数式编程</title>
+  <link>https://flatig.vip/posts/%E8%AF%A6%E8%A7%A3%E9%97%AD%E5%8C%85-rust%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</link>
+  <pubDate>Sun, 02 Apr 2023 21:05:39 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E8%AF%A6%E8%A7%A3%E9%97%AD%E5%8C%85-rust%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</guid>
+  <description><![CDATA[<p>全文长度：2300词
+阅读时长：约15分钟</p>
+<p>本节参考：</p>
+<ul>
+<li><a href="https://course.rs/advance/functional-programing/closure.html"target="_blank" rel="external nofollow noopener noreferrer">Rust语言圣经<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li><a href="https://rustwiki.org/zh-CN/reference/expressions/closure-expr.html"target="_blank" rel="external nofollow noopener noreferrer">RF-闭包表达式<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li><a href="https://rustwiki.org/zh-CN/reference/types/closure.html"target="_blank" rel="external nofollow noopener noreferrer">RF-闭包类型<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/341815515"target="_blank" rel="external nofollow noopener noreferrer">Rust中的闭包与关键字Move<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+</ul>
+<p>Rust中函数式编程的大梁由四大天王顶起：</p>
+<ul>
+<li>模式匹配</li>
+<li>枚举</li>
+<li>迭代器</li>
+<li>闭包</li>
+</ul>
+<p>使用 <strong>闭包（Closure）</strong> 可以做到将一系列语句和表达式赋值给变量，因此也可以将语句和表达式作为参数传递，将语句和表达式作为函数返回值返回，它具有如此一系列神奇的特性。闭包的使用很简单，但其中一些细节需要仔细推敲。
+下面，我们从闭包如何捕获环境，闭包如何使用捕获值，以及闭包实现的角度，来介绍这个编程利器。</p>
+<h2 id="开始捕获环境">开始——捕获环境</h2>
+<hr>
+<p>Rust中的函数是无法捕获其所在环境的。对于以下代码：</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{num}</span><span class="s">&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">fn</span> <span class="nf">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{num}</span><span class="s">&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>即使该函数定义在 <code>main()</code> 内部，它仍然无法访问到自己被定义的环境中定义的变量。若要访问这些变量，只能通过传递函数参数的方式。需要注意，<code>static</code> 和 <code>const</code> 这样的量具有静态生命周期，是可以访问的。
+而使用闭包，便可以起到捕获环境的作用。
+那么如何定义一个闭包呢？Rust中通过闭包表达式定义一个闭包类型，在其他语言中也称为 <strong>lambda表达式</strong>。</p>
+<p>闭包表达式的<strong>句法规则</strong>是：可选的 <code>move</code> ，后跟由 <code>||</code> 围住的参数模式列表（可以省略类型标注），后跟可选的返回值标注 <code>-&gt; type</code> ，后跟一个块表达式（无返回值标注时，若块内只有一个表达式则可以直接写在 <code>||</code> 后）。例如：</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="k">fn</span> <span class="nf">func</span><span class="p">(</span><span class="n">a</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">a</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="kt">i32</span><span class="o">|</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 闭包定义4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 相同的调用方式 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">assert_eq!</span><span class="p">(</span><span class="n">res</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="闭包捕获环境的方式">闭包捕获环境的方式</h2>
+<hr>
+<p>闭包是可以捕获环境的，捕获的方式有这几种（不捕获环境的闭包见后文）：</p>
+<ul>
+<li>不可变引用 <code>&amp;T</code></li>
+<li>可变引用 <code>&amp;mut T</code></li>
+<li>移动语义（获取所有权） <code>T</code>
+当在 <code>||</code> 前使用 <code>move</code> 时，将强制闭包以移动语义（move）捕获值，获取值的所有权。对于实现了 <code>Copy Trait</code> 的类型，则使用 <code>Copy</code> <strong>复制语义</strong>。当没有使用 <code>move</code> 时，编译器会按照如下顺序进行检查，选择捕获方式，直到遇到第一个能通过编译的选项：</li>
+</ul>
+<ol>
+<li>不可变引用</li>
+<li>唯一不可变引用</li>
+<li>可变引用</li>
+<li>移动语义
+此处，<strong>唯一不可变引用</strong> 是基于借用规则而出现的一种特殊的捕获方式。对于下述代码：</li>
+</ol>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">};</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 下行代码不正确  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// let y = &amp;b;  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">x</span><span class="p">();</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{y}</span><span class="s">&#34;</span><span class="p">);</span><span class="w">   </span><span class="c1">// 由于NLL，这里需要使用 y
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">;</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>代码中 <code>b</code> 是对 <code>a</code> 的可变借用，因此可以通过解引用 <code>b</code> 来修改 <code>a</code> 的值。但在这里我们将修改的操作放在一个闭包中，其中使用了 <code>b</code>，因此闭包需要捕获它。由于 <code>b</code> 本身不是 <code>mut</code> 的，因此无法以可变引用的形式捕获。但若以不可变引用的形式捕获，那么就会获得对可变引用的引用 <code>&amp; &amp;mut</code>，它将不是唯一的，这违反了借用规则。
+这时，闭包便使用<strong>唯一不可变引用</strong>的方式来捕获变量，即它会对 <code>b</code> 进行不可变引用，同时会确保对 <code>b</code> 的引用只有一个。</p>
+<h2 id="3种闭包trait">3种闭包Trait</h2>
+<hr>
+<p>这里需要做一区别，闭包<strong>如何捕获环境</strong>，和闭包<strong>如何使用捕获到的值</strong>，两者是不同的。</p>
+<p>Rust编译器会根据闭包 <strong>如何使用</strong> 捕获到的值，来决定为闭包实现哪些<strong>闭包Trait</strong>。
+或者说，编译器通过这3种Trait来描述和分类不同的闭包：</p>
+<ul>
+<li><code>FnOnce</code> ：闭包可能会消耗掉捕获值的所有权，表示闭包至少能使用一次，因此所有的闭包均实现了该Trait。</li>
+<li><code>FnMut</code> ：闭包不会消耗掉捕获值的所有权，同时会对捕获值进行修改。</li>
+<li><code>Fn</code> ：闭包不会消耗掉捕获值的所有权，同时不会对捕获值进行修改。
+所有闭包都 <strong>至少</strong> 实现了 <code>FnOnce</code>。</li>
+</ul>
+<p>所有类型的闭包中，有些闭包可能会消耗掉捕获值的所有权，这种闭包在调用一次后无法再次调用（要处理的值已经不见了），因此对于所有的闭包来说，闭包最少是可以使用一次的，使用 <code>FnOnce</code> 描述。如果闭包并不消耗掉捕获值的所有权，便可以多次被调用，它对捕获值的操作，只可能是修改或者不修改，前者使用 <code>FnMut</code> 描述，后者使用 <code>Fn</code> 描述。</p>
+<p>因此可以说， <strong>3种闭包Trait，是在闭包如何使用捕获值的角度上，对闭包的分类。</strong></p>
+<p>现在观察这3种Trait的定义签名（简化）：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">Fn</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span>: <span class="nb">FnMut</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;rust-call&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">args</span>: <span class="nc">Args</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span>::<span class="n">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">FnMut</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span>: <span class="nb">FnOnce</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;rust-call&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_mut</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">args</span>: <span class="nc">Args</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span>::<span class="n">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">FnOnce</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">type</span> <span class="nc">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;rust-call&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">args</span>: <span class="nc">Args</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span>::<span class="n">Output</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，实现 <code>FnMut</code> 的条件是，已经实现了 <code>FnOnce</code>，而实现 <code>Fn</code> 的条件是已经实现了 <code>FnMut</code>，因此，闭包对这3种Trait的实现有这三种情况：</p>
+<ol>
+<li>只实现了 <code>FnOnce</code></li>
+<li>实现了 <code>FnOnce</code> 和 <code>FnMut</code></li>
+<li>实现了 <code>FnOnce</code> ，<code>FnMut</code> 和 <code>Fn</code>
+分别对应上述三种Trait的情况。</li>
+</ol>
+<h2 id="函数式编程作为参数和返回值">函数式编程：作为参数和返回值</h2>
+<hr>
+<p>由于Rust中的闭包实现了上文介绍的几种闭包特征，因此可以使用特征约束的方法让闭包作为函数参数或返回值来使用，例如：</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// 接收一个 FnOnce() 类型的闭包并调用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">function</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">where</span><span class="w"> </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">f</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 返回一个 FnOnce() -&gt; &amp;&#39;static str 类型的闭包
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">some_func</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span> <span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;666&#34;</span><span class="w"> </span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 返回一个特征对象，不常用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">dyn_func</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nb">Box</span><span class="o">&lt;</span><span class="k">dyn</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nb">Box</span>::<span class="n">new</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;999&#34;</span><span class="w"> </span><span class="p">})</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于函数而言，只要符合特征约束，也可以作为其他函数的参数：</p>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// 将要接收函数和闭包作为参数的函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">call_me</span><span class="o">&lt;</span><span class="n">F</span>: <span class="nb">Fn</span><span class="p">()</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">f</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 一个函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">fn</span> <span class="nf">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;I&#39;m a function!&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 一个闭包
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">closure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;I&#39;m a closure!&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">call_me</span><span class="p">(</span><span class="n">closure</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">call_me</span><span class="p">(</span><span class="n">function</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="闭包的实际类型">闭包的实际类型</h2>
+<hr>
+<p>当使用闭包表达式定义一个闭包时，编译器会隐式生成一个匿名结构体，结构体中的字段会存储闭包捕获的变量。同时，会为该结构体实现闭包特征，并由此实现闭包的函数功能。
+例如，对于以下闭包：</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">closure</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">f</span>: <span class="nc">F</span><span class="p">)</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">where</span><span class="w"> </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span>  
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;closure: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">());</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;Hello&#34;</span><span class="w"> </span><span class="p">};</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">closure</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译器会大致生成如下的代码：</p>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">ClosureSome</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">a</span>: <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">ClosureSome</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">type</span> <span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nb">&#39;static</span><span class="w"> </span><span class="kt">str</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">fn</span> <span class="nf">call_once</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nb">&#39;static</span> <span class="kt">str</span> <span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="s">&#34;Hello&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>因此每个闭包都具有自己独特的类型，且无法被写出。
+由此可以看出，当传递一个闭包时，<strong>传递的实际上是一个结构体</strong>，而调用一个闭包时，则是调用相应Trait定义的方法。</p>
+<p>上文中介绍了编译器根据闭包如何使用捕获到的值而实现不同的闭包特征，而对于 <strong>闭包没有捕获值</strong> 的情况，该闭包可以被 <strong>自动强转</strong> 为函数指针：</p>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">add</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">type</span> <span class="nc">Binop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">fn</span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">bo</span>: <span class="nc">Binop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">add</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bo</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="总结">总结</h2>
+<hr>
+<p>Rust中的闭包可以实现一些函数式编程的功能，它与函数类似，但也不同，主要便在于<strong>闭包可以捕获环境</strong>。</p>
+<p>闭包 <strong>捕获环境</strong> 的方式分为三种，即 <code>&amp;T</code> <code>&amp;mut T</code> 和 <code>T</code>，当闭包不捕获环境时，可以被自动强转为函数指针。
+闭包 <strong>使用捕获值</strong> 的方式也分为三种，即消耗所有权，不消耗所有权并进行修改，不消耗所有权且不修改。与此对应的，有三种闭包特征，即 <code>FnOnce</code>， <code>FnMut</code> 和 <code>Fn</code>，实现了后一个特征则肯定实现了前一个特征，如一个闭包实现了 <code>Fn</code>，它肯定实现了 <code>FnMut</code> 和 <code>FnOnce</code>。</p>
+<p>通过使用特征约束，利用3种Trait，可以将闭包作为参数传递，或作为返回值返回。
+最后，闭包实现这样一系列功能，它的真实类型便是一个编译器自动生成的匿名结构体，结构体的字段存储着闭包捕获的环境，编译器为它实现相应的Trait，并将闭包包含的语句和表达式作为具体的实现。</p>
+]]></description>
+</item>
+<item>
+  <title>不只是版本控制：使用Git搭建你的工作流</title>
+  <link>https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/</link>
+  <pubDate>Wed, 24 Aug 2022 23:48:27 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%BD%BF%E7%94%A8git%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81/</guid>
+  <description><![CDATA[<p>全文字数：5241</p>
+<p>阅读时长：15分钟</p>
+<h2 id="开始">开始</h2>
+<p>在2021 <strong>Stack Overflow</strong> 最受欢迎的工具调查排名中，有超过90%的开发者选择<strong>git</strong>，它如今已成为开发人员的基本技能和工作时首选的版本控制系统。本文将介绍git的基本概念和常用操作，教你使用git快速完成自己的工作流。</p>
+<p>本文只介绍<strong>基本</strong>操作和概念，若想对git有更详细的了解，请到git官网（https://git-scm.com）获取更多细节。推荐到官网阅读并下载 <strong>Pro Git</strong> 中文版阅读（https://book.git-scm.com/book/zh/v2）。有时网络不太好，你可以在公众号消息界面发送 <em><strong>ProGit</strong></em> 即可获得文章编写时的最新<strong>pdf</strong>文件。</p>
+<p><strong>git</strong>(/ɡɪt/)是一个分布式版本控制软件软件，最初由<strong>Linus Torvalds</strong>创作，于2005年以GPL许可协议发布。最初目的是为了更好地管理Linux内核开发而设计。</p>
+<blockquote>
+<p>历史（Wikipedia）</p>
+<p>自2002年开始，Linus Torvalds决定使用BitKeeper作为Linux内核主要的版本控制系统用以维护代码。因为BitKeeper为专有软件，这个决定在社群中长期遭受质疑。在Linux社群中，特别是理查德·斯托曼与自由软件基金会的成员，主张应该使用开放源代码的软件来作为Linux内核的版本控制系统。Linus曾考虑过采用现成软件作为版本控制系统（例如Monotone），但这些软件都存在一些问题，特别是性能不佳。现成的方案，如CVS的架构，受到Linus的批评。</p>
+<p>2005年，Andrew Tridgell写了一个简单程序，可以连接BitKeeper的仓库，BitKeeper著作权拥有者拉里·麦沃伊认为Andrew对BitKeeper内部使用的协议进行逆向工程，决定收回无偿使用BitKeeper的许可。Linux内核开发团队与BitMover公司进行磋商，但无法解决他们之间的歧见。Linus决定自行开发版本控制系统替代BitKeeper，以<strong>十天</strong>的时间编写出git第一个版本。</p>
+</blockquote>
+<h2 id="安装配置">安装配置</h2>
+<ul>
+<li>Linux</li>
+</ul>
+<p>在Linux上可以方便地通过自己系统的软件包管理器安装 git，如：</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Debian:</span>
+</span></span><span class="line"><span class="cl">sudo apt install git
+</span></span><span class="line"><span class="cl"><span class="c1"># Fedora:</span>
+</span></span><span class="line"><span class="cl">sudo yum install git
+</span></span><span class="line"><span class="cl"><span class="c1"># Arch Linux:</span>
+</span></span><span class="line"><span class="cl">sudo pacman -S git
+</span></span><span class="line"><span class="cl"><span class="c1"># ......</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Windows</li>
+</ul>
+<p>Windows下的安装一般选择直接到官网下载适合自己系统的版本（https://book.git-scm.com/download/win）。</p>
+<p>若有winget（Windows下的包管理器），也可以使用：</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">winget</span> <span class="n">install</span> <span class="p">-</span><span class="n">-id</span> <span class="n">Git</span><span class="p">.</span><span class="py">Git</span> <span class="n">-e</span> <span class="p">-</span><span class="n">-source</span> <span class="n">winget</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>macOS</li>
+</ul>
+<p>一般使用HomeBrew或MacPorts：</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># HomeBrew:</span>
+</span></span><span class="line"><span class="cl">brew install git
+</span></span><span class="line"><span class="cl"><span class="c1"># MacPorts:</span>
+</span></span><span class="line"><span class="cl">sudo port install git</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="一些概念">一些概念</h2>
+<h3 id="版本控制">版本控制</h3>
+<p>我们使用git，主要是将它作为一个版本控制工具，那么什么是版本控制？</p>
+<p>在手机上安装完软件后，我们经常需要对它们进行升级，或者说<strong>版本更新</strong>。旧版和新版软件最明显的区别是什么？就是它们的版本号不同。而一般来说，每个版本对应的软件包，它们在界面、功能、体验等方面总有一些差别，除非开发者故意拿一套不变的代码糊弄。同样的，在实际开发过程中，总是要对程序做修改，导致文件前后发生变化。我们把这些软件包，源代码，或者说<strong>文件</strong>的不同“内容”，叫做不同的<strong>版本</strong>，可以写个版本号来表示。而<strong>版本控制</strong>，就是用来记录一个或多个文件内容（版本）变化的系统。</p>
+<p>开发程序的过程中，我们用版本控制工具来管理程序的源代码文件。但几乎所有版本控制工具都可以拿来管理 <strong>所有文件</strong> 的版本。我们可以用它来管理 .kt, .cpp, .rs, .docx, .xlsx, .txt, .png 甚至 .mp4文件。</p>
+<p>我们<strong>为什么需要版本控制</strong>呢？假设你是一位装修设计师，正在设计一个房间，本来房间的基本架构都做好了，某天你突然想改装一下卫生间，之后又想改装一下飘窗，后面发现这样会弄坏承重墙和楼下邻居的天花板，由于你改得一团糟，很难再改回去了。这时如果你使用了版本控制，你可以<strong>很轻松</strong>地恢复到原来的样子，通常这样比<strong>备份多个文件</strong>更方便。</p>
+<h3 id="分布式版本控制系统">分布式版本控制系统</h3>
+<p>分布式是相对于集中式而言的，它们是描述多人协作的版本控制方式的。假设要开发一个大型软件，这个软件要求连接互联网，可以与人对话，会根据用户手机壳颜色更换主题（/手动滑稽），显然一个人不太可能精通所有方面，所以需要很多人同时开发，写好自己的代码然后合并在一个软件里面。</p>
+<p>集中式指的是，这个软件的代码存放在一个中心服务器上，即它的仓库是在一个地方统一管理的，每个程序员在开发时都要连接这个服务器，取出最新的文件然后开发再上传。你可以看到这个软件每个人开发的最新情况是什么样的，也可以在别人把服务器卡死不能工作的时候回家休息一段时间。</p>
+<p>分布式，则指的是这个软件的完整代码，分布在每一个开发人员手上，即每个人都需要有这个软件的完整仓库。分布式一般会设置一个仓库作为中心仓库，存放目前开发的主线（应该是用来作为代码交换的中心），在每次工作结束之后，每个人只需要提交自己的改动即可，同时再同步一下别人的改动。你可以按照自己的想法完全修改这个仓库，可以在公司停电的情况下在自家工作，也可以在克隆仓库时花一个多小时（一般只在第一次，且大多数都在几分钟）。</p>
+<h3 id="存储文件快照">存储文件快照</h3>
+<p>不同于CVS等版本控制工具，git对待数据的方式是直接记录文件的快照（某个版本的文件本身），而不是记录文件的变化（这是<strong>基于差异</strong>的版本控制系统 <strong>delta-based</strong>）。</p>
+<p>具体来说，基于差异的控制方式是，只记录每次的改动：假设你有一个香蕉，某天你在香蕉上贴了标签，这作为一个版本，之后你又在香蕉上打蜡，再作为一个版本。那么你现有的三个版本是这样记录的，一个香蕉， 香蕉上贴了标签， 香蕉上打了蜡。</p>
+<p>而git则是记录每次的文件本身：还是这根香蕉，使用git记录的话，这三个版本则是这样的，一个香蕉，一个贴了标签的香蕉，一个贴了标签并打了蜡的香蕉。</p>
+<h3 id="git的一些特点">git的一些特点</h3>
+<ul>
+<li>
+<p>几乎都在本地执行。git中绝大多数操作只需要访问本地资源，一般不需要互联网或其他计算机的信息，这让它在工作时具有令人极其舒服的快速。</p>
+</li>
+<li>
+<p>文件完整性校验。git中所有的数据在存储前都会计算SHA-1值，然后通过哈希值来引用，而不是文件名。这样，你就无法在git不知情的情况下修改文件及内容。同样，git也会发现你在传输过程中发生的信息丢失或文件损坏。</p>
+</li>
+<li>
+<p>一般只添加数据。我们执行的git操作几乎只向数据库中添加数据，而很难<strong>从数据库中</strong>删除数据，它几乎不会执行任何可能导致文件不能回复的操作，这让它更加安全。</p>
+</li>
+</ul>
+<h3 id="git-bash">Git Bash</h3>
+<p>在Linux/macOS上，运行git只需要在终端执行 <code>git [commands命令] [arguments参数]</code> 之类的命令即可。在Windows下，会提供 <em><strong>git bash</strong></em> 工具，使用 git bash 可以保持命令的一致性。本文的所有git命令均可以在不同平台运行。</p>
+<h2 id="全局配置">全局配置</h2>
+<p>版本控制系统需要知道每次都是谁对文件做了修改，因此你需要为git配置你的一些信息，每台计算机（严格说是某个计算机的某个系统中的某个用户）只需要<strong>全局配置</strong>一次，今后的版本控制都将<strong>默认</strong>使用全局配置，你也可以在特定仓库中使用不同的配置。</p>
+<p>进行全局配置的工具为 <code>git config</code>，git将配置存储在一些文件中：</p>
+<ul>
+<li>
+<p>Linux/macOS：</p>
+<ol>
+<li>
+<p>系统配置文件： <em><strong>/etc/gitconfig</strong></em></p>
+<p>使用 <code>git config --system</code> 进行读写。</p>
+</li>
+<li>
+<p>全局配置文件： <em><strong>~/.gitconfig  或  ~/.config/git/config</strong></em></p>
+</li>
+</ol>
+<p>使用 <code>git config --global</code> 进行读写。</p>
+<ol start="3">
+<li>
+<p>仓库配置文件：<em><strong>仓库/.git/config</strong></em></p>
+<p>使用 <code>git config --local</code> 进行读写，前提是你已经在此仓库中。</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Windows（使用命令同上）</p>
+<ol>
+<li>系统配置文件：<em><strong>C:\ProgramFiles\Git\etc\gitconfig</strong></em> （在你的Git安装目录下寻找）</li>
+<li>全局配置文件：<em><strong>C:\Users\用户名.gitconfig</strong></em></li>
+<li>仓库配置文件：<em><strong>仓库\.git\gitconfig</strong></em></li>
+</ol>
+</li>
+</ul>
+<p>大多数情况下，我们只需要关注<strong>全局配置文件</strong>，在极少数的情况下会配置仓库配置文件。以下为配置的命令：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看现有配置</span>
+</span></span><span class="line"><span class="cl">git config --list
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 配置用户信息，默认全局配置</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可使用 --local 代替 --global 来进行仓库配置</span>
+</span></span><span class="line"><span class="cl">git config --global user.name <span class="s2">&#34;你的用户名&#34;</span>
+</span></span><span class="line"><span class="cl">git config --global user.email 你的邮箱@mail.com</span></span></code></pre></td></tr></table>
+</div>
+</div><p>只需要输入两行命令就可以完成配置，之后就可以使用git来工作了。</p>
+<h2 id="工作区">工作区</h2>
+<p>在git中，文件存在三种状态：</p>
+<ul>
+<li>已修改  modified</li>
+<li>已暂存  staged</li>
+<li>已提交  committed</li>
+</ul>
+<p>与之对应，git项目就会有三个阶段：</p>
+<ul>
+<li>工作区  working directory</li>
+<li>暂存区  staging area (Index)</li>
+<li>git仓库  .git repository</li>
+</ul>
+<p>需要知道的是，你的仓库就是在 项目 .git 文件夹下的一些内容，当你克隆仓库时，你不需要复制克隆别的文件，克隆的只是 .git文件夹。</p>
+<p><strong>工作区</strong>就是你本来的项目文件，它在.git文件夹外。严格来说，在你使用git管理你的项目文件后，之前的项目文件就应该看做是从.git仓库的某个特定版本的数据库中提取出来的文件，放在磁盘上以供修改使用。</p>
+<p><strong>暂存区</strong>是一个文件，按git的术语也可以叫做索引（Index），它一般放在.git文件夹下，保存了下次将要提交的文件列表信息。比如，你对工作区中的a文件做了修改，那么在你保存后，暂存区中就会记录a文件已经修改，准备下次提交，你可以手动选择是否提交。</p>
+<p><strong>git仓库</strong>是你提交的内容，你的本地仓库，它在.git文件夹下，存放项目元数据和对象数据库。</p>
+<h2 id="使用git">使用Git</h2>
+<p>这里将从头开始创建一个git仓库，并在实际操作中学习如何使用git工作。</p>
+<h3 id="创建仓库">创建仓库</h3>
+<p>在本地创建仓库有两种方式：</p>
+<ul>
+<li>将一个本地目录转换为git仓库：</li>
+</ul>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 新建文件夹作为仓库</span>
+</span></span><span class="line"><span class="cl">mkdir my_git
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> my_git
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git init 		<span class="c1"># git init 命令将初始化一个本地仓库</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>从其他计算机或服务器克隆一个git仓库：</li>
+</ul>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 从url地址克隆一个git仓库</span>
+</span></span><span class="line"><span class="cl">git clone <span class="o">[</span>url<span class="o">]</span> <span class="o">(</span>rename<span class="o">)</span>  <span class="c1">#可以选择添加rename参数更改目录名</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在创建一个git仓库后，对应目录下会出现一个 .git 目录，这里面含有你初始化git仓库所有必要的文件，它是git仓库的骨干。</p>
+<h3 id="检查文件状态">检查文件状态</h3>
+<p>你工作目录下的文件只有两种状态：<strong>已跟踪</strong> 和 <strong>未跟踪</strong>，它们的区别是是否纳入版本控制。对于已跟踪的文件，git知道要记录它们的版本变化。通过以下命令查看当前文件是否跟踪：</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git status
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果有未跟踪的文件你将在Untracked files中看到</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 你还可以看到在暂存区未提交的文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用以下命令查看更简略的信息</span>
+</span></span><span class="line"><span class="cl">git status -s
+</span></span><span class="line"><span class="cl">git status --short
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用 git ststis -s 时：</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## ??表示未跟踪的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##  A表示新添加到暂存区的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##  M表示修改后的文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##</span>
+</span></span><span class="line"><span class="cl"><span class="c1">##   注意，状态码包含两个字符，左侧表示暂存区，右侧表示工作区</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## MM表示文件已修改并暂存，暂存后又做了修改，后做的修改未暂存</span>
+</span></span><span class="line"><span class="cl"><span class="c1">## A 表示已修改且已暂存</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="跟踪暂存文件">跟踪、暂存文件</h3>
+<p>在创建仓库之后，我们需要将项目文件添加到版本控制。</p>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 使用git add 跟踪未跟踪的文件，可以使用通配符</span>
+</span></span><span class="line"><span class="cl">git add files 		<span class="c1"># 跟踪files文件</span>
+</span></span><span class="line"><span class="cl">git add .			<span class="c1"># 跟踪所有文件</span>
+</span></span><span class="line"><span class="cl">git add src			<span class="c1"># 跟踪src目录下的所有文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 在文件修改后，再次使用add命令会将文件添加到暂存区</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 修改文件后及时运行git add命令是一个良好的习惯</span>
+</span></span><span class="line"><span class="cl">git add .</span></span></code></pre></td></tr></table>
+</div>
+</div><p>需要注意的是，只有对文件进行跟踪，才可以使用git进行版本控制。每次修改完成后，应该再次使用add将文件添加到暂存区。</p>
+<h3 id="忽略掉某些文件">忽略掉某些文件</h3>
+<p>通常来说，为了方便我们会直接运行 git add 命令来将项目所有文件纳入跟踪并添加到暂存区。但有时候，会有一些本地配置文件或生成的中间文件（如gcc编译的目标文件），我们并不需要将其纳入版本控制，但一个一个进行add又有些麻烦。</p>
+<p>这种情况下，我们可以在项目根目录（事实上可以在项目内的任何一个目录创建，以起到分别对目录管理）创建一个 <em><strong>.gitignore</strong></em> 文件，在里面列出要忽略的文件格式。</p>
+<p>.gitignore文件的格式规范可查看官方文档，这里是一些常用的示例：</p>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 忽略所有的 .a 文件</span>
+</span></span><span class="line"><span class="cl">*.a
+</span></span><span class="line"><span class="cl"><span class="c1"># 跟踪所有的 lib.a 文件，这会覆盖之前忽略 .a 文件对 lib.a 文件的影响</span>
+</span></span><span class="line"><span class="cl">!lib.a
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略当前目录下的 TODO 文件</span>
+</span></span><span class="line"><span class="cl">/TODO
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略所有目录下名为 build 的文件夹</span>
+</span></span><span class="line"><span class="cl">build/
+</span></span><span class="line"><span class="cl"><span class="c1"># 忽略 app 文件夹下的 build 文件夹</span>
+</span></span><span class="line"><span class="cl">app/build/</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="查看修改">查看修改</h3>
+<p>可以使用 git statue 命令查看文件的修改状态，有时在向仓库提交前我们要查看一些详细的信息，比如某一行修改的具体内容，这时候就可以使用 git diff：</p>
+<div class="highlight" id="id-10"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看尚未暂存的文件的变化：</span>
+</span></span><span class="line"><span class="cl">git diff 
+</span></span><span class="line"><span class="cl"><span class="c1"># 修改的部分是与上次已暂存的文件相比较</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看已暂存的文件的变化：</span>
+</span></span><span class="line"><span class="cl">git diff --staged
+</span></span><span class="line"><span class="cl">git diff --cached 		<span class="c1"># 与上面一条同义</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#修改的部分是与上次已提交到git仓库的文件相比较</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="提交到本地仓库">提交到本地仓库</h3>
+<p>当把所有修改完成的文件提交到暂存区后，就可以提交到本地仓库了。在此之前，请务必确认所有已修改或新建的文件都有 add 过，可以使用git status查看，否则提交的时候变化不会被包含在里面。使用如下命令进行提交：</p>
+<div class="highlight" id="id-11"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 提交到本地仓库</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 提交之前确定运行 git add</span>
+</span></span><span class="line"><span class="cl">git commit
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令会打开文本编辑器，你需要在里面填写提交说明</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 良好的提交声明会让版本管理更加有效</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git commit -m <span class="s2">&#34;Commit Message&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令可以很方便地书写提交信息，更加方便，适合短说明文本</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git commit -a
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令，git会自动对所有已跟踪的文件执行 git add，使命令更简洁</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>要注意，提交到仓库的是暂存区的文件快照，如果工作区的修改未提交到暂存区，将会造成遗漏。</p>
+<h3 id="移动移除文件">移动、移除文件</h3>
+<p>有时，我们需要git停止对某一文件的跟踪，或者删除某些错误提交到版本库中的文件，或是移动某些文件的位置，这时就需要用到：</p>
+<div class="highlight" id="id-12"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 移除文件</span>
+</span></span><span class="line"><span class="cl">git rm file
+</span></span><span class="line"><span class="cl"><span class="c1"># 运行此命令会删除工作区的本地文件，并撤销git对其的版本跟踪</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git rm -f file
+</span></span><span class="line"><span class="cl"><span class="c1"># 当要rm的文件已被提交到暂存区时，就要使用 -f （force）指令</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 强制rm，这是git的一种安全措施</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 移除在 git 仓库和暂存区中的文件，而不删除工作区的文件</span>
+</span></span><span class="line"><span class="cl">git rm --cached file
+</span></span><span class="line"><span class="cl"><span class="c1"># 这个命令常作为忘记添加 .gitignore文件的补救措施</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 移动文件</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># git mv命令与linux的mv命令使用方法基本相同</span>
+</span></span><span class="line"><span class="cl">git mv file files/file
+</span></span><span class="line"><span class="cl"><span class="c1"># 将根目录的file文件移动到 files/文件夹下</span>
+</span></span><span class="line"><span class="cl">git mv filea fileb
+</span></span><span class="line"><span class="cl"><span class="c1"># 将当前目录的 filea 文件更名为 fileb文件</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用 mv 命令 可以保持git对文件的跟踪，</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 而不需要在移动或改名后再次运行 mv, git add, git rm</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="查看提交历史">查看提交历史</h3>
+<p>当我们想查看项目或文件的提交历史时：</p>
+<div class="highlight" id="id-13"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看提交历史</span>
+</span></span><span class="line"><span class="cl">git log
+</span></span><span class="line"><span class="cl"><span class="c1"># 默认情况下，git log会按时间顺序排列所有提交</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 它带有很多选项，当然你也可以使用 grep 等工具</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示每次提交引入的差异</span>
+</span></span><span class="line"><span class="cl">git log -p 		<span class="c1"># 或 --patch</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示最近2条提交</span>
+</span></span><span class="line"><span class="cl">git log -n
+</span></span><span class="line"><span class="cl"><span class="c1"># 显示每次提交的简略统计信息</span>
+</span></span><span class="line"><span class="cl">git log --stat
+</span></span><span class="line"><span class="cl"><span class="c1">#用不同格式显示</span>
+</span></span><span class="line"><span class="cl">git log --pretty<span class="o">=[]</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># []内可以是 oneline:每个提交放到一行显示</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 还有类似的 short , full ,fuller</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 可以使用 format 来定制记录的显示格式</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git log --pretty<span class="o">=</span>oneline --graph
+</span></span><span class="line"><span class="cl"><span class="c1"># 使用此命令会用一些字符“图形化”地显示出每次提交和分支之间的关系</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="撤销操作">撤销操作</h3>
+<p>在某个阶段，比如正常运行的程序在修改后无法运行，这时我们可能需要撤销对相应文件的修改。撤销操作有可能会导致之前的工作丢失，在执行撤销前一定要注意。</p>
+<div class="highlight" id="id-14"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 重新提交</span>
+</span></span><span class="line"><span class="cl">git commit --amend
+</span></span><span class="line"><span class="cl"><span class="c1"># 适用于提交后发现某些文件忘记添加或提交信息写错的情况</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果暂存区没有文件改变，将只覆盖提交信息</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -amend 选项可以避免因为失误导致仓库版本混乱</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git reset HEAD &lt;file&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 此命令会将git仓库中的file文件复制到暂存区，不会改变工作区</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 以此来撤销对暂存区文件的修改</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 若文件不存在，则在暂存区中删除</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">git checkout -- &lt;file&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 此命令会同时还原暂存区和工作区的file文件</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="远程仓库">远程仓库</h3>
+<p>为了能在git管理的项目上写作，我们通常会使用远程仓库，比如 <strong>Git Hub</strong> ，下面介绍如何连接远程仓库。</p>
+<div class="highlight" id="id-15"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看当前仓库对应的远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote 		<span class="c1"># -v选项会显示git保存的简写</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 如果当前仓库还未配置远程仓库，则需要</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 添加远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote add &lt;shortname&gt; &lt;url&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># shortname 设置为你自己对仓库的简写</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># url 为远程仓库的地址</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 从远程仓库中同步最新数据</span>
+</span></span><span class="line"><span class="cl">git fetch &lt;remote&gt;
+</span></span><span class="line"><span class="cl"><span class="c1"># 会从远程仓库下载最新版本的文件和数据</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 推送到远程仓库</span>
+</span></span><span class="line"><span class="cl">git push origin master
+</span></span><span class="line"><span class="cl"><span class="c1"># 会将本地仓库同步到远程仓库的master分支</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote show origin
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># rm远程仓库</span>
+</span></span><span class="line"><span class="cl">git remote rename name1 name2
+</span></span><span class="line"><span class="cl">git remote remove name1
+</span></span><span class="line"><span class="cl"><span class="c1"># 命令会将 name1 仓库更名为name2</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 命令会移除 name1 远程仓库</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 需要你对远程仓库具有读写权限</span></span></span></code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item>
+<item>
+  <title>手把手教你搭建自己的静态博客网站—使用Hexo与Git</title>
+  <link>https://flatig.vip/posts/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E7%BD%91%E7%AB%99%E4%BD%BF%E7%94%A8hexo%E4%B8%8Egit/</link>
+  <pubDate>Sun, 10 Jul 2022 10:55:19 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E7%BD%91%E7%AB%99%E4%BD%BF%E7%94%A8hexo%E4%B8%8Egit/</guid>
+  <description><![CDATA[<p>全文字数：3354
+阅读时长：15min
+文章类型：教程</p>
+<h3 id="介绍">介绍</h3>
+<hr>
+<p>这可能是你见过<strong>最清楚的</strong>，使用 <strong>GitHub</strong> 或 <strong>Gitee</strong> 与 <strong>Hexo</strong>搭建个人博客网站的教程，即使是小白，看不太懂某些概念，按照文中的方法流程操作，也可以完成网站的搭建。此篇教程的目的是搭建完成自己的博客并让它可以运行，更高级的定制操作将在后面介绍</p>
+<p>编写时间为2022/7/10，教程中所用工具与网站以当前为准。</p>
+<h4 id="基础">基础</h4>
+<p>首先介绍一下这几个概念。</p>
+<h5 id="静态网站">静态网站</h5>
+<p>按照网站的组成和架构，可以将网站分为 静态网站和动态网站。它的<strong>静态</strong>体现在，用户访问的是完全固定的代码，除非网站的开发者做出一些更改，不然用户接收到的内容<strong>永远不会改变</strong>。二者主要有这样几个区别：</p>
+<ul>
+<li>源代码。静态网站代码均是由 <strong>HTML/CSS</strong> 等静态标记语言组成的。而动态网站还会使用到 <strong>JavaScript</strong>，<strong>PHP</strong> 等语言。</li>
+<li>组成。静态网站只有<strong>前端页面</strong>，也即用户能看到的部分。动态网站具有<strong>数据库</strong>（最主要的区别之一），<strong>用户交互功能</strong>等。</li>
+<li>托管方式。访问静态网站一般只需访问其 <strong>index.html</strong> 以及与其相关的一系列文件，因此托管静态网站只需要一个能让用户直接访问到<strong>这些</strong>（百度网盘这些单文件访问不行，除非你只有一个index.html）文件的“东西”，甚至可以是经过内网穿透和映射的NAS。而动态网站则需要一个完整的服务器，以实现动态交互功能。</li>
+<li>功能。静态网站的主要功能是，提供一些可以让用户看到的信息。动态网站则具有，与用户交换数据，动态访问与数据安全性等。</li>
+</ul>
+<h5 id="githubgitee">GitHub/Gitee</h5>
+<p>GitHub与Gitee均是基于 <strong>git</strong> 的代码托管平台（GitHub是全球使用最多的开源平台）。利用它们提供的  <strong>Pages功能</strong>，可以满足我们托管静态网站的需求，最重要的是，它们是<strong>免费</strong>的！</p>
+<p>利用它们搭建静态网站需要频繁使用到git，不会使用的读者有必要了解一下git，参照以下链接：</p>
+<p><a href="https://www.runoob.com/git/git-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Git教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+<p>由于GitHub目前的访问不太稳定，有时甚至无法访问，因此本教程还会介绍如何使用Gitee搭建博客。</p>
+<h5 id="hexo">Hexo</h5>
+<p>Hexo是一款简洁、高效的博客框架，使用Node.js 编写。目前多数托管在GitHub上的博客均使用Hexo。</p>
+<p>Hexo使用<strong>Markdown</strong> 渲染引擎解析文章。**用户使用Markdown书写文章内容，Hexo 将其渲染成网页。**Hexo 有很多主题供你选择。</p>
+<p>Markdown是一种轻量级的标记语言，或者说是排版语言，人们可以使用Markdown<strong>快速编写具有一定排版的文章</strong>，您现在正在阅读的这篇文章就是由Markdown写出的。Markdown的使用类似于Word，但它更能让你专注于内容写作。Markdown的学习较简单，不了解的读者有必要了解一下，参照以下链接：</p>
+<p><a href="https://www.runoob.com/markdown/md-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Markdown教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+<h4 id="原理">原理</h4>
+<p>用户访问一个网站，其大致流程是：</p>
+<ol>
+<li>在浏览器<strong>输入域名</strong>，按下回车 。</li>
+<li>经过一系列的<strong>DNS信息查询</strong>步骤，得到服务器的<strong>IP地址。</strong></li>
+<li>通过得到的IP与端口，经过三次握手，与服务器建立<strong>TCP连接</strong>（不出意外的话，QUIC将在未来取代TCP）。</li>
+<li>通过<strong>HTTP/HTTPS协议</strong>请求网页内容，若通过，服务器便回复“OK”并下发网页内容。</li>
+<li>浏览器得到HTML内容，将其<strong>解析渲染</strong>，成为用户看到的网页。</li>
+</ol>
+<p>我们使用GitHub或Gitee创建静态网页并没有涉及到服务器的搭建和处理，我们只需要关心我们网站内容的建设，这是一个<strong>纯前端</strong>的工作，而与客户端沟通等工作便交予服务器。等等，<strong>我们的服务器呢？</strong></p>
+<p>在这里，GitHub和Gitee的Pages服务便解决了我们的服务器需要的工作。当用户访问特定的域名时，经过DNS服务器获取IP后指向GitHub/Gitee的Pages服务器，并与之建立连接，当客户端发送请求时，服务器将找到在万千数据中相对应的，然后返回我们的网页给用户。<strong>那我们的网页要放在哪里呢？</strong></p>
+<p>我们只需要在GitHub/Gitee上创建一个<strong>仓库</strong>，将我们的网页代码放在上面就可以了（首页还是永远的index.html），我们在里面写什么，看到的网页就是什么。由于GitHub/Gitee Pages的服务基于我们创建的代码仓库，<strong>因此我们只能在上面创建静态网站。</strong></p>
+<p>也就是说，在GitHub/Gitee上做一些配置，就相当于我们把服务器创建好了，后面怎么创建网页内容完全是我们的自由。那么<strong>Hexo是干什么的？</strong></p>
+<p>Hexo如前面所说，就是一款博客框架，它的作用是帮我们创建出比较精美的博客网页，我们不需要再去学习HTML5之类的新的语言，把它交给前端，我们再去做属于自己的工作（如果你是一名前端工程师，完全可以尝试自己写出一个漂亮的网页）。</p>
+<p>我们总体的<strong>流程</strong>就是：</p>
+<ol>
+<li>使用Hexo或自己<strong>编写</strong>，在电脑本地<strong>生成</strong>静态网站文件。</li>
+<li>使用git或Hexo deploy（基于git），将文件<strong>同步</strong>到我们的代码仓库。（你甚至可以<strong>直接上传</strong>到仓库，只要不嫌麻烦）</li>
+<li>在服务配置好的情况下，我们的网站便可以<strong>访问</strong>了。</li>
+</ol>
+<h4 id="准备工作">准备工作</h4>
+<p>这里对使用本教程的方法创建网站所需的内容列一清单，工具的Windows版本<strong>官方</strong>下载链接在下，Linux可使用apt自行安装。</p>
+<p><strong>基础知识</strong>：</p>
+<ul>
+<li>Git的使用（用于向GitHub或Gitee提交文件）<a href="https://www.runoob.com/git/git-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Git教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+<li>Markdown（学习简单，用于编写文章和内容）<a href="https://www.runoob.com/markdown/md-tutorial.html"target="_blank" rel="external nofollow noopener noreferrer">Markdown教程——菜鸟教程<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></li>
+</ul>
+<p><strong>需要工具</strong>：</p>
+<ul>
+<li>
+<p>一台电脑</p>
+</li>
+<li>
+<p>Git（安装适用于自己系统的版本）<a href="https://git-scm.com/downloads"target="_blank" rel="external nofollow noopener noreferrer">Git——下载<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+</li>
+<li>
+<p>Node.js （用于安装和使用 Hexo）<a href="https://nodejs.org/en/download/"target="_blank" rel="external nofollow noopener noreferrer">Node.js——下载<i class="fa-solid fa-external-link-alt fa-fw fa-xs ms-1 text-secondary" aria-hidden="true"></i></a></p>
+</li>
+<li>
+<p>Hexo （博客搭建核心工具）</p>
+</li>
+</ul>
+<p><strong>需要完成的操作</strong>：</p>
+<ul>
+<li>注册GitHub或Gitee账号</li>
+<li>在电脑上创建一个用于存放你的博客的文件夹（路径最好全英文，否则可能有意想不到的错误发生）</li>
+</ul>
+<h3 id="开始">开始</h3>
+<hr>
+<p>下面是安装和创建博客的全步骤。</p>
+<h4 id="配置hexo">配置Hexo</h4>
+<p>这一步将先创建网站的<strong>基本框架</strong>。</p>
+<p>首先<strong>安装Git，Node.js</strong>。Windows在安装时注意勾选 &ldquo;Add To Path&rdquo;，以全局使用。</p>
+<p>在安装完成后，打开命令行，分别输入git，node，若无报错且出现版本信息，即为安装成功。</p>
+<p>创建一个专用于博客的文件夹，其路径名应是全英文。在该文件夹下打开命令行，输入如下命令。</p>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">npm install hexo-cli -g
+</span></span><span class="line"><span class="cl"><span class="c1"># 全局安装hexo</span>
+</span></span><span class="line"><span class="cl">hexo init blog
+</span></span><span class="line"><span class="cl"><span class="c1"># 初始化创建blog文件夹</span>
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> blog
+</span></span><span class="line"><span class="cl"><span class="c1"># 移动到blog文件夹</span>
+</span></span><span class="line"><span class="cl">npm install
+</span></span><span class="line"><span class="cl"><span class="c1"># 初始化</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在执行完所有命令后，博客的本地文件就已经搭建完成了。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca684cf54cd3f937f15c69.png" data-thumbnail="https://pic.imgdb.cn/item/62ca684cf54cd3f937f15c69.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca684cf54cd3f937f15c69.png</h2>"></a></p>
+<p>这时候，我们可以再输入以下命令以在本地<strong>预览</strong>我们的网站内容。</p>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hexo server
+</span></span><span class="line"><span class="cl"><span class="c1"># 或 hexo s</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在输入后，按住Ctrl点击出现的链接即可跳转到浏览器。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca6917f54cd3f937f22d8a.png" data-thumbnail="https://pic.imgdb.cn/item/62ca6917f54cd3f937f22d8a.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca6917f54cd3f937f22d8a.png</h2>"></a></p>
+<p>如果出现这样的界面，那恭喜你，你已经做好自己的网站了，接下来只差修改内容和让别人看到他，预览完毕后可按 Ctrl + C 结束。</p>
+<h4 id="配置本地git">配置本地Git</h4>
+<p>首先注册GitHub/Gitee账号，取决于你要使用哪个平台。</p>
+<p>打开<strong>Git bash</strong>，输入如下命令。</p>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">git config --global user.name <span class="s2">&#34;你的GitHub/Gitee用户名&#34;</span>
+</span></span><span class="line"><span class="cl">git config --global user.email <span class="s2">&#34;你的GitHub/Gitee注册邮箱&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 用于配置本地用户信息</span>
+</span></span><span class="line"><span class="cl">ssh-keygen -t rsa -C <span class="s2">&#34;你的GitHub/Gitee注册邮箱&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 用于生成SSH Key，之后出现三个选项，直接回车即可</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>由于你的本地 Git 仓库和 GitHub/Gitee 仓库之间的传输是通过<strong>SSH加密</strong>的，所以我们需要配置验证信息。Git通过<strong>非对称加密的公钥与私钥</strong>来完成加密，公钥放置在远程库（GitHub/Gitee）上，私钥放置在客户端上。每次同步都需要输入账号密码验证推送用户是否是合法用户，为了省去每次输入密码的步骤，在这里采用SSH。当进行推送时，Git会匹配公钥私钥是否合法，若匹配成功则允许推送。</p>
+<p>我们的SSH公钥私钥文件默认存放在 <strong>C:\Users\你的用户名\.ssh\</strong> 路径下（Linux默认在 /home/.ssh 下）。</p>
+<h4 id="配置githubgitee">配置GitHub/Gitee</h4>
+<h5 id="gitee-版">Gitee 版</h5>
+<p>在登陆后，首先打开个人设置中的SSH公钥设置，打开我们在SSH公钥文件夹下的 <strong>id_rsa.pub</strong> 文件，将其内容全部复制，粘贴到公钥处。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7493f54cd3f937ffc93c.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7493f54cd3f937ffc93c.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7493f54cd3f937ffc93c.png</h2>"></a></p>
+<p>然后在git bash 或 shell中输入如下代码判断是否成功：</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca78c3f54cd3f93705487e.png" data-thumbnail="https://pic.imgdb.cn/item/62ca78c3f54cd3f93705487e.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca78c3f54cd3f93705487e.png</h2>"></a></p>
+<p>这样我们就可以使用Git直接同步仓库内容了。</p>
+<p>之后在Gitee中创建一个仓库，仓库名称可以随意选取，但仓库路径<strong>需要与你的用户名相同</strong>，这样才可以用于创建网站。</p>
+<p>此外，我们还需要添加Readme文件，其他不做要求。</p>
+<!-- raw HTML omitted -->
+<p>在此步骤之后，复制仓库的SSH地址。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7a07f54cd3f937073e1c.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7a07f54cd3f937073e1c.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7a07f54cd3f937073e1c.png</h2>"></a></p>
+<p>然后我们就可以打开 <strong>blog</strong> 文件夹了，打开里面的 <strong>_config.yml</strong> 文件，在其末尾修改编辑如下内容：</p>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">deploy</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 若之后出错，可用单引号括起git，即 &#39;git&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">git@gitee.com:flatig/blog.git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 这里是你刚刚复制的地址</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l">main</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 仓库分支，gitee一般为master，可在仓库首页查看</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑完毕保存之后，即可进入下一步骤。</p>
+<hr>
+<h5 id="github版">GitHub版</h5>
+<p>在登陆后，首先打开 Settings 中的 SSH and GPG keys，打开我们在SSH公钥文件夹下的 <strong>id_rsa.pub</strong> 文件，将其内容全部复制，粘贴到公钥处。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7728f54cd3f93702f8a5.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7728f54cd3f93702f8a5.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7728f54cd3f93702f8a5.png</h2>"></a></p>
+<p>然后在git bash 或 shell中输入如下代码判断是否成功：</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7882f54cd3f93704de9f.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7882f54cd3f93704de9f.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7882f54cd3f93704de9f.png</h2>"></a></p>
+<p>这样我们就可以使用Git直接同步仓库内容了。</p>
+<p>之后在GitHub中创建一个仓库，仓库名要求这样的格式： <strong>用户名.github.io</strong></p>
+<p>此外其他不做要求。在此步骤之后，复制仓库的SSH地址。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca7a4bf54cd3f937079e63.png" data-thumbnail="https://pic.imgdb.cn/item/62ca7a4bf54cd3f937079e63.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca7a4bf54cd3f937079e63.png</h2>"></a></p>
+<p>然后我们就可以打开 <strong>blog</strong> 文件夹了，打开里面的 <strong>_config.yml</strong> 文件，在其末尾修改编辑如下内容：</p>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">deploy</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 若之后出错，可用单引号括起git，即 &#39;git&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l">git@github.com:Flatigers/Flatigers.github.io.git</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 这里是你刚刚复制的地址</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l">main</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 仓库分支，GitHub一般为main，可在仓库首页查看</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑完毕保存之后，即可进入下一步骤。</p>
+<h4 id="同步到githubgitee">同步到GitHub/Gitee</h4>
+<p>在完成上述所有操作后，在 blog 文件夹下打开终端或shell，输入如下命令：</p>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">npm install hexo-deployer-git --save
+</span></span><span class="line"><span class="cl"><span class="c1"># 安装Hexo的git同步插件</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在完成之后，输入如下命令，将仓库同步：</p>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">hexo clean
+</span></span><span class="line"><span class="cl"><span class="c1"># 清除旧文件，可以简写为 hexo c</span>
+</span></span><span class="line"><span class="cl">hexo generate
+</span></span><span class="line"><span class="cl"><span class="c1"># 生成新文件，可以简写为 hexo g</span>
+</span></span><span class="line"><span class="cl">hexo deploy
+</span></span><span class="line"><span class="cl"><span class="c1"># 推送并同步，可以简写为 hexo d</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># hexo新版本默认deploy前自动generate，故可省略hexo g</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 以上命令可以同时简写为：</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># hexo c | hexo d</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在同步完成之后，打开你的 GitHub/Gitee 仓库，你会看到多出了许多文件。</p>
+<p><strong>使用GitHub的用户，此时已经可以访问到自己的网站了，只需要在浏览器输入 用户名.github.io</strong></p>
+<p>使用Gitee的用户，还需要开启Pages服务。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ca802ef54cd3f937102504.png" data-thumbnail="https://pic.imgdb.cn/item/62ca802ef54cd3f937102504.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ca802ef54cd3f937102504.png</h2>"></a></p>
+<p>若出现问题，可以选择<strong>强制启动HTTPS</strong>，之后便可以通过提供的域名访问了。</p>
+<h3 id="完成">完成</h3>
+<hr>
+<p>到这里已经基本完成了整个网站的搭建工作。</p>
+<p>此外，还有一些别的操作，如绑<strong>定高级域名，更换主题，设置评论区，自定义404</strong>等，这些可以在<strong>Hexo的官方文档</strong>中找到，这里后续有可能会继续更新。</p>
+<p>继续探索多彩的网络世界吧！</p>
+]]></description>
+</item>
+<item>
+  <title>安装使用更可靠的Linux发行版—Debian</title>
+  <link>https://flatig.vip/posts/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%E6%9B%B4%E5%8F%AF%E9%9D%A0%E7%9A%84linux%E5%8F%91%E8%A1%8C%E7%89%88debian/</link>
+  <pubDate>Tue, 28 Jun 2022 09:53:06 &#43;0000</pubDate>
+  <author>flatig</author>
+  <guid>https://flatig.vip/posts/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8%E6%9B%B4%E5%8F%AF%E9%9D%A0%E7%9A%84linux%E5%8F%91%E8%A1%8C%E7%89%88debian/</guid>
+  <description><![CDATA[<p>全文字数：1555
+阅读时长：4min
+文章类型：教程</p>
+<h3 id="介绍">介绍</h3>
+<blockquote>
+<p>Debian（/ˈdɛbiən/）是完全由自由软件组成的类UNIX操作系统，其包含的多数软件使用GNU通用公共许可协议授权，并由Debian计划的参与者组成团队对其进行打包、开发与维护。Debian以其坚守Unix和自由软件的精神，以及其给予用户的众多选择而闻名。现时Debian提供了超过25,000个软件，超过50,000个软件包，并正式支持10个计算机系统结构。  ——来自Wikipedia</p>
+</blockquote>
+<p>个人在开发时常使用<strong>Ubuntu</strong>，它也是基于Debian 的Linux发行版，但在近日使用 Debian 后，终于尝到了它的甜头。在我看来，Debian（with KDE）的<strong>流畅度</strong>明显高于Ubuntu，从某些方面来说，它**”更像Linux“<strong>，这么说是由于Ubuntu的衬托，在使用数月之后，使用Gnome的Ubuntu流畅度要比开始慢上很多。总之，Ubuntu对我而言显得有些臃肿了，而Debian则</strong>稳定，简单，规矩**。</p>
+<p>本篇文章将从头介绍，从一台Windows电脑开始，如何一步一步安装<strong>Debian 11.3.0</strong>（2022年最新版本）。</p>
+<p><strong>注意：较新的电脑安装Debian一般会遇到问题，参照结尾 “问题及注意”</strong></p>
+<h3 id="准备工作">准备工作</h3>
+<p>在开始前，先确保您准备好了：</p>
+<p>一台电脑（以Windows 11为例），一个移动存储设备（U盘，移动硬盘等）。</p>
+<h4 id="下载安装镜像">下载安装镜像</h4>
+<p>安装镜像即系统本身，我一般较多使用<strong>清华Tuna</strong>和<strong>华为云</strong>提供的镜像服务，这里以Tuna为例。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba666e1d64b070662fde81.png" data-thumbnail="https://pic.imgdb.cn/item/62ba666e1d64b070662fde81.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba666e1d64b070662fde81.png</h2>"></a></p>
+<p>我们需要下载安装的是<strong>Live</strong>版本，它包含了基本的所有软件，可以简化我们的安装和使用。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba67061d64b07066308913.png" data-thumbnail="https://pic.imgdb.cn/item/62ba67061d64b07066308913.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba67061d64b07066308913.png</h2>"></a></p>
+<p>在这里我选择安装<strong>KDE</strong>图形管理器的版本。可以根据自己的喜好选择Gnome, KDE, xfce 等图形管理器的版本。</p>
+<p>点击下载，等它下载的同时可以完成下面的两个步骤。</p>
+<h4 id="拆分系统分区">拆分系统分区</h4>
+<p>新安装的系统需要找个地方放置它，在Windows 10以后的系统，均可以使用系统自带的工具**“创建并格式化硬盘分区”**。</p>
+<p>在开始菜单搜索“硬盘分区”，找到该工具，进入。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba6a711d64b07066348a45.png" data-thumbnail="https://pic.imgdb.cn/item/62ba6a711d64b07066348a45.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba6a711d64b07066348a45.png</h2>"></a></p>
+<p>创建的新分区建议应该大于30G，我这里创建一个60G的分区以便使用。</p>
+<ol>
+<li>右键点击自己要拆分的分区（我选择F盘），点击<strong>压缩卷</strong>。</li>
+<li>输入自己要压缩的盘区大小，即新系统的磁盘大小，这里我选择61440MB （即60G）。</li>
+<li>压缩完成后，工具中会出现黑色的未分配卷，到这里已经可以了，这个未分配的空间将用于安装系统。</li>
+</ol>
+<h4 id="启动盘创建工具">启动盘创建工具</h4>
+<p><strong>Rufus</strong>是一款开源软件，是我目前最喜欢使用的启动盘创建工具，下载它即可。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba6a3f1d64b0706634543c.png" data-thumbnail="https://pic.imgdb.cn/item/62ba6a3f1d64b0706634543c.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba6a3f1d64b0706634543c.png</h2>"></a></p>
+<h4 id="检查电脑设置">检查电脑设置</h4>
+<p>在前面的步骤完成后，需要检查自己电脑的启动设置，一般需要：</p>
+<p>查找自己的电脑如何进入<strong>引导配置界面</strong>。如我的联想小新需在开机界面按<strong>F12</strong>键。</p>
+<p>有些电脑可能会因为安全启动而无法从U盘启动系统。如果出现这种情况，请根据自己电脑的品牌或主板，查找自己的电脑如何进入<strong>UEFI固件设置界面</strong>，如我的电脑需在开机界面按<strong>F10</strong>键。在UEFI界面，关闭<strong>安全启动</strong>。</p>
+<h3 id="开始安装">开始安装</h3>
+<h4 id="将iso文件写入u盘">将ISO文件写入U盘</h4>
+<p>打开Rufus或你自己的启动盘制作工具，这里以Rufus为例。</p>
+<p><a class="lightgallery" href="https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png" data-thumbnail="https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png" data-sub-html="<h2>https://pic.imgdb.cn/item/62ba73891d64b0706640277b.png</h2>"></a></p>
+<p>选择你的U盘和刚下载的iso文件，不需要更改其他设置，直接开始写入。若询问要以哪种方式写入（iso或dd，dd为Linux上主要用于转换和输出文件的命令），推荐选择iso模式。然后静静等待写入完成。</p>
+<p>完成之后，就可以开始下一步安装了。</p>
+<h4 id="从u盘启动电脑并安装">从U盘启动电脑并安装</h4>
+<p>将U盘插拔一次，以保证电脑正确识别U盘。然后关闭电脑，开机时按F12（不同电脑可能不同）进入引导配置界面。选择U盘引导，启动。
+进入Grub界面，直接选择第一个选项进入，即可进入Debian安装程序。
+之后根据安装提示进行安装即可。</p>
+<h4 id="安装完成">安装完成</h4>
+<p>在安装流程结束之后，根据提示，进行重启。等待电脑电源指示灯熄灭后，拔掉U盘，然后静待开机。在此之后每次启动电脑，开机前均会进入Grub界面，可以在Grub界面选择你想进入的系统。Grub为Debian默认引导所必需的，若要直接进入Windows，可在UEFI配置引导，将Windows Boot Manager作为首选引导项。</p>
+<h3 id="问题及注意">问题及注意</h3>
+<p>Debian的发行版更新周期一般为2年，即每两年正式发布一次系统。例如，19 年 7 月的 Debian 10 “buster” 到 21 年 8 月的 Debian 11 “Bullseye”。
+更新周期较长主要会带来硬件驱动兼容问题。我在安装时，遇到GPU，USB串口和网卡等不能正确识别的情况，甚至无法正常启动系统。
+<strong>解决方案</strong>：</p>
+<ul>
+<li>可以尝试安装使用Debian-testing分支，一般不会有驱动问题</li>
+<li>若只有网卡声卡等驱动出现问题，不影响系统的正常操作，可以在GitHub或硬件提供商处找到相应的硬件驱动，然后编译或安装、</li>
+<li>放弃安装Debian，转向其他Linux（Arch Linux, Fedora, Open SUSE等），基于需求甚至可以使用WSL</li>
+</ul>
+<p>上述安装流程也可适用于其他系统的安装。​</p>
+]]></description>
+</item>
+</channel>
+</rss>

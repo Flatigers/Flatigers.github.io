@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+    <meta name="robots" content="noodp" />
+    <title>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四) - flatig-我的个人博客站</title><meta name="author" content="flatig">
+<meta name="author-link" content="https://github.com/Flatigers">
+<meta name="description" content="流程 将RNA-seq reads与基因组进行比对 ● 时间&lt;20分钟 将每个样本的reads映射到参考基因组上 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188044_chrX_1.fastq.gz -2 chrX_data/samples/ERR188044_chrX_2.fastq.gz -S ERR188044_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188104_chrX_1.fastq.gz -2 chrX_data/samples/ERR188104_chrX_2.fastq.gz -S ERR188104_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188234_chrX_1.fastq.gz -2 chrX_data/samples/ERR188234_chrX_2.fastq.gz -S ERR188234_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188245_chrX_1.fastq.gz -2 chrX_data/samples/ERR188245_chrX_2.fastq.gz -S ERR188245_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1" /><meta name="keywords" content='生物信息学, 翻译文献, RNA-Seq, 协议Protocol' /><meta itemprop="name" content="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)">
+<meta itemprop="description" content="流程 将RNA-seq reads与基因组进行比对 ● 时间&lt;20分钟 将每个样本的reads映射到参考基因组上 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188044_chrX_1.fastq.gz -2 chrX_data/samples/ERR188044_chrX_2.fastq.gz -S ERR188044_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188104_chrX_1.fastq.gz -2 chrX_data/samples/ERR188104_chrX_2.fastq.gz -S ERR188104_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188234_chrX_1.fastq.gz -2 chrX_data/samples/ERR188234_chrX_2.fastq.gz -S ERR188234_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188245_chrX_1.fastq.gz -2 chrX_data/samples/ERR188245_chrX_2.fastq.gz -S ERR188245_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1"><meta itemprop="datePublished" content="2022-03-12T17:01:35+00:00" />
+<meta itemprop="dateModified" content="2022-03-12T17:01:35+00:00" />
+<meta itemprop="wordCount" content="3201"><meta itemprop="image" content="https://flatig.vip/images/logo.png"/>
+<meta itemprop="keywords" content="生物信息学,翻译文献,RNA-Seq,协议Protocol," /><meta property="og:title" content="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)" />
+<meta property="og:description" content="流程 将RNA-seq reads与基因组进行比对 ● 时间&lt;20分钟 将每个样本的reads映射到参考基因组上 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188044_chrX_1.fastq.gz -2 chrX_data/samples/ERR188044_chrX_2.fastq.gz -S ERR188044_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188104_chrX_1.fastq.gz -2 chrX_data/samples/ERR188104_chrX_2.fastq.gz -S ERR188104_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188234_chrX_1.fastq.gz -2 chrX_data/samples/ERR188234_chrX_2.fastq.gz -S ERR188234_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188245_chrX_1.fastq.gz -2 chrX_data/samples/ERR188245_chrX_2.fastq.gz -S ERR188245_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/" /><meta property="og:image" content="https://flatig.vip/images/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-03-12T17:01:35+00:00" />
+<meta property="article:modified_time" content="2022-03-12T17:01:35+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://flatig.vip/images/logo.png"/>
+
+<meta name="twitter:title" content="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)"/>
+<meta name="twitter:description" content="流程 将RNA-seq reads与基因组进行比对 ● 时间&lt;20分钟 将每个样本的reads映射到参考基因组上 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188044_chrX_1.fastq.gz -2 chrX_data/samples/ERR188044_chrX_2.fastq.gz -S ERR188044_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188104_chrX_1.fastq.gz -2 chrX_data/samples/ERR188104_chrX_2.fastq.gz -S ERR188104_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188234_chrX_1.fastq.gz -2 chrX_data/samples/ERR188234_chrX_2.fastq.gz -S ERR188234_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 chrX_data/samples/ERR188245_chrX_1.fastq.gz -2 chrX_data/samples/ERR188245_chrX_2.fastq.gz -S ERR188245_chrX.sam $ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1"/>
+<meta name="application-name" content="Flatig 博客站">
+<meta name="apple-mobile-web-app-title" content="Flatig 博客站"><meta name="theme-color" data-light="#ffffff" data-dark="#252627" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/" /><link rel="prev" href="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%B8%89/" /><link rel="next" href="https://flatig.vip/posts/%E8%AF%BA%E8%B4%9D%E5%B0%94%E6%96%87%E5%AD%A6%E5%A5%96%E5%BE%97%E4%B8%BB%E7%BB%8F%E5%85%B8%E6%83%85%E8%AF%97%E5%A6%82%E6%9E%9C%E4%BD%A0%E5%BF%98%E8%AE%B0%E6%88%91/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)",
+    "inLanguage": "zh-CN",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https:\/\/flatig.vip\/posts\/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B\/"
+    },"genre": "posts","keywords": "生物信息学, 翻译文献, RNA-Seq, 协议Protocol","wordcount":  3201 ,
+    "url": "https:\/\/flatig.vip\/posts\/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B\/","datePublished": "2022-03-12T17:01:35+00:00","dateModified": "2022-03-12T17:01:35+00:00","publisher": {
+      "@type": "Organization",
+      "name": "flatig","logo": "https:\/\/flatig.vip\/images\/logo.png"},"author": {
+        "@type": "Person",
+        "name": "flatig"
+      },"description": ""
+  }
+  </script></head>
+  <body data-header-desktop="sticky" data-header-mobile="auto"><script>(window.localStorage?.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('data-theme', 'dark');</script><div class="wrapper" data-page-style="normal"><header class="desktop animate__faster" id="header-desktop">
+  <div class="header-wrapper" data-github-corner="right">
+    <div class="header-title">
+      <a href="/" title="flatig-我的个人博客站"><img loading="lazy" src="/images/logo.svg" srcset="/images/logo.svg, /images/logo.svg 1.5x, /images/logo.svg 2x" sizes="auto" data-title="flatig-我的个人博客站" data-alt="flatig-我的个人博客站" class="logo" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span class="header-title-text">Flatig</span></a><span id="typeit-header-subtitle-desktop" class="typeit header-subtitle"></span></div>
+    <nav>
+      <ul class="menu"><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/posts/"
+                
+                
+              ><i class="fa-solid fa-archive fa-fw fa-sm" aria-hidden="true"></i> 文章</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/categories/"
+                
+                
+              ><i class="fa-solid fa-th fa-fw fa-sm" aria-hidden="true"></i> 分类</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/tags/"
+                
+                
+              ><i class="fa-solid fa-tags fa-fw fa-sm" aria-hidden="true"></i> 标签</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/tags/"
+                
+                
+              ><i class="fa-solid fa-book fa-fw fa-sm" aria-hidden="true"></i> 文档</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/friends/"
+                
+                
+              ><i class="fa-solid fa-users fa-fw fa-sm" aria-hidden="true"></i> 友链</a></li><li class="menu-item">
+              <a
+                class="menu-link"
+                href="/about/"
+                
+                
+              ><i class="fa-solid fa-user-tie fa-fw fa-sm" aria-hidden="true"></i> 关于</a></li><li class="menu-item delimiter"></li><li class="menu-item search" id="search-desktop">
+            <input type="text" placeholder="Search something" id="search-input-desktop">
+            <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+              <i class="fa-solid fa-search fa-fw" aria-hidden="true"></i>
+            </a>
+            <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+              <i class="fa-solid fa-times-circle fa-fw" aria-hidden="true"></i>
+            </a>
+            <span class="search-button search-loading" id="search-loading-desktop">
+              <i class="fa-solid fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+            </span>
+          </li><li class="menu-item theme-switch" title="切换主题">
+          <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+        </li></ul>
+    </nav>
+  </div>
+</header><header class="mobile animate__faster" id="header-mobile">
+  <div class="header-container">
+    <div class="header-wrapper">
+      <div class="header-title">
+        <a href="/" title="flatig-我的个人博客站"><img loading="lazy" src="/images/logo.svg" srcset="/images/logo.svg, /images/logo.svg 1.5x, /images/logo.svg 2x" sizes="auto" data-title="/images/logo.svg" data-alt="/images/logo.svg" class="logo" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span class="header-title-text">Flatig</span></a><span id="typeit-header-subtitle-mobile" class="typeit header-subtitle"></span></div>
+      <div class="menu-toggle" id="menu-toggle-mobile">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <nav>
+      <ul class="menu" id="menu-mobile"><li class="search-wrapper">
+            <div class="search mobile" id="search-mobile">
+              <input type="text" placeholder="Search something" id="search-input-mobile">
+              <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                <i class="fa-solid fa-search fa-fw" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                <i class="fa-solid fa-times-circle fa-fw" aria-hidden="true"></i>
+              </a>
+              <span class="search-button search-loading" id="search-loading-mobile">
+                <i class="fa-solid fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+              </span>
+            </div>
+            <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+              取消
+            </a>
+          </li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/posts/"
+                  
+                  
+                ><i class="fa-solid fa-archive fa-fw fa-sm" aria-hidden="true"></i> 文章</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/categories/"
+                  
+                  
+                ><i class="fa-solid fa-th fa-fw fa-sm" aria-hidden="true"></i> 分类</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/tags/"
+                  
+                  
+                ><i class="fa-solid fa-tags fa-fw fa-sm" aria-hidden="true"></i> 标签</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/tags/"
+                  
+                  
+                ><i class="fa-solid fa-book fa-fw fa-sm" aria-hidden="true"></i> 文档</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/friends/"
+                  
+                  
+                ><i class="fa-solid fa-users fa-fw fa-sm" aria-hidden="true"></i> 友链</a></li><li
+              class="menu-item"
+            ><a
+                  class="menu-link"
+                  href="/about/"
+                  
+                  
+                ><i class="fa-solid fa-user-tie fa-fw fa-sm" aria-hidden="true"></i> 关于</a></li><li
+              class="menu-item text-center"
+            ><a
+                  class="menu-link"
+                  href="https://github.com/Flatigers"
+                  title="GitHub"
+                  rel="noopener noreferrer" target="_blank"
+                ><i class='fa-brands fa-github fa-fw' aria-hidden='true'></i> </a></li><li class="menu-item menu-system">
+          <span class="menu-system-item theme-switch" title="切换主题"><i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i></span></li>
+      </ul>
+    </nav>
+  </div>
+</header><div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+  </div>
+  <div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+  </div><nav aria-label="breadcrumb" class="breadcrumb-container sticky">
+    <ol class="breadcrumb"><li class="breadcrumb-item"><a href="/posts/" title="Posts">Posts</a></li><li class="breadcrumb-item active" aria-current="page">使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)</li>
+    </ol>
+  </nav><main class="container"><aside class="toc" id="toc-auto"><h2 class="toc-title">目录&nbsp;<i class="toc-icon fa-solid fa-angle-down fa-fw" aria-hidden="true"></i></h2>
+      <div class="toc-content" id="toc-content-auto"></div></aside>
+
+  <aside class="aside-custom">
+    </aside>
+
+  <article class="page single">
+    <div class="header"><h1 class="single-title animate__animated animate__flipInX"><span>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)</span>
+      </h1></div><div class="post-meta">
+      <div class="post-meta-line"><span class="post-author"><a href="https://github.com/Flatigers" title="作者"target="_blank" rel="external nofollow noopener noreferrer author" class="author"><img loading="lazy" src="https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp" srcset="https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp, https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp 1.5x, https://gravatar.loli.net/avatar/73af57b4975d7b4b5c5067f9a84805b3?s=32&amp;d=mp 2x" sizes="auto" data-title="flatig" data-alt="flatig" class="avatar" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/>&nbsp;flatig</a></span>
+          <span class="post-category">收录于 <a href="/categories/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6%E4%B9%A0/"><i class="fa-regular fa-folder fa-fw" aria-hidden="true"></i> 生物信息学习</a></span></div>
+      <div class="post-meta-line"><span title="发布于 2022-03-12 17:01:35"><i class="fa-regular fa-calendar-alt fa-fw me-1" aria-hidden="true"></i><time datetime="2022-03-12">2022-03-12</time></span>&nbsp;<span title="更新于 2022-03-12 17:01:35"><i class="fa-regular fa-edit fa-fw me-1" aria-hidden="true"></i><time datetime="2022-03-12">2022-03-12</time></span>&nbsp;<span title="3201 字"><i class="fa-solid fa-pencil-alt fa-fw me-1" aria-hidden="true"></i>约 3300 字</span>&nbsp;<span><i class="fa-regular fa-clock fa-fw me-1" aria-hidden="true"></i>预计阅读 7 分钟</span>&nbsp;</div>
+    </div><div class="details toc" id="toc-static" data-kept="false">
+        <div class="details-summary toc-title">
+          <span>目录</span>
+          <span><i class="details-icon fa-solid fa-angle-right" aria-hidden="true"></i></span>
+        </div>
+        <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#流程">流程</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+      </div><div class="content" id="content" data-end-flag="-- ~ --"><div class="details admonition warning open">
+      <div class="details-summary admonition-title">
+        <i class="icon fa-solid fa-exclamation-triangle fa-fw" aria-hidden="true"></i>警告<i class="details-icon fa-solid fa-angle-right fa-fw" aria-hidden="true"></i>
+      </div>
+      <div class="details-content">
+        <div class="admonition-content">本文最后更新于 2022-03-12，文中内容可能已过时。</div>
+      </div>
+    </div><h3 id="流程">流程</h3>
+<h5 id="将rna-seq-reads与基因组进行比对--时间20分钟">将RNA-seq reads与基因组进行比对 ● 时间&lt;20分钟</h5>
+<ol>
+<li>将每个样本的reads映射到参考基因组上</li>
+</ol>
+<div class="highlight" id="id-1"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188044_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188044_chrX_2.fastq.gz -S ERR188044_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188104_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188104_chrX_2.fastq.gz -S ERR188104_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1 
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188234_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188234_chrX_2.fastq.gz -S ERR188234_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188245_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188245_chrX_2.fastq.gz -S ERR188245_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188257_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188257_chrX_2.fastq.gz -S ERR188257_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188273_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188273_chrX_2.fastq.gz -S ERR188273_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188337_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188337_chrX_2.fastq.gz -S ERR188337_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188383_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188383_chrX_2.fastq.gz -S ERR188383_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188401_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188401_chrX_2.fastq.gz -S ERR188401_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188428_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188428_chrX_2.fastq.gz -S ERR188428_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188454_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR188454_chrX_2.fastq.gz -S ERR188454_chrX.sam
+</span></span><span class="line"><span class="cl">$ hisat2 -p 8 --dta -x chrX_data/indexes/chrX_tran -1
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR204916_chrX_1.fastq.gz -2
+</span></span><span class="line"><span class="cl">chrX_data/samples/ERR204916_chrX_2.fastq.gz -S ERR204916_chrX.sam</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>将SAM文件分类并转换为BAM文件。</li>
+</ol>
+<div class="highlight" id="id-2"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188044_chrX.bam ERR188044_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188104_chrX.bam ERR188104_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188234_chrX.bam ERR188234_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188245_chrX.bam ERR188245_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188257_chrX.bam ERR188257_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188273_chrX.bam ERR188273_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188337_chrX.bam ERR188337_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188383_chrX.bam ERR188383_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188401_chrX.bam ERR188401_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188428_chrX.bam ERR188428_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR188454_chrX.bam ERR188454_chrX.sam
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 -o ERR204916_chrX.bam ERR204916_chrX.sam</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>上述命令适用于SAMtools
+1.3版或更新的版本。对于旧版本的SAMtools，用户应该参考Box3。</p>
+</blockquote>
+<p>- Box3 | 使用SAMtools 1.2.1版及以上版本对SAM文件进行分类和转换</p>
+<blockquote>
+<p>最近版本的SAMtools可以在一个步骤中把SAM文件转换成BAM文件。对于使用旧版本的人来说，需要两个步骤。如图所示。</p>
+</blockquote>
+<div class="highlight" id="id-3"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Convert SAM files to binary BAM files:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188044_chrX.sam &gt;ERR188044_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188104_chrX.sam &gt;ERR188104_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188234_chrX.sam &gt;ERR188234_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188245_chrX.sam &gt;ERR188245_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188257_chrX.sam &gt;ERR188257_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188273_chrX.sam &gt;ERR188273_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188337_chrX.sam &gt;ERR188337_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188383_chrX.sam &gt;ERR188383_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188401_chrX.sam &gt;ERR188401_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188428_chrX.sam &gt;ERR188428_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR188454_chrX.sam &gt;ERR188454_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">$ samtools view -bS ERR204916_chrX.sam &gt;ERR204916_chrX_unsorted.bam
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Sort the BAM files:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188044_chrX_unsorted.bam ERR188044_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188104_chrX_unsorted.bam ERR188104_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188234_chrX_unsorted.bam ERR188234_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188245_chrX_unsorted.bam ERR188245_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188257_chrX_unsorted.bam ERR188257_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188273_chrX_unsorted.bam ERR188273_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188337_chrX_unsorted.bam ERR188337_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188383_chrX_unsorted.bam ERR188383_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188401_chrX_unsorted.bam ERR188401_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188428_chrX_unsorted.bam ERR188428_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR188454_chrX_unsorted.bam ERR188454_chrX
+</span></span><span class="line"><span class="cl">$ samtools sort -@ 8 ERR204916_chrX_unsorted.bam ERR204916_chrX
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">// Optionally, the user might want to delete temporary files:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ rm *.sam *unsorted.bam </span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="组装和量化表达的基因和转录物--时间15分钟">组装和量化表达的基因和转录物 ● 时间~15分钟</h5>
+<ol>
+<li>为每个样本组装转录本</li>
+</ol>
+<div class="highlight" id="id-4"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188044_chrX.gtf –l ERR188044 ERR188044_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188104_chrX.gtf –l ERR188104 ERR188104_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188234_chrX.gtf –l ERR188234 ERR188234_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188245_chrX.gtf –l ERR188245 ERR188245_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188257_chrX.gtf –l ERR188257 ERR188257_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188273_chrX.gtf –l ERR188273 ERR188273_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188337_chrX.gtf –l ERR188337 ERR188337_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188383_chrX.gtf –l ERR188383 ERR188383_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188401_chrX.gtf –l ERR188401 ERR188401_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188428_chrX.gtf –l ERR188428 ERR188428_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR188454_chrX.gtf –l ERR188454 ERR188454_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie -p 8 -G chrX_data/genes/chrX.gtf -o
+</span></span><span class="line"><span class="cl">ERR204916_chrX.gtf –l ERR204916 ERR204916_chrX.bam</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>合并所有样本的转录本</li>
+</ol>
+<div class="highlight" id="id-5"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stringtie --merge -p 8 -G chrX_data/genes/chrX.gtf -o stringtie_merged.gtf chrX_data/mergelist.txt</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>错误排除</li>
+</ul>
+<blockquote>
+<p>这里mergelist.txt是一个文本文件，其中有上一步创建的基因转移格式（GTF）文件的名称，每个文件的名称在一行中（参见ChrX_data的例子文件）。如果你不在所有GTF文件所在的同一目录下运行StringTie，那么你可能需要在mergelist.txt中的每个GTF文件名中包括其完整路径。使用任何文本编辑器来创建或编辑（纯文本）mergelist.txt文件。</p>
+</blockquote>
+<ol>
+<li>检查转录本与参考注释的对比情况（可选）</li>
+</ol>
+<div class="highlight" id="id-6"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ gffcompare –r chrX_data/genes/chrX.gtf –G –o merged stringtie_merged.gtf</span></span></code></pre></td></tr></table>
+</div>
+</div><p>选项-o指定了gffcompare将创建的输出文件的前缀。上面的命令将生成多个文件，在<em>gffcompare</em>文档中作了解释；更多细节见<strong>BOX1</strong>。</p>
+<ol>
+<li>估计转录物丰度，并为Ballgown创建表格计数</li>
+</ol>
+<div class="highlight" id="id-7"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188044/ERR188044_chrX.gtf ERR188044_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188104/ERR188104_chrX.gtf ERR188104_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188234/ERR188234_chrX.gtf ERR188234_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188245/ERR188245_chrX.gtf ERR188245_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188257/ERR188257_chrX.gtf ERR188257_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188273/ERR188273_chrX.gtf ERR188273_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188337/ERR188337_chrX.gtf ERR188337_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188383/ERR188383_chrX.gtf ERR188383_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188401/ERR188401_chrX.gtf ERR188401_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188428/ERR188428_chrX.gtf ERR188428_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR188454/ERR188454_chrX.gtf ERR188454_chrX.bam
+</span></span><span class="line"><span class="cl">$ stringtie –e –B -p 8 -G stringtie_merged.gtf -o
+</span></span><span class="line"><span class="cl">ballgown/ERR204916/ERR204916_chrX.gtf ERR204916_chrX.bam</span></span></code></pre></td></tr></table>
+</div>
+</div><h5 id="运行差异化表达分析协议--时间5分钟">运行差异化表达分析协议 ● 时间~5分钟</h5>
+<ol>
+<li>加载相关的R包。这些包包括你将用于执行大部分分析的Ballgown包，以及其他一些有助于这些分析的包，特别是<strong>RSkittleBrewer</strong>（用于设置颜色）、<strong>genefilter</strong>（用于快速计算平均值和变异值）、<strong>dplyr</strong>（用于排序和排列结果）和<strong>devtools</strong>（用于重现性和安装软件包）。</li>
+</ol>
+<div class="highlight" id="id-8"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">$ R
+</span></span><span class="line"><span class="cl">R version 3.2.2 (2015-08-14) -- &#34;Fire Safety&#34;
+</span></span><span class="line"><span class="cl">Copyright (C) 2015 The R Foundation for Statistical Computing
+</span></span><span class="line"><span class="cl">Platform: x86_64-apple-darwin13.4.0 (64-bit)
+</span></span><span class="line"><span class="cl">&gt;library(ballgown)
+</span></span><span class="line"><span class="cl">&gt;library(RSkittleBrewer)
+</span></span><span class="line"><span class="cl">&gt;library(genefilter)
+</span></span><span class="line"><span class="cl">&gt;library(dplyr)
+</span></span><span class="line"><span class="cl">&gt;library(devtools)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>加载样本的表型数据。一个名为geuvadis_phenodata.csv的示例文件包括在该协议的数据文件中（ChrX_data）。一般来说，你将不得不自己创建这个文件。它包含了关于你的RNA-seq样本的信息，格式如这个csv（逗号分隔的值）文件中所示。文件中的每一行包含每个样本的描述，每一列应该包含一个变量。为了将这个文件读入R，我们使用read.csv命令。在这个文件中，数值是由逗号分隔的，但如果文件是以制表符分隔的，你可以使用函数read.table。</li>
+</ol>
+<div class="highlight" id="id-9"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;pheno_data = read.csv(&#34;geuvadis_phenodata.csv&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>错误排除</li>
+</ul>
+<ol>
+<li>读入由StringTie计算的表达数据。Ballgown目前也支持从Cufflinks6和RSEM17读取数据。要做到这一点，我们使用带有以下三个参数的ballgown命令：存储数据的目录（dataDir，这里简单命名为&rsquo;Ballgown&rsquo;），出现在样本名称中的模式（samplePattern）和我们在前一步加载的表型信息（pData）。请注意，一旦创建了Ballgown对象，任何其他Bioconductor32软件包都可以应用于数据分析或数据可视化。这里我们提出了一个标准化的流程，可以用来进行标准的差异表达分析。</li>
+</ol>
+<div class="highlight" id="id-10"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;bg_chrX = ballgown(dataDir = &#34;ballgown&#34;, samplePattern = &#34;ERR&#34;, pData=pheno_data)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>错误排除</li>
+</ul>
+<ol>
+<li>使用筛选器去除低丰度基因。RNA-seq数据的一个常见问题是，某些基因经常有非常少的计数或零计数。一个常见的步骤是过滤掉其中的一些。另一种被用于基因表达分析的方法是应用一个方差过滤器。在这里，我们删除所有跨样本方差小于1的转录本。</li>
+</ol>
+<div class="highlight" id="id-11"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;bg_chrX_filt = subset(bg_chrX,&#34;rowVars(texpr(bg_chrX)) &gt;1&#34;,genomesubset=TRUE)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>识别在统计学上显示组间差异的转录本。我们可能想做的一件事是确保我们考虑到其他变量引起的表达变化。作为一个例子，我们将寻找在性别间有差异表达的转录本，同时校正由于群体变量造成的任何表达差异。我们可以使用Ballgown的stattest函数来做这件事。我们设置了<strong>getFC=TRUE</strong>参数，这样我们就可以查看两组之间经混杂因素调整后的折叠变化。
+请注意，Ballgown的统计测试是一个基于标准线性模型的比较。对于小样本量（每组n&lt;4），通常最好进行正则化。这可以用<em>Bioconductor</em>中的limma包来完成。其他正则化方法，如DESeq和edgeR可以应用于基因或外显子计数，但它们不适合直接应用于FPKM丰度估计。统计测试使用累积的上四分位数规范化(<em>cumulative
+upper quartile normalization</em>)。</li>
+</ol>
+<div class="highlight" id="id-12"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_transcripts = stattest(bg_chrX_filt,
+</span></span><span class="line"><span class="cl">feature=&#34;transcript&#34;,covariate=&#34;sex&#34;,adjustvars = c(&#34;population&#34;), 
+</span></span><span class="line"><span class="cl">getFC=TRUE, meas=&#34;FPKM&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>识别组间有统计学差异的基因。为此，我们可以运行与识别差异表达的转录本相同的函数，在这里我们在stattest命令中设置feature=&ldquo;gene&rdquo;</li>
+</ol>
+<div class="highlight" id="id-13"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_genes = stattest(bg_chrX_filt, feature=&#34;gene&#34;,
+</span></span><span class="line"><span class="cl">covariate=&#34;sex&#34;, adjustvars = c(&#34;population&#34;), getFC=TRUE,
+</span></span><span class="line"><span class="cl">meas=&#34;FPKM&#34;)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>在results_transcripts数据框中添加基因名称和基因ID</li>
+</ol>
+<div class="highlight" id="id-14"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_transcripts =
+</span></span><span class="line"><span class="cl">data.frame(geneNames=ballgown::geneNames(bg_chrX_filt),
+</span></span><span class="line"><span class="cl">geneIDs=ballgown::geneIDs(bg_chrX_filt), results_transcripts)</span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>将结果从最小的P值排序到最大</li>
+</ol>
+<div class="highlight" id="id-15"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;results_transcripts = arrange(results_transcripts,pval)
+</span></span><span class="line"><span class="cl">&gt;results_genes = arrange(results_genes,pval)</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>两性之间差异表达的转录物（q值&lt;5%） 基因名|基因ID|转录本名|ID|Fold
+Change|P值|q值 :&ndash;:|:&ndash;:|:&ndash;:|:&ndash;:|:&ndash;:|:&ndash;:|:&ndash;: XIST
+MSTRG.506|NR_001564|1729|0.003255|7.0447e-10|1.6160e-06
+|MSTRG.506|MSTRG.506.1|1728|0.016396|1.2501e-08|1.4339e-05
+TSIX|MSTRG.505|NR_003255|1726|0.083758|2.4939e-06|1.9070e-03
+|MSTRG.506|MSTRG.506.2|1727|0.047965|3.7175e-06|2.1319e-03
+|MSTRG.585|MSTRG.585.1|1919|7.318925|9.3945e-06|3.7715e-03
+PNPLA4|MSTRG.56|NM_004650|203|0.466647|9.8645e-06|3.7715e-03
+|MSTRG.506|MSTRG.506.5|1731|0.046993|2.1350e-05|6.9968e-03
+|MSTRG.592|MSTRG.592.1|1923|9.186257|3.5077e-05|1.0058e-02
+|MSTRG.518|MSTRG.518.1|1744|11.972859|4.4476e-05|1.1336e-02</li>
+</ul>
+<blockquote>
+<p>Fold
+Change是指女性与男性的表达比例；因此，低于1的数值意味着转录物在男性中的表达水平较低。</p>
+</blockquote>
+<ol>
+<li>将结果写入一个可以共享和分发的csv文件</li>
+</ol>
+<div class="highlight" id="id-16"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;write.csv(results_transcripts, &#34;chrX_transcript_results.csv&#34;,
+</span></span><span class="line"><span class="cl">row.names=FALSE)
+</span></span><span class="line"><span class="cl">&gt;write.csv(results_genes, &#34;chrX_gene_results.csv&#34;,
+</span></span><span class="line"><span class="cl">row.names=FALSE) </span></span></code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>识别q值&lt;0.05的转录物和基因</li>
+</ol>
+<div class="highlight" id="id-17"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&gt;subset(results_transcripts,results_transcripts$qval&lt;0.05)
+</span></span><span class="line"><span class="cl">&gt;subset(results_genes,results_genes$qval&lt;0.05)</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每个命令的Ballgown输出都会出现在屏幕上；我们在下面的<strong>Table3</strong>（转录物）和<strong>Table4</strong>（基因）中显示了结果。如表所示，X号染色体有9个转录本在两性之间有差异表达（使用q值阈值为0.05），其中3个对应于已知基因的异构体（XIST、TSIX和PNPLA4）。在基因水平上（表4），X染色体在相同的q值临界点上有10个差异表达的基因。(如果使用不同版本的程序，这些表格可能包含略有不同的结果）。</p>
+<ul>
+<li>
+<p>错误排除</p>
+</li>
+<li>
+<p>错误排除</p>
+</li>
+<li>
+<p>错误排除</p>
+</li>
+</ul>
+</div><div class="post-reward">
+    <div class="comment">Buy me a coffee~</div>
+    <input type="checkbox" class="reward-input" name="reward" id="fi-reward" hidden />
+    <label class="reward-button" for="fi-reward">赞赏</label>
+    <div class="reward-ways" data-mode="fixed"><div><img loading="lazy" src="/images/alipay.jpg" srcset="/images/alipay.jpg, /images/alipay.jpg 1.5x, /images/alipay.jpg 2x" sizes="auto" data-title="flatig 支付宝" data-alt="flatig 支付宝" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span data-animation>支付宝</span>
+          </div><div><img loading="lazy" src="/images/wechatpay.jpg" srcset="/images/wechatpay.jpg, /images/wechatpay.jpg 1.5x, /images/wechatpay.jpg 2x" sizes="auto" data-title="flatig 微信" data-alt="flatig 微信" style="background: url(/svg/loading.min.svg) no-repeat center;" onload="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}this.dataset.lazyloaded='';" onerror="this.title=this.dataset.title;this.alt=this.dataset.alt;for(const a of ['style','data-title','data-alt','onerror','onload']){this.removeAttribute(a);}"/><span data-animation>微信</span>
+          </div></div>
+  </div><div class="post-footer" id="post-footer">
+  <div class="post-info">
+    <div class="post-info-line">
+      <div class="post-info-mod">
+        <span title="更新于 2022-03-12 17:01:35">更新于 2022-03-12&nbsp;</span>
+      </div><div class="post-info-license">
+          <span><a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span>
+        </div></div>
+    <div class="post-info-line">
+      <div class="post-info-md"><span><a href="https://github.com/Flatigers/flatigers.github.io/edit/docs/content/posts/%e4%bd%bf%e7%94%a8HISAT%20StringTie%e5%92%8cBallgown%e8%bf%9b%e8%a1%8c%e7%9a%84%e8%bd%ac%e5%bd%95%e6%9c%ac%e8%a1%a8%e8%be%be%e6%b0%b4%e5%b9%b3%e5%88%86%e6%9e%90%ef%bc%88%e4%b8%ad%e8%af%91%ef%bc%89%28%e5%9b%9b%29.md" title="编辑此页"target="_blank" rel="external nofollow noopener noreferrer" class="link-to-edit">编辑此页</a></span></div>
+      <div class="post-info-share">
+        <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/" data-title="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)" data-hashtags="生物信息学,翻译文献,RNA-Seq,协议Protocol"><i class="fa-brands fa-twitter fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/" data-hashtag="生物信息学"><i class="fa-brands fa-facebook-square fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 Linkedin" data-sharer="linkedin" data-url="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/"><i class="fa-brands fa-linkedin fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/" data-title="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)"><i class="fa-brands fa-weibo fa-fw" aria-hidden="true"></i></a>
+  <a href="javascript:void(0);" title="分享到 百度" data-sharer="baidu" data-url="https://flatig.vip/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E5%9B%9B/" data-title="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(四)"><i data-svg-src="/lib/simple-icons/icons/baidu.min.svg" aria-hidden="true"></i></a>
+  </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="post-info-more">
+    <section class="post-tags"><i class="fa-solid fa-tags fa-fw me-1" aria-hidden="true"></i><a href='/tags/%E7%94%9F%E7%89%A9%E4%BF%A1%E6%81%AF%E5%AD%A6/' class="post-tag">生物信息学</a><a href='/tags/%E7%BF%BB%E8%AF%91%E6%96%87%E7%8C%AE/' class="post-tag">翻译文献</a><a href='/tags/rna-seq/' class="post-tag">RNA-Seq</a><a href='/tags/%E5%8D%8F%E8%AE%AEprotocol/' class="post-tag">协议Protocol</a></section>
+    <section>
+      <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+    </section>
+  </div>
+
+  <div class="post-nav"><a href="/posts/%E4%BD%BF%E7%94%A8hisat-stringtie%E5%92%8Cballgown%E8%BF%9B%E8%A1%8C%E7%9A%84%E8%BD%AC%E5%BD%95%E6%9C%AC%E8%A1%A8%E8%BE%BE%E6%B0%B4%E5%B9%B3%E5%88%86%E6%9E%90%E4%B8%AD%E8%AF%91%E4%B8%89/" class="post-nav-item" rel="prev" title="使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(三)"><i class="fa-solid fa-angle-left fa-fw" aria-hidden="true"></i>使用HISAT StringTie和Ballgown进行的转录本表达水平分析（中译）(三)</a>
+      <a href="/posts/%E8%AF%BA%E8%B4%9D%E5%B0%94%E6%96%87%E5%AD%A6%E5%A5%96%E5%BE%97%E4%B8%BB%E7%BB%8F%E5%85%B8%E6%83%85%E8%AF%97%E5%A6%82%E6%9E%9C%E4%BD%A0%E5%BF%98%E8%AE%B0%E6%88%91/" class="post-nav-item" rel="next" title="如果你忘记我">如果你忘记我<i class="fa-solid fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+</article></main><footer class="footer">
+    <div class="footer-container"><div class="footer-line powered">由 <a href="https://gohugo.io/" target="_blank" rel="external nofollow noopener noreferrer" title="Hugo 0.119.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/hugo-fixit/FixIt" target="_blank" rel="external" title="FixIt v0.2.18-lts.1"><img class="fixit-icon" src="/fixit.min.svg" alt="FixIt logo" />&nbsp;FixIt</a>
+        </div><div class="footer-line copyright" itemscope itemtype="http://schema.org/CreativeWork"><i class="fa-regular fa-copyright fa-fw" aria-hidden="true"></i>
+            <span itemprop="copyrightYear">2023</span><span class="author" itemprop="copyrightHolder">
+              <a href="https://github.com/Flatigers"target="_blank" rel="external nofollow noopener noreferrer">flatig</a></span><span class="license footer-divider"><a rel="license external nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div><div class="footer-line statistics order-first"><span class="site-time" title='网站运行中……'><i class="fa-solid fa-heartbeat fa-fw animate-icon" aria-hidden="true"></i><span class="ms-1 d-none">博客已运行</span><span class="run-times ms-1">网站运行中……</span></span></div></div>
+  </footer></div><div class="widgets"><div class="fixed-buttons animate__faster d-none"><div class="fixed-button back-to-top" role="button" aria-label="回到顶部"><i class="fa-solid fa-arrow-up fa-fw" aria-hidden="true"></i><span class="variant-numeric">0%</span>
+        </div></div><a href="https://github.com/Flatigers" title="我的GitHub，看看有没有你感兴趣的项目"target="_blank" rel="external nofollow" class="github-corner right d-none-mobile"><svg viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><div id="mask"></div><div class="reading-progress-bar" style="left: 0;top: 0;--bg-progress: #000;--bg-progress-dark: #fff;"></div><noscript>
+    <div class="noscript-warning">FixIt 主题在启用 JavaScript 的情况下效果最佳。</div>
+  </noscript>
+</div><link rel="stylesheet" href="/lib/lightgallery/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><link rel="stylesheet" href="/lib/pace/themes/blue/pace-theme-minimal.css"><script src="/lib/autocomplete/autocomplete.min.js" defer></script><script src="/lib/algoliasearch/algoliasearch-lite.umd.min.js" defer></script><script src="/lib/instant-page/instantpage.min.js" async defer type="module"></script><script src="/lib/twemoji/twemoji.min.js" defer></script><script src="/lib/lightgallery/lightgallery.min.js" defer></script><script src="/lib/lightgallery/plugins/thumbnail/lg-thumbnail.min.js" defer></script><script src="/lib/lightgallery/plugins/zoom/lg-zoom.min.js" defer></script><script src="/lib/sharer/sharer.min.js" async defer></script><script src="/lib/typeit/index.umd.js" defer></script><script src="/lib/katex/katex.min.js" defer></script><script src="/lib/katex/auto-render.min.js" defer></script><script src="/lib/katex/copy-tex.min.js" defer></script><script src="/lib/katex/mhchem.min.js" defer></script><script src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script src="/lib/pangu/pangu.min.js" defer></script><script src="/lib/cell-watermark/watermark.min.js" defer></script><script src="/lib/pace/pace.min.js" async defer></script><script>window.config={"autoBookmark":true,"code":{"copyTitle":"复制到剪贴板","editLockTitle":"锁定可编辑代码块","editUnLockTitle":"解锁可编辑代码块","editable":true,"maxShownLines":50},"comment":{"enable":false},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验。"},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"data":{"typeit-header-subtitle-desktop":"博客|技术分享","typeit-header-subtitle-mobile":"博客|技术分享"},"enablePWA":true,"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"pangu":{"enable":true,"selector":"article"},"search":{"algoliaAppID":"","algoliaIndex":"","algoliaSearchKey":"","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"},"siteTime":"2023-10-14T11:30:00+08:00","twemoji":true,"typeit":{"cursorChar":"|","cursorSpeed":1000,"data":{"typeit-header-subtitle-desktop":["typeit-header-subtitle-desktop"],"typeit-header-subtitle-mobile":["typeit-header-subtitle-mobile"]},"duration":-1,"loop":false,"speed":100},"watermark":{"appendto":".wrapper\u003emain","colspacing":30,"content":"\u003cimg style=\"height: 0.85rem;\" src=\"/logo.png\" alt=\"logo\" /\u003e flatig","enable":true,"fontfamily":"MMT_LRH,沐目体","fontsize":1.1,"height":20,"opacity":0.0125,"rotate":15,"rowspacing":60,"width":150}};</script><script src="/js/theme.min.js" defer></script></body>
+</html>
